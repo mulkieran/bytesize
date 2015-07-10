@@ -12,7 +12,8 @@ Contents:
    :maxdepth: 2
 
    intro
-   modules
+   bytesize/modules
+   tests/modules
 
 Indices and tables
 ==================
