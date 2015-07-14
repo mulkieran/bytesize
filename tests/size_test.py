@@ -486,6 +486,3 @@ class UtilityMethodsTestCase(unittest.TestCase):
 
     def testUnitStr(self):
         self.assertEqual(size.unitStr(KiB), "KiB")
-
-if __name__ == "__main__":
-    unittest.main()
