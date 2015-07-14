@@ -439,10 +439,18 @@ class Size(object):
         """ Return the size in the units indicated by the specifier.
 
             :param spec: a units specifier
+            :type spec: a units specifier or :class:`Size`
             :returns: a numeric value in the units indicated by the specifier
             :rtype: Decimal
+            :raises SizeNonsensicalOpError: if unit specifier is non-positive
         """
-        return self.magnitude / Decimal((spec or B).factor)
+        spec = B if spec is None else spec
+        factor = Decimal(int(getattr(spec, "factor", spec)))
+
+        if factor <= 0:
+            raise SizeNonsensicalOpError("can not convert to non-positive unit %s" % factor)
+
+        return self.magnitude / factor
 
     def humanReadable(self, max_places=2, strip=True, min_value=1, xlate=True):
         """ Return a string representation of this size with appropriate
@@ -515,15 +523,27 @@ class Size(object):
         return retval_str + " " + _makeSpec(unit.abbr, _BYTES_SYMBOL, xlate, lowercase=False)
 
     def roundToNearest(self, unit, rounding=ROUND_DEFAULT):
-        """
-            :param unit: a unit specifier, a named constant like KiB
+        """ Rounds to nearest unit specified as a named constant or a Size.
+
+            :param unit: a unit specifier
+            :type unit: a named constant like KiB, or any non-negative Size
             :keyword rounding: which direction to round
             :type rounding: one of ROUND_UP, ROUND_DOWN, or ROUND_DEFAULT
             :returns: Size rounded to nearest whole specified unit
             :rtype: :class:`Size`
+
+            If unit is Size(0), returns Size(0).
         """
         if rounding not in (ROUND_UP, ROUND_DOWN, ROUND_DEFAULT):
             raise SizeRoundingError("invalid rounding specifier")
 
-        rounded = self.convertTo(unit).to_integral_value(rounding=rounding)
-        return Size(rounded * unit.factor)
+        factor = Decimal(int(getattr(unit, "factor", unit)))
+
+        if factor == 0:
+            return Size(0)
+
+        if factor < 0:
+            raise SizeNonsensicalOpError("invalid rounding unit: %s" % factor)
+
+        rounded = (self.magnitude / factor).to_integral_value(rounding=rounding)
+        return Size(rounded * factor)

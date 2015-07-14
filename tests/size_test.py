@@ -151,6 +151,16 @@ class SizeTestCase(unittest.TestCase):
         self.assertEquals(s.convertTo(KiB), 1792)
         self.assertEquals(s.convertTo(MiB), 1.75)
 
+    def testConvertToWithSize(self):
+        s = Size(1835008)
+        self.assertEqual(s.convertTo(Size(1)), s.convertTo(B))
+        self.assertEqual(s.convertTo(Size(1024)), s.convertTo(KiB))
+        self.assertEqual(Size(512).convertTo(Size(1024)), Decimal("0.5"))
+        self.assertEqual(Size(1024).convertTo(Size(512)), Decimal(2))
+
+        with self.assertRaises(SizeNonsensicalOpError):
+            s.convertTo(Size(0))
+
     def testNegative(self):
         s = Size(-500, MiB)
         self.assertEquals(s.humanReadable(), "-500 MiB")
@@ -336,6 +346,18 @@ class TranslationTestCase(unittest.TestCase):
         self.assertEqual(s.roundToNearest(TiB), Size(1, TiB))
         self.assertEqual(s.roundToNearest(TiB, rounding=size.ROUND_DOWN),
                          Size(0))
+
+        # test Size parameters
+        self.assertEqual(s.roundToNearest(Size(128, GiB)), Size(512, GiB))
+        self.assertEqual(s.roundToNearest(Size(1, KiB)), Size(513, GiB))
+        self.assertEqual(s.roundToNearest(Size(1, TiB)), Size(1, TiB))
+        self.assertEqual(s.roundToNearest(Size(1, TiB), rounding=size.ROUND_DOWN), Size(0))
+        self.assertEqual(s.roundToNearest(Size(0)), Size(0))
+        self.assertEqual(s.roundToNearest(Size(13, GiB)), Size(507, GiB))
+
+        with self.assertRaises(SizeNonsensicalOpError):
+            s.roundToNearest(Size(-1, B))
+
 
 class UtilityMethodsTestCase(unittest.TestCase):
 
