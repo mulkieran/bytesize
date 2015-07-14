@@ -141,7 +141,7 @@ class SizeTestCase(unittest.TestCase):
 
         s = Size(0.5, GiB)
         self.assertEqual(s.humanReadable(max_places=2, min_value=1), "512 MiB")
-        self.assertEqual(s.humanReadable(max_places=2, min_value=Decimal(0.1)), "0.5 GiB")
+        self.assertEqual(s.humanReadable(max_places=2, min_value=Decimal("0.1")), "0.5 GiB")
         self.assertEqual(s.humanReadable(max_places=2, min_value=Decimal(1)), "512 MiB")
 
     def testConvertToPrecision(self):
