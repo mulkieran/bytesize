@@ -142,7 +142,7 @@ class Size(object):
         if isinstance(other, Size):
             (div, rem) = divmod(self._magnitude, int(other))
             return (div, Size(rem))
-        if isinstance(other, (six.integer_types, float, Decimal)):
+        if isinstance(other, (six.integer_types, Decimal)):
             (div, rem) = divmod(self._magnitude, other)
             return (Size(div), Size(rem))
         raise SizeNonsensicalOpError("unsupported operand type(s) for divmod '%s' and '%s'" % (type(self).__name__, type(other).__name__))
@@ -166,7 +166,7 @@ class Size(object):
         #                     = int, if T(other) is Size
         if isinstance(other, Size):
             return self._magnitude // int(other)
-        if isinstance(other, (six.integer_types, float, Decimal)):
+        if isinstance(other, (six.integer_types, Decimal)):
             return Size(self._magnitude // other)
         raise SizeNonsensicalOpError("unsupported operand type(s) for floordiv: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
@@ -202,7 +202,7 @@ class Size(object):
         # Therefore, T(mod) = Size
         if isinstance(other, Size):
             return Size(self._magnitude % int(other))
-        if isinstance(other, (six.integer_types, float, Decimal)):
+        if isinstance(other, (six.integer_types, Decimal)):
             return Size(self._magnitude % other)
         raise SizeNonsensicalOpError("unsupported operand type(s) for mod: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
@@ -216,7 +216,7 @@ class Size(object):
     def __mul__(self, other):
         # self * other = mul
         # Therefore, T(mul) = Size and T(other) is a numeric type.
-        if isinstance(other, (six.integer_types, float, Decimal)):
+        if isinstance(other, (six.integer_types, Decimal)):
             return Size(self._magnitude * other)
         if isinstance(other, Size):
             raise SizeUnrepresentableOpError("unsupported operand type(s) for *: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
@@ -225,7 +225,7 @@ class Size(object):
 
     def __pow__(self, other):
         # Cannot represent multiples of Sizes.
-        if not isinstance(other, (six.integer_types, float, Decimal)):
+        if not isinstance(other, (six.integer_types, Decimal)):
             raise SizeNonsensicalOpError("unsupported operand type(s) for **: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
         raise SizeUnrepresentableOpError("unsupported operand type(s) for **: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
@@ -256,7 +256,7 @@ class Size(object):
         #                       = Decimal, if T(other) is Size
         if isinstance(other, Size):
             return Decimal(self._magnitude) / Decimal(int(other))
-        if isinstance(other, (six.integer_types, float, Decimal)):
+        if isinstance(other, (six.integer_types, Decimal)):
             return Size(Decimal(self._magnitude) / other)
         raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
