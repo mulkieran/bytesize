@@ -105,15 +105,9 @@ class Size(object):
     def __nonzero__(self):
         return self._magnitude != 0
 
-    def __complex__(self):
-        return complex(self._magnitude)
-
     def __int__(self):
         return self._magnitude
     __trunc__ = __int__
-
-    def __float__(self):
-        return float(self._magnitude)
 
     def __hash__(self):
         return hash(self._magnitude)

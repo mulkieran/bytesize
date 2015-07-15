@@ -353,9 +353,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(abs(Size(-32, TiB)), Size(32, TiB))
 
         # conversions
-        self.assertIsInstance(float(Size(32, MiB)), float)
         self.assertIsInstance(int(Size(32, MiB)), int)
-        self.assertIsInstance(complex(Size(32, MiB)), complex)
 
         # boolean properties
         self.assertEqual(Size(0) and True, Size(0))
