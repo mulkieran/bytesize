@@ -34,6 +34,13 @@ Numerous computations with bytes are nonsensical. For example, 2 raised to a
 power which is some number of bytes, is a meaningless computation. All such
 operations cause an error to be raised.
 
+Floating Point Numbers
+----------------------
+It is not possible to use floating point numbers in computations with Sizes.
+Where a fractional quantity is desired, use Decimal objects instead of floats.
+Thus, Size(0) * 1.2 raises an exception, but Size(0) * Decimal("1.2") is
+acceptable.
+
 Displaying Sizes
 ----------------
 Sizes are displayed using binary rather than SI prefixes or names, regardless
@@ -51,7 +58,10 @@ fractional bytes are not of interest.
 Constructing Sizes Programatically
 ----------------------------------
 New Size objects can be constructed from Size objects, numeric values, e.g.,
-ints, floats, or Decimal, or strings which represent such numeric values.
+int or Decimal, or strings which represent such numeric values.
+strings may be used to represent fractional quantities, e.g., "1.2", but
+floats are disallowed.
+
 The constructor takes an optional units specifier, which defaults to bytes
 for all numeric values, and to None for Size objects. The type of the
 unit specifier is a named prefix supplied by the size module. Fractional
