@@ -165,9 +165,9 @@ class Size(object):
         # Therefore, T(floor) = Size, if T(other) is numeric
         #                     = int, if T(other) is Size
         if isinstance(other, Size):
-            return self._magnitude // int(other)
+            return self._magnitude.__floordiv__(int(other))
         if isinstance(other, (six.integer_types, Decimal)):
-            return Size(self._magnitude // other)
+            return Size(Decimal(self._magnitude).__floordiv__(other))
         raise SizeNonsensicalOpError("unsupported operand type(s) for floordiv: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
     def __rfloordiv__(self, other):
@@ -175,7 +175,7 @@ class Size(object):
         # Therefore, T(floor) = int and T(other) is Size
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for floordiv: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return int(other) // self._magnitude
+        return int(other).__floordiv__(self._magnitude)
 
     def __ge__(self, other):
         if not isinstance(other, Size):
@@ -255,9 +255,9 @@ class Size(object):
         # Therefore, T(truediv) = Size, if T(other) is numeric
         #                       = Decimal, if T(other) is Size
         if isinstance(other, Size):
-            return Decimal(self._magnitude) / Decimal(int(other))
+            return Decimal(self._magnitude).__truediv__(Decimal(int(other)))
         if isinstance(other, (six.integer_types, Decimal)):
-            return Size(Decimal(self._magnitude) / other)
+            return Size(Decimal(self._magnitude).__truediv__(other))
         raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
     __div__ = __truediv__
@@ -267,7 +267,7 @@ class Size(object):
         # Therefore, T(truediv) = Decimal and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return Decimal(int(other)) / Decimal(self._magnitude)
+        return Decimal(int(other)).__truediv__(Decimal(self._magnitude))
 
     __rdiv__ = __rtruediv__
 
