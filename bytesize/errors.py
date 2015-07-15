@@ -26,10 +26,6 @@ class SizeConstructionError(SizeError):
     """ Error that occurs while constructing a Size object. """
     pass
 
-class SizeParseError(SizeError):
-    """ Error that occurs while parsing a string corresponding to a Size. """
-    pass
-
 class SizeDisplayError(SizeError):
     """ Error while displaying Size object. """
     pass

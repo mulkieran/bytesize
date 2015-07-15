@@ -22,15 +22,12 @@
 # Red Hat Author(s): David Cantrell <dcantrell@redhat.com>
 #                    Anne Mulhern <amulhern@redhat.com>
 
-import locale
-import os
 import unittest
 
 from decimal import Decimal
 
-from bytesize.i18n import _
 from bytesize.errors import SizeConstructionError, SizeDisplayError
-from bytesize.errors import SizeNonsensicalOpError, SizeParseError
+from bytesize.errors import SizeNonsensicalOpError
 from bytesize.errors import SizeRoundingError, SizeUnrepresentableOpError
 from bytesize import size
 from bytesize.size import Size, B, KiB, MiB, GiB, TiB
@@ -183,119 +180,6 @@ class SizeTestCase(unittest.TestCase):
     def testNoUnitsInString(self):
         self.assertEqual(Size("1024"), Size(1, KiB))
 
-    def testScientificNotation(self):
-        self.assertEqual(size.parseSpec("1e+0 KiB"), Decimal(1024))
-        self.assertEqual(size.parseSpec("1e-0 KiB"), Decimal(1024))
-        self.assertEqual(size.parseSpec("1e-1 KB"), Decimal(100))
-        self.assertEqual(size.parseSpec("1E-4KB"), Decimal("0.1"))
-        self.assertEqual(Size(size.parseSpec("1E-10KB")), Size(0))
-
-class TranslationTestCase(unittest.TestCase):
-
-    def __init__(self, methodName='runTest'):
-        super(TranslationTestCase, self).__init__(methodName=methodName)
-
-        # es_ES uses latin-characters but a comma as the radix separator
-        # kk_KZ uses non-latin characters and is case-sensitive
-        # ml_IN uses a lot of non-letter modifier characters
-        # fa_IR uses non-ascii digits, or would if python supported that, but
-        #       you know, just in case
-        self.TEST_LANGS = ["es_ES.UTF-8", "kk_KZ.UTF-8", "ml_IN.UTF-8", "fa_IR.UTF-8"]
-
-    def setUp(self):
-        self.saved_lang = os.environ.get('LANG', None)
-
-    def tearDown(self):
-        os.environ['LANG'] = self.saved_lang
-        locale.setlocale(locale.LC_ALL, '')
-
-    def testMakeSpec(self):
-        """ Tests for _makeSpecs(). """
-        for lang in  self.TEST_LANGS:
-            os.environ['LANG'] = lang
-            locale.setlocale(locale.LC_ALL, '')
-
-            # untranslated specs
-            self.assertEqual(size._makeSpec(b"", b"BYTES", False), b"bytes")
-            self.assertEqual(size._makeSpec(b"Mi", b"b", False), b"mib")
-
-            # un-lower-cased specs
-            self.assertEqual(size._makeSpec(b"", b"BYTES", False, False), b"BYTES")
-            self.assertEqual(size._makeSpec(b"Mi", b"b", False, False), b"Mib")
-            self.assertEqual(size._makeSpec(b"Mi", b"B", False, False), b"MiB")
-
-            # translated specs
-            res = size._makeSpec(b"", b"bytes", True)
-
-            # Note that exp != _(b"bytes").lower() as one might expect
-            exp = (_(b"") + _(b"bytes")).lower()
-            self.assertEqual(res, exp)
-
-    def testParseSpec(self):
-        """ Tests for parseSpec(). """
-        for lang in  self.TEST_LANGS:
-            os.environ['LANG'] = lang
-            locale.setlocale(locale.LC_ALL, '')
-
-            # Test parsing English spec in foreign locales
-            self.assertEqual(size.parseSpec("1 kibibytes"), Decimal(1024))
-            self.assertEqual(size.parseSpec("2 kibibyte"), Decimal(2048))
-            self.assertEqual(size.parseSpec("2 kilobyte"), Decimal(2000))
-            self.assertEqual(size.parseSpec("2 kilobytes"), Decimal(2000))
-            self.assertEqual(size.parseSpec("2 KB"), Decimal(2000))
-            self.assertEqual(size.parseSpec("2 K"), Decimal(2048))
-            self.assertEqual(size.parseSpec("2 k"), Decimal(2048))
-            self.assertEqual(size.parseSpec("2 Ki"), Decimal(2048))
-            self.assertEqual(size.parseSpec("2 g"), Decimal(2 * 1024 ** 3))
-            self.assertEqual(size.parseSpec("2 G"), Decimal(2 * 1024 ** 3))
-
-            # Test parsing foreign spec
-            self.assertEqual(size.parseSpec("1 %s%s" % (_("kibi"), _("bytes"))), Decimal(1024))
-
-            # Can't parse a valueless number
-            with self.assertRaises(SizeParseError):
-                size.parseSpec("Ki")
-
-            # Can't parse a number with bad units specification
-            with self.assertRaises(SizeParseError):
-                size.parseSpec("1 ersatzbyte")
-
-            with self.assertRaises(SizeParseError):
-                size.parseSpec("")
-
-            self.assertEqual(size.parseSpec("2 %s" % _("K")), Decimal(2048))
-            self.assertEqual(size.parseSpec("2 %s" % _("Ki")), Decimal(2048))
-            self.assertEqual(size.parseSpec("2 %s" % _("g")), Decimal(2 * 1024 ** 3))
-            self.assertEqual(size.parseSpec("2 %s" % _("G")), Decimal(2 * 1024 ** 3))
-            self.assertEqual(size.parseSpec("2"), Decimal(2))
-
-    def testTranslated(self):
-        s = Size(56.19, MiB)
-        for lang in  self.TEST_LANGS:
-            os.environ['LANG'] = lang
-            locale.setlocale(locale.LC_ALL, '')
-
-            # Check English parsing
-            self.assertEqual(s, Size(size.parseSpec("56.19 MiB")))
-
-            # Check native parsing
-            self.assertEqual(s, Size(size.parseSpec("56.19 %s%s" % (_("Mi"), _("B")))))
-
-            # Check native parsing, all lowercase
-            self.assertEqual(s, Size(size.parseSpec(("56.19 %s%s" % (_("Mi"), _("B"))).lower())))
-
-            # Check native parsing, all uppercase
-            self.assertEqual(s, Size(size.parseSpec(("56.19 %s%s" % (_("Mi"), _("B"))).upper())))
-
-            # If the radix separator is not a period, repeat the tests with the
-            # native separator
-            radix = locale.nl_langinfo(locale.RADIXCHAR)
-            if radix != '.':
-                self.assertEqual(s, Size(size.parseSpec("56%s19 MiB" % radix)))
-                self.assertEqual(s, Size(size.parseSpec("56%s19 %s%s" % (radix, _("Mi"), _("B")))))
-                self.assertEqual(s, Size(size.parseSpec(("56%s19 %s%s" % (radix, _("Mi"), _("B"))).lower())))
-                self.assertEqual(s, Size(size.parseSpec(("56%s19 %s%s" % (radix, _("Mi"), _("B"))).upper())))
-
     def testRoundToNearest(self):
         self.assertEqual(size.ROUND_DEFAULT, size.ROUND_HALF_UP)
 
@@ -349,11 +233,6 @@ class TranslationTestCase(unittest.TestCase):
 
 
 class UtilityMethodsTestCase(unittest.TestCase):
-
-    def testLowerASCII(self):
-        """ Tests for _lowerASCII. """
-        self.assertEqual(size._lowerASCII(b""), b"")
-        self.assertEqual(size._lowerASCII(b"B"), b"b")
 
     def testArithmetic(self):
         s = Size(2, GiB)
@@ -472,6 +351,3 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(True and Size(0), Size(0))
         self.assertEqual(Size(1) or True, Size(1))
         self.assertEqual(False or Size(5, MiB), Size(5, MiB))
-
-    def testUnitStr(self):
-        self.assertEqual(size.unitStr(KiB), "KiB")

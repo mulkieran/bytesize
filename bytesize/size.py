@@ -17,12 +17,7 @@
 # License and may only be used or replicated with the express permission of
 # Red Hat, Inc.
 #
-# Red Hat Author(s): David Cantrell <dcantrell@redhat.com>
-#                    Anne Mulhern <amulhern@redhat.com>
-
-import locale
-import re
-import string
+# Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
 from collections import namedtuple
 from decimal import Decimal
@@ -32,10 +27,8 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_UP
 import six
 
 from .errors import SizeConstructionError, SizeDisplayError
-from .errors import SizeNonsensicalOpError, SizeParseError
+from .errors import SizeNonsensicalOpError
 from .errors import SizeRoundingError, SizeUnrepresentableOpError
-from .i18n import _, N_
-from .util import stringize, unicodeize
 
 ROUND_DEFAULT = ROUND_HALF_UP
 
@@ -45,177 +38,33 @@ _Prefix = namedtuple("Prefix", ["factor", "prefix", "abbr"])
 _DECIMAL_FACTOR = 10 ** 3
 _BINARY_FACTOR = 2 ** 10
 
-_BYTES_SYMBOL = N_(b"B")
-_BYTES_WORDS = (N_(b"bytes"), N_(b"byte"))
+_BYTES_SYMBOL = "B"
 
 # Symbolic constants for units
-B = _Prefix(1, b"", b"")
+B = _Prefix(1, "", "")
 
-KB = _Prefix(_DECIMAL_FACTOR ** 1, N_(b"kilo"), N_(b"k"))
-MB = _Prefix(_DECIMAL_FACTOR ** 2, N_(b"mega"), N_(b"M"))
-GB = _Prefix(_DECIMAL_FACTOR ** 3, N_(b"giga"), N_(b"G"))
-TB = _Prefix(_DECIMAL_FACTOR ** 4, N_(b"tera"), N_(b"T"))
-PB = _Prefix(_DECIMAL_FACTOR ** 5, N_(b"peta"), N_(b"P"))
-EB = _Prefix(_DECIMAL_FACTOR ** 6, N_(b"exa"), N_(b"E"))
-ZB = _Prefix(_DECIMAL_FACTOR ** 7, N_(b"zetta"), N_(b"Z"))
-YB = _Prefix(_DECIMAL_FACTOR ** 8, N_(b"yotta"), N_(b"Y"))
+KB = _Prefix(_DECIMAL_FACTOR ** 1, "kilo", "k")
+MB = _Prefix(_DECIMAL_FACTOR ** 2, "mega", "M")
+GB = _Prefix(_DECIMAL_FACTOR ** 3, "giga", "G")
+TB = _Prefix(_DECIMAL_FACTOR ** 4, "tera", "T")
+PB = _Prefix(_DECIMAL_FACTOR ** 5, "peta", "P")
+EB = _Prefix(_DECIMAL_FACTOR ** 6, "exa", "E")
+ZB = _Prefix(_DECIMAL_FACTOR ** 7, "zetta", "Z")
+YB = _Prefix(_DECIMAL_FACTOR ** 8, "yotta", "Y")
 
-KiB = _Prefix(_BINARY_FACTOR ** 1, N_(b"kibi"), N_(b"Ki"))
-MiB = _Prefix(_BINARY_FACTOR ** 2, N_(b"mebi"), N_(b"Mi"))
-GiB = _Prefix(_BINARY_FACTOR ** 3, N_(b"gibi"), N_(b"Gi"))
-TiB = _Prefix(_BINARY_FACTOR ** 4, N_(b"tebi"), N_(b"Ti"))
-PiB = _Prefix(_BINARY_FACTOR ** 5, N_(b"pebi"), N_(b"Pi"))
-EiB = _Prefix(_BINARY_FACTOR ** 6, N_(b"exbi"), N_(b"Ei"))
-ZiB = _Prefix(_BINARY_FACTOR ** 7, N_(b"zebi"), N_(b"Zi"))
-YiB = _Prefix(_BINARY_FACTOR ** 8, N_(b"yobi"), N_(b"Yi"))
+KiB = _Prefix(_BINARY_FACTOR ** 1, "kibi", "Ki")
+MiB = _Prefix(_BINARY_FACTOR ** 2, "mebi", "Mi")
+GiB = _Prefix(_BINARY_FACTOR ** 3, "gibi", "Gi")
+TiB = _Prefix(_BINARY_FACTOR ** 4, "tebi", "Ti")
+PiB = _Prefix(_BINARY_FACTOR ** 5, "pebi", "Pi")
+EiB = _Prefix(_BINARY_FACTOR ** 6, "exbi", "Ei")
+ZiB = _Prefix(_BINARY_FACTOR ** 7, "zebi", "Zi")
+YiB = _Prefix(_BINARY_FACTOR ** 8, "yobi", "Yi")
 
 # Categories of symbolic constants
 _DECIMAL_PREFIXES = [KB, MB, GB, TB, PB, EB, ZB, YB]
 _BINARY_PREFIXES = [KiB, MiB, GiB, TiB, PiB, EiB, ZiB, YiB]
 _EMPTY_PREFIX = B
-
-if six.PY2:
-    _ASCIIlower_table = string.maketrans(string.ascii_uppercase, string.ascii_lowercase) # pylint: disable=no-member
-else:
-    _ASCIIlower_table = str.maketrans(string.ascii_uppercase, string.ascii_lowercase) # pylint: disable=no-member
-
-def _lowerASCII(s):
-    """Convert a string to lowercase using only ASCII character definitions.
-
-       :param str s: string to convert
-       :returns: lower-cased string
-       :rtype: str
-    """
-    if six.PY2:
-        return string.translate(s, _ASCIIlower_table) # pylint: disable=no-member
-    else:
-        return str.translate(s, _ASCIIlower_table) # pylint: disable=no-member
-
-def _makeSpec(prefix, suffix, xlate, lowercase=True):
-    """ Synthesizes a whole word from prefix and suffix.
-
-        :param str prefix: a prefix
-        :param str suffixes: a suffix
-        :param bool xlate: if True, treat as locale specific
-        :param bool lowercase: if True, make all lowercase
-
-        :returns:  whole word
-        :rtype: str
-    """
-    if xlate:
-        word = (_(prefix) + _(suffix))
-        return word.lower() if lowercase else word
-    else:
-        word = prefix + suffix
-        return _lowerASCII(word) if lowercase else word
-
-def unitStr(unit, xlate=False):
-    """ Return a string representation of unit.
-
-        :param unit: a named unit, e.g., KiB
-        :param bool xlate: if True, translate to current locale
-        :rtype: some kind of string type
-        :returns: string representation of unit
-    """
-    return _makeSpec(unit.abbr, _BYTES_SYMBOL, xlate, lowercase=False)
-
-def parseUnits(spec, xlate):
-    """ Parse a unit specification and return corresponding factor.
-
-        :param spec: a units specifier
-        :type spec: any type of string like object
-        :param bool xlate: if True, assume locale specific
-
-        :returns: a named constant corresponding to spec, if found
-        :rtype: _Prefix or NoneType
-
-        Looks first for exact matches for a specifier, but, failing that,
-        searches for partial matches for abbreviations.
-
-        Normalizes units to lowercase, e.g., MiB and mib are treated the same.
-    """
-    if spec == "":
-        return B
-
-    if xlate:
-        spec = spec.lower()
-    else:
-        spec = _lowerASCII(spec)
-
-    # Search for complete matches
-    for unit in [_EMPTY_PREFIX] + _BINARY_PREFIXES + _DECIMAL_PREFIXES:
-        if spec == _makeSpec(unit.abbr, _BYTES_SYMBOL, xlate) or \
-           spec in (_makeSpec(unit.prefix, s, xlate) for s in _BYTES_WORDS):
-            return unit
-
-    # Search for unambiguous partial match among binary abbreviations
-    matches = [p for p in _BINARY_PREFIXES if _makeSpec(p.abbr, "", xlate).startswith(spec)]
-    if len(matches) == 1:
-        return matches[0]
-
-    return None
-
-def parseSpec(spec):
-    """ Parse string representation of size.
-
-        :param spec: the specification of a size with, optionally, units
-        :type spec: any type of string like object
-        :returns: numeric value of the specification in bytes
-        :rtype: Decimal
-
-        :raises SizeParseError: if spec is unparseable
-
-        Tries to parse the spec first as English, if that fails, as
-        a locale specific string.
-    """
-
-    if not spec:
-        raise SizeParseError("invalid size specification: %s" % spec)
-
-    # Replace the localized radix character with a .
-    radix = locale.nl_langinfo(locale.RADIXCHAR)
-    if radix != '.':
-        spec = spec.replace(radix, '.')
-
-    m = re.match(r'(?P<numeric>(-|\+)?\s*(?P<base>([0-9]+)|([0-9]*\.[0-9]+)|([0-9]+\.[0-9]*))(?P<exp>(e|E)(-|\+)[0-9]+)?)\s*(?P<rest>[^\s]*)$', spec.strip())
-    if not m:
-        raise SizeParseError("invalid size specification: %s" % spec)
-
-    try:
-        size = Decimal(m.group('numeric'))
-    except InvalidOperation:
-        raise SizeParseError("invalid size specification: %s" % spec)
-
-    specifier = m.group('rest')
-
-    # First try to parse as English.
-    try:
-        if six.PY2:
-            spec_ascii = str(specifier.decode("ascii"))
-        else:
-            spec_ascii = bytes(specifier, 'ascii')
-    except (UnicodeDecodeError, UnicodeEncodeError):
-        # String contains non-ascii characters, so can not be English.
-        pass
-    else:
-        unit = parseUnits(spec_ascii, False)
-        if unit is not None:
-            return size * unit.factor
-
-    # No English match found, try localized size specs.
-    if six.PY2:
-        if isinstance(specifier, unicode):
-            spec_local = specifier
-        else:
-            spec_local = specifier.decode("utf-8")
-    else:
-        spec_local = specifier
-
-    unit = parseUnits(spec_local, True)
-    if unit is not None:
-        return size * unit.factor
-
-    raise SizeParseError("invalid size specification: %s" % spec)
 
 class Size(object):
 
