@@ -245,7 +245,8 @@ class SizeTestCase(unittest.TestCase):
 
 class UtilityMethodsTestCase(unittest.TestCase):
 
-    def testArithmetic(self):
+    def testBinaryOperatorsSize(self):
+        """ Test binary operators with a possible Size result. """
         s = Size(2, GiB)
 
         # +
@@ -304,6 +305,17 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalOpError):
             2 ** Size(0) # pylint: disable=expression-not-assigned, pointless-statement
 
+        # divmod
+        self.assertEqual(divmod(Size(32, MiB), 2), (Size(16, MiB), Size(0)))
+        self.assertEqual(divmod(Size(24, MiB), Size(16, MiB)), (1, Size(8, MiB)))
+        with self.assertRaises(SizeNonsensicalOpError):
+            divmod(2048, Size(12, B))
+        with self.assertRaises(SizeNonsensicalOpError):
+            divmod(s, "str")
+
+    def testBinaryOperatorsBoolean(self):
+        """ Test binary operators with a boolean result. """
+
         # <
         self.assertTrue(Size(0, MiB) < Size(32))
         with self.assertRaises(SizeNonsensicalOpError):
@@ -335,13 +347,14 @@ class UtilityMethodsTestCase(unittest.TestCase):
         # !=
         self.assertTrue(Size(32, MiB) != Size(32, GiB))
 
-        # divmod
-        self.assertEqual(divmod(Size(32, MiB), 2), (Size(16, MiB), Size(0)))
-        self.assertEqual(divmod(Size(24, MiB), Size(16, MiB)), (1, Size(8, MiB)))
-        with self.assertRaises(SizeNonsensicalOpError):
-            divmod(2048, Size(12, B))
-        with self.assertRaises(SizeNonsensicalOpError):
-            divmod(s, "str")
+        # boolean properties
+        self.assertEqual(Size(0) and True, Size(0))
+        self.assertEqual(True and Size(0), Size(0))
+        self.assertEqual(Size(1) or True, Size(1))
+        self.assertEqual(False or Size(5, MiB), Size(5, MiB))
+
+    def testUnaryOperators(self):
+        s = Size(2, GiB)
 
         # unary +/-
         self.assertEqual(-(Size(32)), Size(-32))
@@ -354,12 +367,8 @@ class UtilityMethodsTestCase(unittest.TestCase):
 
         # conversions
         self.assertIsInstance(int(Size(32, MiB)), int)
-
-        # boolean properties
-        self.assertEqual(Size(0) and True, Size(0))
-        self.assertEqual(True and Size(0), Size(0))
-        self.assertEqual(Size(1) or True, Size(1))
-        self.assertEqual(False or Size(5, MiB), Size(5, MiB))
+        self.assertFalse(bool(Size(0)))
+        self.assertTrue(bool(Size(1)))
 
     def testOtherMethods(self):
         self.assertEqual(str(Size(0)), "0.00 B")
@@ -373,7 +382,4 @@ class UtilityMethodsTestCase(unittest.TestCase):
 
         s = Size(1024)
         z = copy.deepcopy(s)
-        self.assertIsNot(s._magnitude, z._magnitude)
-
-        self.assertFalse(bool(Size(0)))
-        self.assertTrue(bool(Size(1)))
+        self.assertIsNot(s._magnitude, z._magnitude) # pylint: disable=protected-access
