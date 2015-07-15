@@ -383,3 +383,36 @@ class UtilityMethodsTestCase(unittest.TestCase):
         s = Size(1024)
         z = copy.deepcopy(s)
         self.assertIsNot(s._magnitude, z._magnitude) # pylint: disable=protected-access
+
+    def testRMethods(self):
+        """ Test certain r* methods. These methods must be invoked
+            explicitly, rather than by means of an operator, in order
+            to be executed. Otherwise, their companion non-R method
+            will be invoked instead.
+        """
+        s = Size(2, GiB)
+
+        # rtruediv, retains fractional quantities
+        self.assertEqual(s.__rtruediv__(s), Decimal(1))
+        with self.assertRaises(SizeNonsensicalOpError):
+            s.__rtruediv__("str") # pylint: disable=pointless-statement
+
+        # rdivmod
+        self.assertEqual(Size(16, MiB).__rdivmod__(Size(24, MiB)), (1, Size(8, MiB)))
+        with self.assertRaises(SizeNonsensicalOpError):
+            divmod(s.__rdivmod__("str"))
+
+        # // rfloordiv
+        self.assertEqual(s.__rfloordiv__(s), 1)
+        with self.assertRaises(SizeNonsensicalOpError):
+            s.__rfloordiv__("str") # pylint: disable=pointless-statement
+
+        # rmod
+        self.assertEqual(s.__rmod__(s), Size(0))
+        with self.assertRaises(SizeNonsensicalOpError):
+            s.__rmod__("str") # pylint: disable=expression-not-assigned, pointless-statement
+
+        # rsub
+        self.assertEqual(s.__rsub__(s), Size(0))
+        with self.assertRaises(SizeNonsensicalOpError):
+            s.__rsub__(2) # pylint: disable=pointless-statement
