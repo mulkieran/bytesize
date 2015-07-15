@@ -452,6 +452,33 @@ class Size(object):
 
         return self.magnitude / factor
 
+    def components(self, min_value=1):
+        """ Return a representation of this size, decomposed into a
+            Decimal value and a unit specifier tuple.
+
+            :param min_value: Lower bound for value, default is 1.
+            :type min_value: A precise numeric type: int, long, or Decimal
+            :returns: a pair of a decimal value and a unit
+            :rtype: tuple of Decimal and unit
+            :raises SizeDisplayError: if min_value is not usable
+        """
+        if min_value < 0 or not isinstance(min_value, (six.integer_types, Decimal)):
+            raise SizeDisplayError("min_value must be a precise positive numeric value.")
+
+        # Find the smallest prefix which will allow a number less than
+        # _BINARY_FACTOR * min_value to the left of the decimal point.
+        # If the number is so large that no prefix will satisfy this
+        # requirement use the largest prefix.
+        limit = _BINARY_FACTOR * min_value
+        for unit in [_EMPTY_PREFIX] + _BINARY_PREFIXES:
+            newcheck = self.convertTo(unit)
+
+            if abs(newcheck) < limit:
+                break
+
+        # pylint: disable=undefined-loop-variable
+        return (newcheck, unit)
+
     def humanReadable(self, max_places=2, strip=True, min_value=1, xlate=True):
         """ Return a string representation of this size with appropriate
             size specifier and in the specified number of decimal places.
@@ -492,24 +519,12 @@ class Size(object):
         if max_places is not None and (max_places < 0 or not isinstance(max_places, six.integer_types)):
             raise SizeDisplayError("max_places must be None or an non-negative integer value")
 
-        if min_value < 0 or not isinstance(min_value, (six.integer_types, Decimal)):
-            raise SizeDisplayError("min_value must be a precise positive numeric value.")
-
-        # Find the smallest prefix which will allow a number less than
-        # _BINARY_FACTOR * min_value to the left of the decimal point.
-        # If the number is so large that no prefix will satisfy this
-        # requirement use the largest prefix.
-        limit = _BINARY_FACTOR * min_value
-        for unit in [_EMPTY_PREFIX] + _BINARY_PREFIXES:
-            newcheck = self.convertTo(unit)
-
-            if abs(newcheck) < limit:
-                break
+        (magnitude, unit) = self.components(min_value)
 
         if max_places is not None:
-            newcheck = newcheck.quantize(Decimal(10) ** -max_places)
+            magnitude = magnitude.quantize(Decimal(10) ** -max_places)
 
-        retval_str = str(newcheck)
+        retval_str = str(magnitude)
 
         if '.' in retval_str and strip:
             retval_str = retval_str.rstrip("0").rstrip(".")
