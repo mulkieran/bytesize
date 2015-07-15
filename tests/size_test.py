@@ -296,17 +296,6 @@ class TranslationTestCase(unittest.TestCase):
                 self.assertEqual(s, Size(size.parseSpec(("56%s19 %s%s" % (radix, _("Mi"), _("B"))).lower())))
                 self.assertEqual(s, Size(size.parseSpec(("56%s19 %s%s" % (radix, _("Mi"), _("B"))).upper())))
 
-
-    def testHumanReadableTranslation(self):
-        s = Size(56.19, MiB)
-        size_str = s.humanReadable()
-        for lang in self.TEST_LANGS:
-
-            os.environ['LANG'] = lang
-            locale.setlocale(locale.LC_ALL, '')
-            self.assertTrue(s.humanReadable().endswith("%s%s" % (_("Mi"), _("B"))))
-            self.assertEqual(s.humanReadable(xlate=False), size_str)
-
     def testRoundToNearest(self):
         self.assertEqual(size.ROUND_DEFAULT, size.ROUND_HALF_UP)
 
