@@ -93,7 +93,7 @@ class Size(object):
             raise SizeConstructionError("invalid value for size")
 
     def __str__(self):
-        return " ".join(self.humanReadableComponents(strip=False))
+        return " ".join(self.humanReadableComponents(strip=False)) + _BYTES_SYMBOL
 
     def __repr__(self):
         return "Size('%s')" % self.magnitude
@@ -356,6 +356,9 @@ class Size(object):
             all ranges are of equal size, and are bisected by the result. So,
             if n.humanReadable() == x U and b is the number of bytes in 1 U,
             and e = 1/2 * 1/(10^max_places) * b, then x - e < n < x + e.
+
+            The second part of the tuple is the unit prefix, e.g., "M", "Gi".
+            The B (for bytes) is implicit.
         """
         if max_places is not None and (max_places < 0 or not isinstance(max_places, six.integer_types)):
             raise SizeDisplayError("max_places must be None or an non-negative integer value")
@@ -370,7 +373,7 @@ class Size(object):
         if '.' in retval_str and strip:
             retval_str = retval_str.rstrip("0").rstrip(".")
 
-	return (retval_str, unit.abbr + _BYTES_SYMBOL)
+        return (retval_str, unit.abbr)
 
     def roundToNearest(self, unit, rounding=ROUND_DEFAULT):
         """ Rounds to nearest unit specified as a named constant or a Size.
