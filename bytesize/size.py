@@ -93,7 +93,7 @@ class Size(object):
             raise SizeConstructionError("invalid value for size")
 
     def __str__(self):
-        return " ".join(self.humanReadableComponents())
+        return " ".join(self.humanReadableComponents(strip=False))
 
     def __repr__(self):
         return "Size('%s')" % self.magnitude
