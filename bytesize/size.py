@@ -80,7 +80,7 @@ class Size(object):
         """
         if isinstance(value, six.integer_types):
             self._magnitude = value * (units or B).factor
-        elif isinstance(value, (Decimal, float, six.string_types)):
+        elif isinstance(value, (Decimal, six.string_types)):
             try:
                 self._magnitude = int((Decimal(value) * (units or B).factor).to_integral_value(rounding=ROUND_DOWN))
             except InvalidOperation:

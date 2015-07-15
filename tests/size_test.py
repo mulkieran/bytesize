@@ -37,7 +37,7 @@ class SizeTestCase(unittest.TestCase):
 
     def testExceptions(self):
         zero = Size(0)
-        self.assertEqual(zero, Size(0.0))
+        self.assertEqual(zero, Size("0.0"))
 
         s = Size(500)
         with self.assertRaises(SizeDisplayError):
@@ -56,28 +56,28 @@ class SizeTestCase(unittest.TestCase):
 
         # humanReable output should be the same as input for big enough sizes
         # and enough places and integer values
-        s = Size(12.68, TiB)
+        s = Size("12.68", TiB)
         self.assertEqual(s.humanReadableComponents(max_places=2), ("12.68", "Ti"))
-        s = Size(26.55, MiB)
+        s = Size("26.55", MiB)
         self.assertEqual(s.humanReadableComponents(max_places=2), ("26.55", "Mi"))
         s = Size(300, MiB)
         self.assertEqual(s.humanReadableComponents(max_places=2), ("300", "Mi"))
 
         # when min_value is 10 and single digit on left of decimal, display
         # with smaller unit.
-        s = Size(9.68, TiB)
+        s = Size('9.68', TiB)
         self.assertEqual(s.humanReadableComponents(max_places=2, min_value=10), ("9912.32", "Gi"))
-        s = Size(4.29, MiB)
+        s = Size('4.29', MiB)
         self.assertEqual(s.humanReadableComponents(max_places=2, min_value=10), ("4392.96", "Ki"))
-        s = Size(7.18, KiB)
+        s = Size('7.18', KiB)
         self.assertEqual(s.humanReadableComponents(max_places=2, min_value=10), ("7352", ""))
 
         # rounding should work with max_places limitted
-        s = Size(12.687, TiB)
+        s = Size('12.687', TiB)
         self.assertEqual(s.humanReadableComponents(max_places=2), ("12.69", "Ti"))
-        s = Size(23.7874, TiB)
+        s = Size('23.7874', TiB)
         self.assertEqual(s.humanReadableComponents(max_places=3), ("23.787", "Ti"))
-        s = Size(12.6998, TiB)
+        s = Size('12.6998', TiB)
         self.assertEqual(s.humanReadableComponents(max_places=2), ("12.7", "Ti"))
 
         # byte values close to multiples of 2 are shown without trailing zeros
@@ -88,7 +88,7 @@ class SizeTestCase(unittest.TestCase):
 
         # a fractional quantity is shown if the value deviates
         # from the whole number of units by more than 1%
-        s = Size(16384 - (1024/100 + 1))
+        s = Size(16384 - (Decimal(1024)/100 + 1))
         self.assertEqual(s.humanReadableComponents(max_places=2), ("15.99", "Ki"))
 
         # if max_places is set to None, all digits are displayed
@@ -147,7 +147,7 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(s.humanReadableComponents(), ("9", "Mi"))
         self.assertEqual(s.humanReadableComponents(min_value=10), ("9216", "Ki"))
 
-        s = Size(0.5, GiB)
+        s = Size("0.5", GiB)
         self.assertEqual(s.humanReadableComponents(max_places=2, min_value=1), ("512", "Mi"))
         self.assertEqual(s.humanReadableComponents(max_places=2, min_value=Decimal("0.1")), ("0.5", "Gi"))
         self.assertEqual(s.humanReadableComponents(max_places=2, min_value=Decimal(1)), ("512", "Mi"))
@@ -175,9 +175,9 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(s.convertTo(B), -524288000)
 
     def testPartialBytes(self):
-        self.assertEqual(Size(1024.6), Size(1024))
-        self.assertEqual(Size(1/1025.0, KiB), Size(0))
-        self.assertEqual(Size(1/1023.0, KiB), Size(1))
+        self.assertEqual(Size("1024.6"), Size(1024))
+        self.assertEqual(Size(1/Decimal(1025), KiB), Size(0))
+        self.assertEqual(Size(1/Decimal(1023), KiB), Size(1))
 
     def testConstructor(self):
         with self.assertRaises(SizeConstructionError):
@@ -194,7 +194,7 @@ class SizeTestCase(unittest.TestCase):
     def testRoundToNearest(self):
         self.assertEqual(size.ROUND_DEFAULT, size.ROUND_HALF_UP)
 
-        s = Size(10.3, GiB)
+        s = Size("10.3", GiB)
         self.assertEqual(s.roundToNearest(GiB), Size(10, GiB))
         self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_DEFAULT),
                          Size(10, GiB))
@@ -216,7 +216,7 @@ class SizeTestCase(unittest.TestCase):
         with self.assertRaises(SizeRoundingError):
             s.roundToNearest(MiB, rounding=ROUND_HALF_DOWN)
 
-        s = Size(10.51, GiB)
+        s = Size("10.51", GiB)
         self.assertEqual(s.roundToNearest(GiB), Size(11, GiB))
         self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_DEFAULT),
                          Size(11, GiB))
