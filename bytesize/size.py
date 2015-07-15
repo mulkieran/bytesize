@@ -243,15 +243,8 @@ class Size(object):
         else:
             raise SizeConstructionError("invalid value for size")
 
-    # Force str and unicode types since the translated sizespec may be unicode
-    def _toString(self):
-        return self.humanReadable()
-
-    def __str__(self, eng=False, context=None):
-        return stringize(self._toString())
-
-    def __unicode__(self):
-        return unicodeize(self._toString())
+    def __str__(self):
+        return " ".join(self.humanReadableComponents())
 
     def __repr__(self):
         return "Size('%s')" % self.magnitude
@@ -479,8 +472,8 @@ class Size(object):
         # pylint: disable=undefined-loop-variable
         return (newcheck, unit)
 
-    def humanReadable(self, max_places=2, strip=True, min_value=1):
-        """ Return a string representation of this size with appropriate
+    def humanReadableComponents(self, max_places=2, strip=True, min_value=1):
+        """ Return a string representation of components with appropriate
             size specifier and in the specified number of decimal places.
             Values are always represented using binary not decimal units.
             For example, if the number of bytes represented by this size
@@ -492,8 +485,8 @@ class Size(object):
             :param bool strip: True if trailing zeros are to be stripped.
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int, long, or Decimal
-            :returns: a representation of the size
-            :rtype: str
+            :returns: a representation of the size as a pair of strings
+            :rtype: tuple of str * str
 
             If max_places is set to None, all non-zero digits will be shown.
             Otherwise, max_places digits will be shown.
@@ -528,8 +521,7 @@ class Size(object):
         if '.' in retval_str and strip:
             retval_str = retval_str.rstrip("0").rstrip(".")
 
-        # pylint: disable=undefined-loop-variable
-        return retval_str + " " + _makeSpec(unit.abbr, _BYTES_SYMBOL, False, lowercase=False)
+	return (retval_str, unit.abbr + _BYTES_SYMBOL)
 
     def roundToNearest(self, unit, rounding=ROUND_DEFAULT):
         """ Rounds to nearest unit specified as a named constant or a Size.
