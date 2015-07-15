@@ -121,12 +121,22 @@ class SizeTestCase(unittest.TestCase):
         # since all significant digits are shown, there are no trailing 0s.
         self.assertEqual(s.humanReadableComponents(max_places=None), ("63.9990234375", "Ki"))
 
+        eps = Decimal(1024)/100/2 # 1/2 of 1% of 1024
+
         # deviation is less than 1/2 of 1% of 1024
-        s = Size(16384 - (1024/100/2))
+        s = Size(16384 - (eps - 1))
         self.assertEqual(s.humanReadableComponents(max_places=2), ("16", "Ki"))
+
         # deviation is greater than 1/2 of 1% of 1024
-        s = Size(16384 - ((1024/100/2) + 1))
+        s = Size(16384 - (eps + 1))
         self.assertEqual(s.humanReadableComponents(max_places=2), ("15.99", "Ki"))
+        # deviation is greater than 1/2 of 1% of 1024
+        s = Size(16384 + (eps + 1))
+        self.assertEqual(s.humanReadableComponents(max_places=2), ("16.01", "Ki"))
+
+        # deviation is less than 1/2 of 1% of 1024
+        s = Size(16384 + (eps - 1))
+        self.assertEqual(s.humanReadableComponents(max_places=2), ("16", "Ki"))
 
         s = Size(0x10000000000000)
         self.assertEqual(s.humanReadableComponents(max_places=2), ("4", "Pi"))
