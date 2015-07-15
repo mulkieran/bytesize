@@ -115,9 +115,6 @@ class Size(object):
     def __float__(self):
         return float(self._magnitude)
 
-    def __long__(self):
-        return self._magnitude
-
     def __hash__(self):
         return hash(self._magnitude)
 

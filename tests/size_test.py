@@ -361,8 +361,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(repr(Size(1024)), "Size('1024')")
         self.assertEqual(repr(Size("1024.1")), "Size('1024')")
 
-        self.assertEqual(long(Size(1024)), 1024)
-
         self.assertEqual(hash(Size(1024)), hash(1024))
 
         s = Size(1024)
