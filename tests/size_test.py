@@ -22,6 +22,7 @@
 # Red Hat Author(s): David Cantrell <dcantrell@redhat.com>
 #                    Anne Mulhern <amulhern@redhat.com>
 
+import copy
 import unittest
 
 from decimal import Decimal
@@ -351,3 +352,19 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(True and Size(0), Size(0))
         self.assertEqual(Size(1) or True, Size(1))
         self.assertEqual(False or Size(5, MiB), Size(5, MiB))
+
+    def testOtherMethods(self):
+        self.assertEqual(str(Size(0)), "0.00 B")
+        self.assertEqual(str(Size(1024)), "1.00 KiB")
+
+        self.assertEqual(repr(Size(0)), "Size('0')")
+        self.assertEqual(repr(Size(1024)), "Size('1024')")
+        self.assertEqual(repr(Size("1024.1")), "Size('1024')")
+
+        self.assertEqual(long(Size(1024)), 1024)
+
+        self.assertEqual(hash(Size(1024)), hash(1024))
+
+        s = Size(1024)
+        z = copy.deepcopy(s)
+        self.assertIsNot(s._magnitude, z._magnitude)
