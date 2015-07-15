@@ -79,16 +79,16 @@ class Size(object):
             Must pass None as units argument if value has type Size.
         """
         if isinstance(value, six.integer_types):
-            self.magnitude = value * (units or B).factor
+            self._magnitude = value * (units or B).factor
         elif isinstance(value, (Decimal, float, six.string_types)):
             try:
-                self.magnitude = int((Decimal(value) * (units or B).factor).to_integral_value(rounding=ROUND_DOWN))
+                self._magnitude = int((Decimal(value) * (units or B).factor).to_integral_value(rounding=ROUND_DOWN))
             except InvalidOperation:
                 raise SizeConstructionError("invalid value %s for size magnitude" % value)
         elif isinstance(value, Size):
             if units is not None:
                 raise SizeConstructionError("units parameter is meaningless when Size value is passed")
-            self.magnitude = value.magnitude
+            self._magnitude = int(value)
         else:
             raise SizeConstructionError("invalid value for size")
 
@@ -96,48 +96,48 @@ class Size(object):
         return " ".join(self.humanReadableComponents(strip=False)) + _BYTES_SYMBOL
 
     def __repr__(self):
-        return "Size('%s')" % self.magnitude
+        return "Size('%s')" % self._magnitude
 
     def __deepcopy__(self, memo):
         # pylint: disable=unused-argument
         return Size(self.convertTo())
 
     def __nonzero__(self):
-        return self.magnitude != 0
+        return self._magnitude != 0
 
     def __complex__(self):
-        return complex(self.magnitude)
+        return complex(self._magnitude)
 
     def __int__(self):
-        return self.magnitude
+        return self._magnitude
     __trunc__ = __int__
 
     def __float__(self):
-        return float(self.magnitude)
+        return float(self._magnitude)
 
     def __long__(self):
-        return self.magnitude
+        return self._magnitude
 
     def __hash__(self):
-        return hash(self.magnitude)
+        return hash(self._magnitude)
 
     # UNARY OPERATIONS
 
     def __abs__(self):
-        return Size(abs(self.magnitude))
+        return Size(abs(self._magnitude))
 
     def __neg__(self):
-        return Size(-(self.magnitude))
+        return Size(-(self._magnitude))
 
     def __pos__(self):
-        return Size(self.magnitude)
+        return Size(self._magnitude)
 
     # BINARY OPERATIONS
 
     def __add__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for +: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return Size(self.magnitude + other.magnitude)
+        return Size(self._magnitude + int(other))
     __radd__ = __add__
 
     def __divmod__(self, other):
@@ -146,10 +146,10 @@ class Size(object):
         #            T(div) = Size, if T(other) is numeric
         #                   = int, if T(other) is Size
         if isinstance(other, Size):
-            (div, rem) = divmod(self.magnitude, other.magnitude)
+            (div, rem) = divmod(self._magnitude, int(other))
             return (div, Size(rem))
         if isinstance(other, (six.integer_types, float, Decimal)):
-            (div, rem) = divmod(self.magnitude, other)
+            (div, rem) = divmod(self._magnitude, other)
             return (Size(div), Size(rem))
         raise SizeNonsensicalOpError("unsupported operand type(s) for divmod '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
@@ -160,20 +160,20 @@ class Size(object):
         # and T(other) is Size
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for divmod '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        (div, rem) = divmod(other.magnitude, self.magnitude)
+        (div, rem) = divmod(int(other), self._magnitude)
         return (div, Size(rem))
 
     def __eq__(self, other):
-        return isinstance(other, Size) and self.magnitude == other.magnitude
+        return isinstance(other, Size) and self._magnitude == int(other)
 
     def __floordiv__(self, other):
         # other * floor + rem = self
         # Therefore, T(floor) = Size, if T(other) is numeric
         #                     = int, if T(other) is Size
         if isinstance(other, Size):
-            return self.magnitude // other.magnitude
+            return self._magnitude // int(other)
         if isinstance(other, (six.integer_types, float, Decimal)):
-            return Size(self.magnitude // other)
+            return Size(self._magnitude // other)
         raise SizeNonsensicalOpError("unsupported operand type(s) for floordiv: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
     def __rfloordiv__(self, other):
@@ -181,35 +181,35 @@ class Size(object):
         # Therefore, T(floor) = int and T(other) is Size
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for floordiv: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return other.magnitude // self.magnitude
+        return int(other) // self._magnitude
 
     def __ge__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for >: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return self.magnitude >= other.magnitude
+        return self._magnitude >= int(other)
 
     def __gt__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for >=: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return self.magnitude > other.magnitude
+        return self._magnitude > int(other)
 
     def __le__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for <=: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return self.magnitude <= other.magnitude
+        return self._magnitude <= int(other)
 
     def __lt__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for <: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return self.magnitude < other.magnitude
+        return self._magnitude < int(other)
 
     def __mod__(self, other):
         # other * div + mod = self
         # Therefore, T(mod) = Size
         if isinstance(other, Size):
-            return Size(self.magnitude % other.magnitude)
+            return Size(self._magnitude % int(other))
         if isinstance(other, (six.integer_types, float, Decimal)):
-            return Size(self.magnitude % other)
+            return Size(self._magnitude % other)
         raise SizeNonsensicalOpError("unsupported operand type(s) for mod: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
     def __rmod__(self, other):
@@ -217,13 +217,13 @@ class Size(object):
         # Therefore, T(mod) = T(other) and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for mod: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return Size(other.magnitude % self.magnitude)
+        return Size(int(other) % self._magnitude)
 
     def __mul__(self, other):
         # self * other = mul
         # Therefore, T(mul) = Size and T(other) is a numeric type.
         if isinstance(other, (six.integer_types, float, Decimal)):
-            return Size(self.magnitude * other)
+            return Size(self._magnitude * other)
         if isinstance(other, Size):
             raise SizeUnrepresentableOpError("unsupported operand type(s) for *: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
         raise SizeNonsensicalOpError("unsupported operand type(s) for *: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
@@ -240,30 +240,30 @@ class Size(object):
         raise SizeNonsensicalOpError("unsupported operand type(s) for **: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
     def __ne__(self, other):
-        return not isinstance(other, Size) or self.magnitude != other.magnitude
+        return not isinstance(other, Size) or self._magnitude != int(other)
 
     def __sub__(self, other):
         # self - other = sub
         # Therefore, T(sub) = T(self) = Size and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return Size(self.magnitude - other.magnitude)
+        return Size(self._magnitude - int(other))
 
     def __rsub__(self, other):
         # other - self = sub
         # Therefore, T(sub) = T(self) = Size and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return Size(other.magnitude - self.magnitude)
+        return Size(int(other) - self._magnitude)
 
     def __truediv__(self, other):
         # other * truediv = self
         # Therefore, T(truediv) = Size, if T(other) is numeric
         #                       = Decimal, if T(other) is Size
         if isinstance(other, Size):
-            return Decimal(self.magnitude) / Decimal(other.magnitude)
+            return Decimal(self._magnitude) / Decimal(int(other))
         if isinstance(other, (six.integer_types, float, Decimal)):
-            return Size(Decimal(self.magnitude) / other)
+            return Size(Decimal(self._magnitude) / other)
         raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
     __div__ = __truediv__
@@ -273,7 +273,7 @@ class Size(object):
         # Therefore, T(truediv) = Decimal and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        return Decimal(other.magnitude) / Decimal(self.magnitude)
+        return Decimal(int(other)) / Decimal(self._magnitude)
 
     __rdiv__ = __rtruediv__
 
@@ -292,7 +292,7 @@ class Size(object):
         if factor <= 0:
             raise SizeNonsensicalOpError("can not convert to non-positive unit %s" % factor)
 
-        return self.magnitude / factor
+        return self._magnitude / factor
 
     def components(self, min_value=1):
         """ Return a representation of this size, decomposed into a
@@ -398,5 +398,5 @@ class Size(object):
         if factor < 0:
             raise SizeNonsensicalOpError("invalid rounding unit: %s" % factor)
 
-        rounded = (self.magnitude / factor).to_integral_value(rounding=rounding)
+        rounded = (self._magnitude / factor).to_integral_value(rounding=rounding)
         return Size(rounded * factor)
