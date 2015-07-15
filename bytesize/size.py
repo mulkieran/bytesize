@@ -118,6 +118,9 @@ class Size(object):
     def __hash__(self):
         return hash(self._magnitude)
 
+    def __bool__(self):
+        return self.__nonzero__()
+
     # UNARY OPERATIONS
 
     def __abs__(self):

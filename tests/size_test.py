@@ -376,3 +376,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
         s = Size(1024)
         z = copy.deepcopy(s)
         self.assertIsNot(s._magnitude, z._magnitude)
+
+        self.assertFalse(bool(Size(0)))
+        self.assertTrue(bool(Size(1)))
