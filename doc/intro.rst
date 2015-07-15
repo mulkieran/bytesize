@@ -5,9 +5,7 @@ Bytesize is a module for handling parsing, display, and computation with
 sizes expressed in bytes. Its principle feature is a Size class from
 which can be constructed Size objects which represent a precise, whole
 quantity of bytes. Size object can be displayed in a locale-specific manner.
-Strings which correspond to the module's interpretation of a locale-specific
-representation of a number of bytes can be parsed and used to construct
-Size objects. Various arithmetic operations are defined for Size objects.
+Various arithmetic operations are defined for Size objects.
 
 Practical Computing with Bytes
 ------------------------------
@@ -49,17 +47,6 @@ Representing Units
 The size module supplies a set of named prefixes for both SI and binary units,
 for all non-fractional prefixes. Fractional prefixes are not defined, since
 fractional bytes are not of interest.
-
-Parsing strings as Sizes
-------------------------
-Generally speaking, parsing a free form string as a specification of a number
-of bytes in what may be a foreign locale is bound to be an error-prone process.
-Whenever a number of bytes is known precisely at compile-time, it is much
-better to avoid string parsing and make use of the units presented by the
-Size module. Parsing should be reserved solely for user-input values when
-no other alternative is available. A partial approach, where the user enters
-a number, but the units are not user-input, is less error-prone than parsing
-a user-entered string.
 
 Constructing Sizes Programatically
 ----------------------------------
