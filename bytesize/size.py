@@ -26,6 +26,8 @@ from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_UP
 
 import six
 
+from .config import StrConfig
+
 from .errors import SizeConstructionError, SizeDisplayError
 from .errors import SizeNonsensicalOpError
 from .errors import SizeRoundingError, SizeUnrepresentableOpError
@@ -69,6 +71,19 @@ _EMPTY_PREFIX = B
 class Size(object):
 
     _NUMERIC_TYPES = (six.integer_types, Decimal)
+    _STR_CONFIG = StrConfig()
+
+    @classmethod
+    def set_str_config(cls, config):
+        """ Set the configuration for __str__ method for all Size objects.
+
+            :param :class:`.config.StrConfig` config: a configuration object
+        """
+        cls._STR_CONFIG = StrConfig(
+            max_places=config.max_places,
+            strip=config.strip,
+            min_value=config.min_value
+        )
 
     def __init__(self, value=0, units=None):
         """ Initialize a new Size object.
@@ -95,7 +110,12 @@ class Size(object):
             raise SizeConstructionError("invalid value for size")
 
     def __str__(self):
-        return " ".join(self.humanReadableComponents(strip=False)) + _BYTES_SYMBOL
+        res = self.humanReadableComponents(
+           max_places=self._STR_CONFIG.max_places,
+           strip=self._STR_CONFIG.strip,
+           min_value=self._STR_CONFIG.min_value
+        )
+        return " ".join(res) + _BYTES_SYMBOL
 
     def __repr__(self):
         return "Size('%s')" % self._magnitude
@@ -333,19 +353,8 @@ class Size(object):
             :returns: a representation of the size as a pair of strings
             :rtype: tuple of str * str
 
-            If max_places is set to None, all non-zero digits will be shown.
-            Otherwise, max_places digits will be shown.
-
-            If strip is True and there is a fractional quantity, trailing
-            zeros are removed up to the decimal point.
-
-            min_value sets the smallest value allowed.
-            If min_value is 10, then single digits on the lhs of
-            the decimal will be avoided if possible. In that case,
-            9216 KiB is preferred to 9 MiB. However, 1 B has no alternative.
-            If min_value is 1, however, 9 MiB is preferred.
-            If min_value is 0.1, then 0.75 GiB is preferred to 768 MiB,
-            but 0.05 GiB is still displayed as 51.2 MiB.
+            The meaning of the parameters is the same as for
+            :class:`.config.StrConfig`.
 
             humanReadable() is a function that evaluates to a number which
             represents a range of values. For a constant choice of max_places,
