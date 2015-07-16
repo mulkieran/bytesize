@@ -68,6 +68,8 @@ _EMPTY_PREFIX = B
 
 class Size(object):
 
+    _NUMERIC_TYPES = (six.integer_types, Decimal)
+
     def __init__(self, value=0, units=None):
         """ Initialize a new Size object.
 
@@ -142,7 +144,7 @@ class Size(object):
         if isinstance(other, Size):
             (div, rem) = divmod(self._magnitude, int(other))
             return (div, Size(rem))
-        if isinstance(other, (six.integer_types, Decimal)):
+        if isinstance(other, self._NUMERIC_TYPES):
             (div, rem) = divmod(self._magnitude, other)
             return (Size(div), Size(rem))
         raise SizeNonsensicalOpError("unsupported operand type(s) for divmod '%s' and '%s'" % (type(self).__name__, type(other).__name__))
@@ -166,7 +168,7 @@ class Size(object):
         #                     = int, if T(other) is Size
         if isinstance(other, Size):
             return self._magnitude.__floordiv__(int(other))
-        if isinstance(other, (six.integer_types, Decimal)):
+        if isinstance(other, self._NUMERIC_TYPES):
             return Size(Decimal(self._magnitude).__floordiv__(other))
         raise SizeNonsensicalOpError("unsupported operand type(s) for floordiv: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
@@ -202,7 +204,7 @@ class Size(object):
         # Therefore, T(mod) = Size
         if isinstance(other, Size):
             return Size(self._magnitude % int(other))
-        if isinstance(other, (six.integer_types, Decimal)):
+        if isinstance(other, self._NUMERIC_TYPES):
             return Size(self._magnitude % other)
         raise SizeNonsensicalOpError("unsupported operand type(s) for mod: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
@@ -216,7 +218,7 @@ class Size(object):
     def __mul__(self, other):
         # self * other = mul
         # Therefore, T(mul) = Size and T(other) is a numeric type.
-        if isinstance(other, (six.integer_types, Decimal)):
+        if isinstance(other, self._NUMERIC_TYPES):
             return Size(self._magnitude * other)
         if isinstance(other, Size):
             raise SizeUnrepresentableOpError("unsupported operand type(s) for *: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
@@ -225,7 +227,7 @@ class Size(object):
 
     def __pow__(self, other):
         # Cannot represent multiples of Sizes.
-        if not isinstance(other, (six.integer_types, Decimal)):
+        if not isinstance(other, self._NUMERIC_TYPES):
             raise SizeNonsensicalOpError("unsupported operand type(s) for **: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
         raise SizeUnrepresentableOpError("unsupported operand type(s) for **: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
@@ -256,7 +258,7 @@ class Size(object):
         #                       = Decimal, if T(other) is Size
         if isinstance(other, Size):
             return Decimal(self._magnitude).__truediv__(Decimal(int(other)))
-        if isinstance(other, (six.integer_types, Decimal)):
+        if isinstance(other, self._NUMERIC_TYPES):
             return Size(Decimal(self._magnitude).__truediv__(other))
         raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
 
@@ -298,7 +300,7 @@ class Size(object):
             :rtype: tuple of Decimal and unit
             :raises SizeDisplayError: if min_value is not usable
         """
-        if min_value < 0 or not isinstance(min_value, (six.integer_types, Decimal)):
+        if min_value < 0 or not isinstance(min_value, self._NUMERIC_TYPES):
             raise SizeDisplayError("min_value must be a precise positive numeric value.")
 
         # Find the smallest prefix which will allow a number less than
