@@ -21,11 +21,9 @@
 
 from collections import namedtuple
 
+import decimal
 from decimal import Decimal
 from decimal import InvalidOperation
-from decimal import ROUND_DOWN
-from decimal import ROUND_HALF_UP
-from decimal import ROUND_UP
 
 import six
 
@@ -37,7 +35,10 @@ from .errors import SizeNonsensicalOpError
 from .errors import SizeRoundingError
 from .errors import SizeUnrepresentableOpError
 
-ROUND_DEFAULT = ROUND_HALF_UP
+from .constants import ROUND_DOWN
+from .constants import ROUND_HALF_DOWN
+from .constants import ROUND_HALF_UP
+from .constants import ROUND_UP
 
 # Container for size unit prefix information
 _Prefix = namedtuple("Prefix", ["factor", "prefix", "abbr"])
@@ -77,6 +78,12 @@ class Size(object):
 
     _NUMERIC_TYPES = (six.integer_types, Decimal)
     _STR_CONFIG = StrConfig()
+    _rounding_map = {
+        ROUND_DOWN: decimal.ROUND_DOWN,
+        ROUND_HALF_DOWN: decimal.ROUND_HALF_DOWN,
+        ROUND_HALF_UP: decimal.ROUND_HALF_UP,
+        ROUND_UP: decimal.ROUND_UP
+    }
 
     @classmethod
     def set_str_config(cls, config):
@@ -104,7 +111,7 @@ class Size(object):
             self._magnitude = value * (units or B).factor
         elif isinstance(value, (Decimal, six.string_types)):
             try:
-                self._magnitude = int((Decimal(value) * (units or B).factor).to_integral_value(rounding=ROUND_DOWN))
+                self._magnitude = int((Decimal(value) * (units or B).factor).to_integral_value(rounding=decimal.ROUND_DOWN))
             except InvalidOperation:
                 raise SizeConstructionError("invalid value %s for size magnitude" % value)
         elif isinstance(value, Size):
@@ -385,28 +392,32 @@ class Size(object):
 
         return (retval_str, unit.abbr)
 
-    def roundToNearest(self, unit, rounding=ROUND_DEFAULT):
+    def roundToNearest(self, unit, rounding):
         """ Rounds to nearest unit specified as a named constant or a Size.
 
             :param unit: a unit specifier
             :type unit: a named constant like KiB, or any non-negative Size
             :keyword rounding: which direction to round
-            :type rounding: one of ROUND_UP, ROUND_DOWN, or ROUND_DEFAULT
+            :type rounding: :class:`constants.RoundingMethod`
             :returns: Size rounded to nearest whole specified unit
             :rtype: :class:`Size`
+            :raises SizeRoundingError: on unusable input
 
             If unit is Size(0), returns Size(0).
         """
-        if rounding not in (ROUND_UP, ROUND_DOWN, ROUND_DEFAULT):
-            raise SizeRoundingError("invalid rounding specifier")
-
         factor = Decimal(int(getattr(unit, "factor", unit)))
+
+        if factor < 0:
+            raise SizeRoundingError("invalid rounding unit: %s" % factor)
 
         if factor == 0:
             return Size(0)
 
-        if factor < 0:
-            raise SizeNonsensicalOpError("invalid rounding unit: %s" % factor)
+        magnitude = (self._magnitude / factor)
+        try:
+            rounding = self._rounding_map[rounding]
+        except KeyError:
+            raise SizeRoundingError("invalid rounding method: %s" % rounding)
 
-        rounded = (self._magnitude / factor).to_integral_value(rounding=rounding)
+        rounded = magnitude.to_integral_value(rounding=rounding)
         return Size(rounded * factor)
