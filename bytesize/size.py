@@ -20,17 +20,22 @@
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
 from collections import namedtuple
+
 from decimal import Decimal
 from decimal import InvalidOperation
-from decimal import ROUND_DOWN, ROUND_UP, ROUND_HALF_UP
+from decimal import ROUND_DOWN
+from decimal import ROUND_HALF_UP
+from decimal import ROUND_UP
 
 import six
 
 from .config import StrConfig
 
-from .errors import SizeConstructionError, SizeDisplayError
+from .errors import SizeConstructionError
+from .errors import SizeDisplayError
 from .errors import SizeNonsensicalOpError
-from .errors import SizeRoundingError, SizeUnrepresentableOpError
+from .errors import SizeRoundingError
+from .errors import SizeUnrepresentableOpError
 
 ROUND_DEFAULT = ROUND_HALF_UP
 
