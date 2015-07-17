@@ -27,11 +27,20 @@ import unittest
 
 from decimal import Decimal
 
-from bytesize.errors import SizeConstructionError, SizeDisplayError
+from bytesize.errors import SizeConstructionError
+from bytesize.errors import SizeDisplayError
 from bytesize.errors import SizeNonsensicalOpError
-from bytesize.errors import SizeRoundingError, SizeUnrepresentableOpError
-from bytesize import size
-from bytesize.size import Size, B, KiB, MiB, GiB, TiB
+from bytesize.errors import SizeRoundingError
+from bytesize.errors import SizeUnrepresentableOpError
+from bytesize.size import Size
+from bytesize.size import B
+from bytesize.size import KiB
+from bytesize.size import MiB
+from bytesize.size import GiB
+from bytesize.size import TiB
+from bytesize.size import ROUND_DOWN
+from bytesize.size import ROUND_HALF_UP
+from bytesize.size import ROUND_UP
 
 class SizeTestCase(unittest.TestCase):
 
@@ -193,19 +202,19 @@ class SizeTestCase(unittest.TestCase):
 
     def testRoundToNearest(self):
         s = Size("10.3", GiB)
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_HALF_UP), Size(10, GiB))
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_HALF_UP),
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_HALF_UP), Size(10, GiB))
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_HALF_UP),
                          Size(10, GiB))
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_DOWN),
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_DOWN),
                          Size(10, GiB))
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_UP),
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_UP),
                          Size(11, GiB))
         # >>> Size("10.3 GiB").convertTo(MiB)
         # Decimal('10547.19999980926513671875')
-        self.assertEqual(s.roundToNearest(MiB, rounding=size.ROUND_HALF_UP), Size(10547, MiB))
-        self.assertEqual(s.roundToNearest(MiB, rounding=size.ROUND_UP),
+        self.assertEqual(s.roundToNearest(MiB, rounding=ROUND_HALF_UP), Size(10547, MiB))
+        self.assertEqual(s.roundToNearest(MiB, rounding=ROUND_UP),
                          Size(10548, MiB))
-        self.assertIsInstance(s.roundToNearest(MiB, rounding=size.ROUND_HALF_UP), Size)
+        self.assertIsInstance(s.roundToNearest(MiB, rounding=ROUND_HALF_UP), Size)
         with self.assertRaises(SizeRoundingError):
             s.roundToNearest(MiB, rounding='abc')
 
@@ -215,30 +224,30 @@ class SizeTestCase(unittest.TestCase):
             s.roundToNearest(MiB, rounding=ROUND_HALF_DOWN)
 
         s = Size("10.51", GiB)
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_HALF_UP), Size(11, GiB))
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_HALF_UP),
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_HALF_UP), Size(11, GiB))
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_HALF_UP),
                          Size(11, GiB))
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_DOWN),
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_DOWN),
                          Size(10, GiB))
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_UP),
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_UP),
                          Size(11, GiB))
 
         s = Size(513, GiB)
-        self.assertEqual(s.roundToNearest(GiB, rounding=size.ROUND_HALF_UP), s)
-        self.assertEqual(s.roundToNearest(TiB, rounding=size.ROUND_HALF_UP), Size(1, TiB))
-        self.assertEqual(s.roundToNearest(TiB, rounding=size.ROUND_DOWN),
+        self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_HALF_UP), s)
+        self.assertEqual(s.roundToNearest(TiB, rounding=ROUND_HALF_UP), Size(1, TiB))
+        self.assertEqual(s.roundToNearest(TiB, rounding=ROUND_DOWN),
                          Size(0))
 
         # test Size parameters
-        self.assertEqual(s.roundToNearest(Size(128, GiB), rounding=size.ROUND_HALF_UP), Size(512, GiB))
-        self.assertEqual(s.roundToNearest(Size(1, KiB), rounding=size.ROUND_HALF_UP), Size(513, GiB))
-        self.assertEqual(s.roundToNearest(Size(1, TiB), rounding=size.ROUND_HALF_UP), Size(1, TiB))
-        self.assertEqual(s.roundToNearest(Size(1, TiB), rounding=size.ROUND_DOWN), Size(0))
-        self.assertEqual(s.roundToNearest(Size(0), rounding=size.ROUND_HALF_UP), Size(0))
-        self.assertEqual(s.roundToNearest(Size(13, GiB), rounding=size.ROUND_HALF_UP), Size(507, GiB))
+        self.assertEqual(s.roundToNearest(Size(128, GiB), rounding=ROUND_HALF_UP), Size(512, GiB))
+        self.assertEqual(s.roundToNearest(Size(1, KiB), rounding=ROUND_HALF_UP), Size(513, GiB))
+        self.assertEqual(s.roundToNearest(Size(1, TiB), rounding=ROUND_HALF_UP), Size(1, TiB))
+        self.assertEqual(s.roundToNearest(Size(1, TiB), rounding=ROUND_DOWN), Size(0))
+        self.assertEqual(s.roundToNearest(Size(0), rounding=ROUND_HALF_UP), Size(0))
+        self.assertEqual(s.roundToNearest(Size(13, GiB), rounding=ROUND_HALF_UP), Size(507, GiB))
 
         with self.assertRaises(SizeRoundingError):
-            s.roundToNearest(Size(-1, B), rounding=size.ROUND_HALF_UP)
+            s.roundToNearest(Size(-1, B), rounding=ROUND_HALF_UP)
 
 
 class UtilityMethodsTestCase(unittest.TestCase):
