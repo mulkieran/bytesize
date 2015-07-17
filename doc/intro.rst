@@ -46,8 +46,7 @@ Displaying Sizes
 Sizes are displayed using binary rather than SI prefixes or names, regardless
 of the value. For example, 1000 bytes is not displayed as 1KB
 (1 kilobyte), but as some number of bytes or KiB (kibibytes). The precise
-form in which a Size is displayed is configurable by means of many parameters
-of the humanReadable() method.
+form in which a Size is displayed is configurable.
 
 Representing Units
 ------------------
