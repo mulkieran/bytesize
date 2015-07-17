@@ -19,8 +19,6 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
-from collections import namedtuple
-
 import decimal
 from decimal import Decimal
 from decimal import InvalidOperation
@@ -35,39 +33,32 @@ from .errors import SizeNonsensicalOpError
 from .errors import SizeRoundingError
 from .errors import SizeUnrepresentableOpError
 
+from .constants import B
+from .constants import KB
+from .constants import MB
+from .constants import GB
+from .constants import TB
+from .constants import PB
+from .constants import EB
+from .constants import ZB
+from .constants import YB
+from .constants import KiB
+from .constants import MiB
+from .constants import GiB
+from .constants import TiB
+from .constants import PiB
+from .constants import EiB
+from .constants import ZiB
+from .constants import YiB
 from .constants import ROUND_DOWN
 from .constants import ROUND_HALF_DOWN
 from .constants import ROUND_HALF_UP
 from .constants import ROUND_UP
 
-# Container for size unit prefix information
-_Prefix = namedtuple("Prefix", ["factor", "prefix", "abbr"])
+_BYTES_SYMBOL = "B"
 
 _DECIMAL_FACTOR = 10 ** 3
 _BINARY_FACTOR = 2 ** 10
-
-_BYTES_SYMBOL = "B"
-
-# Symbolic constants for units
-B = _Prefix(1, "", "")
-
-KB = _Prefix(_DECIMAL_FACTOR ** 1, "kilo", "k")
-MB = _Prefix(_DECIMAL_FACTOR ** 2, "mega", "M")
-GB = _Prefix(_DECIMAL_FACTOR ** 3, "giga", "G")
-TB = _Prefix(_DECIMAL_FACTOR ** 4, "tera", "T")
-PB = _Prefix(_DECIMAL_FACTOR ** 5, "peta", "P")
-EB = _Prefix(_DECIMAL_FACTOR ** 6, "exa", "E")
-ZB = _Prefix(_DECIMAL_FACTOR ** 7, "zetta", "Z")
-YB = _Prefix(_DECIMAL_FACTOR ** 8, "yotta", "Y")
-
-KiB = _Prefix(_BINARY_FACTOR ** 1, "kibi", "Ki")
-MiB = _Prefix(_BINARY_FACTOR ** 2, "mebi", "Mi")
-GiB = _Prefix(_BINARY_FACTOR ** 3, "gibi", "Gi")
-TiB = _Prefix(_BINARY_FACTOR ** 4, "tebi", "Ti")
-PiB = _Prefix(_BINARY_FACTOR ** 5, "pebi", "Pi")
-EiB = _Prefix(_BINARY_FACTOR ** 6, "exbi", "Ei")
-ZiB = _Prefix(_BINARY_FACTOR ** 7, "zebi", "Zi")
-YiB = _Prefix(_BINARY_FACTOR ** 8, "yobi", "Yi")
 
 # Categories of symbolic constants
 _DECIMAL_PREFIXES = [KB, MB, GB, TB, PB, EB, ZB, YB]

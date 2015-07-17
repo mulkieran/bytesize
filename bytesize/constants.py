@@ -27,3 +27,38 @@ ROUND_DOWN = RoundingMethod()
 ROUND_HALF_DOWN = RoundingMethod()
 ROUND_HALF_UP = RoundingMethod()
 ROUND_UP = RoundingMethod()
+
+class Unit(object):
+    """ Class to encapsulate unit information. """
+
+    def __init__(self, factor, prefix, abbr):
+        self._factor = factor
+        self._prefix = prefix
+        self._abbr = abbr
+
+    factor = property(lambda s: s._factor)
+    abbr = property(lambda s: s._abbr)
+    prefix = property(lambda s: s._prefix)
+
+_DECIMAL_FACTOR = 10 ** 3
+_BINARY_FACTOR = 2 ** 10
+
+B = Unit(1, "", "")
+
+KB = Unit(_DECIMAL_FACTOR ** 1, "kilo", "k")
+MB = Unit(_DECIMAL_FACTOR ** 2, "mega", "M")
+GB = Unit(_DECIMAL_FACTOR ** 3, "giga", "G")
+TB = Unit(_DECIMAL_FACTOR ** 4, "tera", "T")
+PB = Unit(_DECIMAL_FACTOR ** 5, "peta", "P")
+EB = Unit(_DECIMAL_FACTOR ** 6, "exa", "E")
+ZB = Unit(_DECIMAL_FACTOR ** 7, "zetta", "Z")
+YB = Unit(_DECIMAL_FACTOR ** 8, "yotta", "Y")
+
+KiB = Unit(_BINARY_FACTOR ** 1, "kibi", "Ki")
+MiB = Unit(_BINARY_FACTOR ** 2, "mebi", "Mi")
+GiB = Unit(_BINARY_FACTOR ** 3, "gibi", "Gi")
+TiB = Unit(_BINARY_FACTOR ** 4, "tebi", "Ti")
+PiB = Unit(_BINARY_FACTOR ** 5, "pebi", "Pi")
+EiB = Unit(_BINARY_FACTOR ** 6, "exbi", "Ei")
+ZiB = Unit(_BINARY_FACTOR ** 7, "zebi", "Zi")
+YiB = Unit(_BINARY_FACTOR ** 8, "yobi", "Yi")
