@@ -1,4 +1,5 @@
 # __init__.py
+# Python module for sizes in bytes.
 #
 # Copyright (C) 2015  Red Hat, Inc.
 #
@@ -18,4 +19,93 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
-__version__ = '1.0'
+""" The public interface of the bytesize package.
+
+    Contents:
+
+    * Unit constants in SI and binary units
+       - Universal:
+          * B
+
+       - SI:
+          * KB
+          * MB
+          * GB
+          * TB
+          * PB
+          * EB
+          * ZB
+          * YB
+
+       - Binary:
+          * KiB
+          * MiB
+          * GiB
+          * TiB
+          * PiB
+          * EiB
+          * ZiB
+          * YiB
+
+    * Rounding constants, with meaning as for the Python decimal module:
+       - ROUND_DOWN
+       - ROUND_HALF_DOWN
+       - ROUND_HALF_UP
+       - ROUND_UP
+
+    * Configuration classes:
+       - :class:`.config.StrConfig`
+
+    * Exception classes:
+       - :class:`.errors.SizeError`
+
+    * Size classes:
+       - :class:`.size.Size`
+
+    All parts of the public interface of bytesize must be imported directly
+    from the top-level bytesize module, as::
+
+        from bytesize import Size
+        from bytesize import KiB
+        from bytesize import SizeError
+
+        s = Size(24, KiB)
+        try:
+            s + 32
+        except SizeError as e:
+            raise e
+"""
+
+# UNIT CONSTANTS
+from .constants import B
+from .constants import KB
+from .constants import MB
+from .constants import GB
+from .constants import TB
+from .constants import PB
+from .constants import EB
+from .constants import ZB
+from .constants import YB
+from .constants import KiB
+from .constants import MiB
+from .constants import GiB
+from .constants import TiB
+from .constants import PiB
+from .constants import EiB
+from .constants import ZiB
+from .constants import YiB
+
+# ROUNDING CONSTANTS
+from .constants import ROUND_DOWN
+from .constants import ROUND_HALF_DOWN
+from .constants import ROUND_HALF_UP
+from .constants import ROUND_UP
+
+# CONFIGURATION
+from .config import StrConfig
+
+# EXCEPTIONS
+from .errors import SizeError
+
+# SIZE
+from .size import Size
