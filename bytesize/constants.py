@@ -75,27 +75,31 @@ B = Unit(1, "", "")
 class DecimalUnits(object):
     """ Class to store decimal unit constants. """
 
-    _FACTOR = 10 ** 3
+    FACTOR = 10 ** 3
 
-    KB = Unit(_FACTOR ** 1, "kilo", "k")
-    MB = Unit(_FACTOR ** 2, "mega", "M")
-    GB = Unit(_FACTOR ** 3, "giga", "G")
-    TB = Unit(_FACTOR ** 4, "tera", "T")
-    PB = Unit(_FACTOR ** 5, "peta", "P")
-    EB = Unit(_FACTOR ** 6, "exa", "E")
-    ZB = Unit(_FACTOR ** 7, "zetta", "Z")
-    YB = Unit(_FACTOR ** 8, "yotta", "Y")
+    KB = Unit(FACTOR ** 1, "kilo", "k")
+    MB = Unit(FACTOR ** 2, "mega", "M")
+    GB = Unit(FACTOR ** 3, "giga", "G")
+    TB = Unit(FACTOR ** 4, "tera", "T")
+    PB = Unit(FACTOR ** 5, "peta", "P")
+    EB = Unit(FACTOR ** 6, "exa", "E")
+    ZB = Unit(FACTOR ** 7, "zetta", "Z")
+    YB = Unit(FACTOR ** 8, "yotta", "Y")
+
+    UNITS = [KB, MB, GB, TB, PB, EB, ZB, YB]
 
 class BinaryUnits(object):
     """ Class to store binary unit constants. """
 
-    _FACTOR = 2 ** 10
+    FACTOR = 2 ** 10
 
-    KiB = Unit(_FACTOR ** 1, "kibi", "Ki")
-    MiB = Unit(_FACTOR ** 2, "mebi", "Mi")
-    GiB = Unit(_FACTOR ** 3, "gibi", "Gi")
-    TiB = Unit(_FACTOR ** 4, "tebi", "Ti")
-    PiB = Unit(_FACTOR ** 5, "pebi", "Pi")
-    EiB = Unit(_FACTOR ** 6, "exbi", "Ei")
-    ZiB = Unit(_FACTOR ** 7, "zebi", "Zi")
-    YiB = Unit(_FACTOR ** 8, "yobi", "Yi")
+    KiB = Unit(FACTOR ** 1, "kibi", "Ki")
+    MiB = Unit(FACTOR ** 2, "mebi", "Mi")
+    GiB = Unit(FACTOR ** 3, "gibi", "Gi")
+    TiB = Unit(FACTOR ** 4, "tebi", "Ti")
+    PiB = Unit(FACTOR ** 5, "pebi", "Pi")
+    EiB = Unit(FACTOR ** 6, "exbi", "Ei")
+    ZiB = Unit(FACTOR ** 7, "zebi", "Zi")
+    YiB = Unit(FACTOR ** 8, "yobi", "Yi")
+
+    UNITS = [KiB, MiB, GiB, TiB, PiB, EiB, ZiB, YiB]
