@@ -44,38 +44,9 @@ from .errors import SizeUnrepresentableOpError
 
 from .constants import B
 from .constants import BinaryUnits
-from .constants import DecimalUnits
 from .constants import RoundingMethods
 
 _BYTES_SYMBOL = "B"
-
-_DECIMAL_FACTOR = 10 ** 3
-_BINARY_FACTOR = 2 ** 10
-
-# Categories of symbolic constants
-_DECIMAL_PREFIXES = [
-   DecimalUnits.KB,
-   DecimalUnits.MB,
-   DecimalUnits.GB,
-   DecimalUnits.TB,
-   DecimalUnits.PB,
-   DecimalUnits.EB,
-   DecimalUnits.ZB,
-   DecimalUnits.YB
-]
-
-_BINARY_PREFIXES = [
-   BinaryUnits.KiB,
-   BinaryUnits.MiB,
-   BinaryUnits.GiB,
-   BinaryUnits.TiB,
-   BinaryUnits.PiB,
-   BinaryUnits.EiB,
-   BinaryUnits.ZiB,
-   BinaryUnits.YiB
-]
-
-_EMPTY_PREFIX = B
 
 class Size(object):
 
@@ -339,11 +310,11 @@ class Size(object):
             raise SizeDisplayError("min_value must be a precise positive numeric value.")
 
         # Find the smallest prefix which will allow a number less than
-        # _BINARY_FACTOR * min_value to the left of the decimal point.
+        # FACTOR * min_value to the left of the decimal point.
         # If the number is so large that no prefix will satisfy this
         # requirement use the largest prefix.
-        limit = _BINARY_FACTOR * min_value
-        for unit in [_EMPTY_PREFIX] + _BINARY_PREFIXES:
+        limit = BinaryUnits.FACTOR * min_value
+        for unit in [B] + BinaryUnits.UNITS:
             newcheck = self.convertTo(unit)
 
             if abs(newcheck) < limit:
