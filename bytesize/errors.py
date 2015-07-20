@@ -18,6 +18,9 @@
 # Red Hat, Inc.
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
+
+""" Exception types used by the bytesize class. """
+
 class SizeError(Exception):
     """ Generic Size error. """
     pass

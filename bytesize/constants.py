@@ -19,6 +19,13 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
+""" Constants used by the bytesize package.
+
+    Categories of constants:
+     * Rounding methods
+     * Size units, e.g., Ki, Mi
+"""
+
 class RoundingMethod(object):
     """ Class to generate rounding method enumeration. """
     pass

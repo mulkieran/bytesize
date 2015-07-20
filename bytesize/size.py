@@ -19,6 +19,15 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
+""" Size class, for creating instances of Size objects.
+
+    Contains a few documented methods and a number of __*__ methods
+    implementing arithmetic operations. Precise numeric types
+    such as int and Decimal may also occur in some arithmetic expressions,
+    but all occurrances of floating point numbers in arithmetic expressions
+    will cause an exception to be raised.
+"""
+
 import decimal
 from decimal import Decimal
 from decimal import InvalidOperation

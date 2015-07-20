@@ -19,6 +19,7 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
+""" Configuration of the bytesize package. """
 
 class StrConfig(object):
     """ Configuration for __str__ method.
