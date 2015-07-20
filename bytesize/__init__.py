@@ -96,10 +96,11 @@ from .constants import ZiB
 from .constants import YiB
 
 # ROUNDING CONSTANTS
-from .constants import ROUND_DOWN
-from .constants import ROUND_HALF_DOWN
-from .constants import ROUND_HALF_UP
-from .constants import ROUND_UP
+from .constants import RoundingMethods as _RoundingMethods
+ROUND_DOWN = _RoundingMethods.ROUND_DOWN
+ROUND_HALF_DOWN = _RoundingMethods.ROUND_HALF_DOWN
+ROUND_HALF_UP = _RoundingMethods.ROUND_HALF_UP
+ROUND_UP = _RoundingMethods.ROUND_UP
 
 # CONFIGURATION
 from .config import StrConfig

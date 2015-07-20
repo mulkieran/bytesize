@@ -28,12 +28,27 @@
 
 class RoundingMethod(object):
     """ Class to generate rounding method enumeration. """
-    pass
 
-ROUND_DOWN = RoundingMethod()
-ROUND_HALF_DOWN = RoundingMethod()
-ROUND_HALF_UP = RoundingMethod()
-ROUND_UP = RoundingMethod()
+    def __init__(self, doc):
+        """ Initializer.
+
+            :param str doc: explanation of the rounding method
+        """
+        self._doc = doc
+
+    doc = property(lambda s: s._doc, doc="explanation of rounding method")
+
+    def __str__(self):
+        return self.doc
+    __repr__ = __str__
+
+class RoundingMethods(object):
+    """ Static class for accessing rounding methods. """
+
+    ROUND_DOWN = RoundingMethod("Round down.")
+    ROUND_HALF_DOWN = RoundingMethod("Round to nearest, down on a tie.")
+    ROUND_HALF_UP = RoundingMethod("Round to nearest, up on a tie.")
+    ROUND_UP = RoundingMethod("Round up.")
 
 class Unit(object):
     """ Class to encapsulate unit information. """

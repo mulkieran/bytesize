@@ -38,9 +38,9 @@ from bytesize.size import KiB
 from bytesize.size import MiB
 from bytesize.size import GiB
 from bytesize.size import TiB
-from bytesize.size import ROUND_DOWN
-from bytesize.size import ROUND_HALF_UP
-from bytesize.size import ROUND_UP
+from bytesize import ROUND_DOWN
+from bytesize import ROUND_HALF_UP
+from bytesize import ROUND_UP
 
 class SizeTestCase(unittest.TestCase):
 

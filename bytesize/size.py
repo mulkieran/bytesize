@@ -59,10 +59,7 @@ from .constants import PiB
 from .constants import EiB
 from .constants import ZiB
 from .constants import YiB
-from .constants import ROUND_DOWN
-from .constants import ROUND_HALF_DOWN
-from .constants import ROUND_HALF_UP
-from .constants import ROUND_UP
+from .constants import RoundingMethods
 
 _BYTES_SYMBOL = "B"
 
@@ -79,10 +76,10 @@ class Size(object):
     _NUMERIC_TYPES = (six.integer_types, Decimal)
     _STR_CONFIG = StrConfig()
     _rounding_map = {
-        ROUND_DOWN: decimal.ROUND_DOWN,
-        ROUND_HALF_DOWN: decimal.ROUND_HALF_DOWN,
-        ROUND_HALF_UP: decimal.ROUND_HALF_UP,
-        ROUND_UP: decimal.ROUND_UP
+        RoundingMethods.ROUND_DOWN: decimal.ROUND_DOWN,
+        RoundingMethods.ROUND_HALF_DOWN: decimal.ROUND_HALF_DOWN,
+        RoundingMethods.ROUND_HALF_UP: decimal.ROUND_HALF_UP,
+        RoundingMethods.ROUND_UP: decimal.ROUND_UP
     }
 
     @classmethod
