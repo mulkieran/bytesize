@@ -78,22 +78,26 @@
 
 # UNIT CONSTANTS
 from .constants import B
-from .constants import KB
-from .constants import MB
-from .constants import GB
-from .constants import TB
-from .constants import PB
-from .constants import EB
-from .constants import ZB
-from .constants import YB
-from .constants import KiB
-from .constants import MiB
-from .constants import GiB
-from .constants import TiB
-from .constants import PiB
-from .constants import EiB
-from .constants import ZiB
-from .constants import YiB
+
+from .constants import DecimalUnits as _DecimalUnits
+KB = _DecimalUnits.KB
+MB = _DecimalUnits.MB
+GB = _DecimalUnits.GB
+TB = _DecimalUnits.TB
+PB = _DecimalUnits.EB
+EB = _DecimalUnits.EB
+ZB = _DecimalUnits.ZB
+YB = _DecimalUnits.YB
+
+from .constants import BinaryUnits as _BinaryUnits
+KiB = _BinaryUnits.KiB
+MiB = _BinaryUnits.MiB
+GiB = _BinaryUnits.GiB
+TiB = _BinaryUnits.TiB
+PiB = _BinaryUnits.PiB
+EiB = _BinaryUnits.EiB
+ZiB = _BinaryUnits.ZiB
+YiB = _BinaryUnits.YiB
 
 # ROUNDING CONSTANTS
 from .constants import RoundingMethods as _RoundingMethods

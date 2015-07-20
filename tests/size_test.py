@@ -33,11 +33,11 @@ from bytesize.errors import SizeNonsensicalOpError
 from bytesize.errors import SizeRoundingError
 from bytesize.errors import SizeUnrepresentableOpError
 from bytesize.size import Size
-from bytesize.size import B
-from bytesize.size import KiB
-from bytesize.size import MiB
-from bytesize.size import GiB
-from bytesize.size import TiB
+from bytesize import B
+from bytesize import KiB
+from bytesize import MiB
+from bytesize import GiB
+from bytesize import TiB
 from bytesize import ROUND_DOWN
 from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP

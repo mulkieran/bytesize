@@ -43,22 +43,8 @@ from .errors import SizeRoundingError
 from .errors import SizeUnrepresentableOpError
 
 from .constants import B
-from .constants import KB
-from .constants import MB
-from .constants import GB
-from .constants import TB
-from .constants import PB
-from .constants import EB
-from .constants import ZB
-from .constants import YB
-from .constants import KiB
-from .constants import MiB
-from .constants import GiB
-from .constants import TiB
-from .constants import PiB
-from .constants import EiB
-from .constants import ZiB
-from .constants import YiB
+from .constants import BinaryUnits
+from .constants import DecimalUnits
 from .constants import RoundingMethods
 
 _BYTES_SYMBOL = "B"
@@ -67,8 +53,28 @@ _DECIMAL_FACTOR = 10 ** 3
 _BINARY_FACTOR = 2 ** 10
 
 # Categories of symbolic constants
-_DECIMAL_PREFIXES = [KB, MB, GB, TB, PB, EB, ZB, YB]
-_BINARY_PREFIXES = [KiB, MiB, GiB, TiB, PiB, EiB, ZiB, YiB]
+_DECIMAL_PREFIXES = [
+   DecimalUnits.KB,
+   DecimalUnits.MB,
+   DecimalUnits.GB,
+   DecimalUnits.TB,
+   DecimalUnits.PB,
+   DecimalUnits.EB,
+   DecimalUnits.ZB,
+   DecimalUnits.YB
+]
+
+_BINARY_PREFIXES = [
+   BinaryUnits.KiB,
+   BinaryUnits.MiB,
+   BinaryUnits.GiB,
+   BinaryUnits.TiB,
+   BinaryUnits.PiB,
+   BinaryUnits.EiB,
+   BinaryUnits.ZiB,
+   BinaryUnits.YiB
+]
+
 _EMPTY_PREFIX = B
 
 class Size(object):

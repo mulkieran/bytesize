@@ -58,29 +58,44 @@ class Unit(object):
         self._prefix = prefix
         self._abbr = abbr
 
-    factor = property(lambda s: s._factor)
-    abbr = property(lambda s: s._abbr)
-    prefix = property(lambda s: s._prefix)
+    factor = property(lambda s: s._factor, doc="numeric multiple of bytes")
+    abbr = property(
+       lambda s: s._abbr,
+       doc="abbreviation for unit, precedes 'B'"
+    )
+    prefix = property(lambda s: s._prefix, doc="prefix for 'bytes'")
 
-_DECIMAL_FACTOR = 10 ** 3
-_BINARY_FACTOR = 2 ** 10
+    def __str__(self):
+        return self.abbr + "B"
+    __repr__ = __str__
 
 B = Unit(1, "", "")
+""" The universal unit, bytes. """
 
-KB = Unit(_DECIMAL_FACTOR ** 1, "kilo", "k")
-MB = Unit(_DECIMAL_FACTOR ** 2, "mega", "M")
-GB = Unit(_DECIMAL_FACTOR ** 3, "giga", "G")
-TB = Unit(_DECIMAL_FACTOR ** 4, "tera", "T")
-PB = Unit(_DECIMAL_FACTOR ** 5, "peta", "P")
-EB = Unit(_DECIMAL_FACTOR ** 6, "exa", "E")
-ZB = Unit(_DECIMAL_FACTOR ** 7, "zetta", "Z")
-YB = Unit(_DECIMAL_FACTOR ** 8, "yotta", "Y")
+class DecimalUnits(object):
+    """ Class to store decimal unit constants. """
 
-KiB = Unit(_BINARY_FACTOR ** 1, "kibi", "Ki")
-MiB = Unit(_BINARY_FACTOR ** 2, "mebi", "Mi")
-GiB = Unit(_BINARY_FACTOR ** 3, "gibi", "Gi")
-TiB = Unit(_BINARY_FACTOR ** 4, "tebi", "Ti")
-PiB = Unit(_BINARY_FACTOR ** 5, "pebi", "Pi")
-EiB = Unit(_BINARY_FACTOR ** 6, "exbi", "Ei")
-ZiB = Unit(_BINARY_FACTOR ** 7, "zebi", "Zi")
-YiB = Unit(_BINARY_FACTOR ** 8, "yobi", "Yi")
+    _FACTOR = 10 ** 3
+
+    KB = Unit(_FACTOR ** 1, "kilo", "k")
+    MB = Unit(_FACTOR ** 2, "mega", "M")
+    GB = Unit(_FACTOR ** 3, "giga", "G")
+    TB = Unit(_FACTOR ** 4, "tera", "T")
+    PB = Unit(_FACTOR ** 5, "peta", "P")
+    EB = Unit(_FACTOR ** 6, "exa", "E")
+    ZB = Unit(_FACTOR ** 7, "zetta", "Z")
+    YB = Unit(_FACTOR ** 8, "yotta", "Y")
+
+class BinaryUnits(object):
+    """ Class to store binary unit constants. """
+
+    _FACTOR = 2 ** 10
+
+    KiB = Unit(_FACTOR ** 1, "kibi", "Ki")
+    MiB = Unit(_FACTOR ** 2, "mebi", "Mi")
+    GiB = Unit(_FACTOR ** 3, "gibi", "Gi")
+    TiB = Unit(_FACTOR ** 4, "tebi", "Ti")
+    PiB = Unit(_FACTOR ** 5, "pebi", "Pi")
+    EiB = Unit(_FACTOR ** 6, "exbi", "Ei")
+    ZiB = Unit(_FACTOR ** 7, "zebi", "Zi")
+    YiB = Unit(_FACTOR ** 8, "yobi", "Yi")
