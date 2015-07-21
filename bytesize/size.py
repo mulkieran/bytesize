@@ -91,14 +91,18 @@ class Size(object):
                 try:
                     magnitude = Decimal(value)
                 except InvalidOperation:
-                    raise SizeConstructionError("invalid value %s for size magnitude" % value)
+                    raise SizeConstructionError(
+                       "invalid value %s for size magnitude" % value
+                    )
                 magnitude = (magnitude * factor).to_integral_value(
                    rounding=decimal.ROUND_DOWN
                 )
 
         elif isinstance(value, Size):
             if units is not None:
-                raise SizeConstructionError("units parameter is meaningless when Size value is passed")
+                raise SizeConstructionError(
+                   "units parameter is meaningless when Size value is passed"
+                )
             magnitude = value
         else:
             raise SizeConstructionError("invalid value for size")
@@ -145,7 +149,6 @@ class Size(object):
         return Size(self._magnitude)
 
     # BINARY OPERATIONS
-
     def __add__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalOpError("unsupported operand type(s) for +: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
@@ -244,8 +247,12 @@ class Size(object):
     def __pow__(self, other):
         # Cannot represent multiples of Sizes.
         if not isinstance(other, self._NUMERIC_TYPES):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for **: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        raise SizeUnrepresentableOpError("unsupported operand type(s) for **: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalOpError(
+               "unsupported operand type(s) for **: '%s' and '%s'"
+               %
+               (type(self).__name__, type(other).__name__)
+            )
+        raise SizeUnrepresentableOpError("cannot represent powers of bytes")
 
     def __rpow__(self, other):
         # A Size exponent is meaningless.
@@ -361,8 +368,11 @@ class Size(object):
             The second part of the tuple is the unit prefix, e.g., "M", "Gi".
             The B (for bytes) is implicit.
         """
-        if max_places is not None and (max_places < 0 or not isinstance(max_places, six.integer_types)):
-            raise SizeDisplayError("max_places must be None or an non-negative integer value")
+        if max_places is not None and \
+           (max_places < 0 or not isinstance(max_places, six.integer_types)):
+            raise SizeDisplayError(
+               "max_places must be None or an non-negative integer value"
+            )
 
         (magnitude, unit) = self.components(min_value)
 

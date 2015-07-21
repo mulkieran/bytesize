@@ -28,6 +28,7 @@
 
 class RoundingMethod(object):
     """ Class to generate rounding method enumeration. """
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, doc):
         """ Initializer.
@@ -44,6 +45,7 @@ class RoundingMethod(object):
 
 class RoundingMethods(object):
     """ Static class for accessing rounding methods. """
+    # pylint: disable=too-few-public-methods
 
     ROUND_DOWN = RoundingMethod("Round down.")
     ROUND_HALF_DOWN = RoundingMethod("Round to nearest, down on a tie.")
@@ -52,6 +54,7 @@ class RoundingMethods(object):
 
 class Unit(object):
     """ Class to encapsulate unit information. """
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, factor, prefix, abbr):
         self._factor = factor
@@ -74,6 +77,8 @@ B = Unit(1, "", "")
 
 class DecimalUnits(object):
     """ Class to store decimal unit constants. """
+    # pylint: disable=invalid-name
+    # pylint: disable=too-few-public-methods
 
     FACTOR = 10 ** 3
 
@@ -90,6 +95,7 @@ class DecimalUnits(object):
 
 class BinaryUnits(object):
     """ Class to store binary unit constants. """
+    # pylint: disable=too-few-public-methods
 
     FACTOR = 2 ** 10
 

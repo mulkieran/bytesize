@@ -75,6 +75,7 @@
         except SizeError as e:
             raise e
 """
+# pylint: disable=invalid-name
 
 # UNIT CONSTANTS
 from .constants import B

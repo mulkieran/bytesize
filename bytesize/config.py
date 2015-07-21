@@ -42,6 +42,7 @@ class StrConfig(object):
         The default for strip is False, so that precision is always shown
         to max_places.
     """
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, max_places=2, strip=False, min_value=1):
         """ Initializer.
