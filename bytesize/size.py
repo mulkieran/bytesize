@@ -49,6 +49,7 @@ from .constants import RoundingMethods
 _BYTES_SYMBOL = "B"
 
 class Size(object):
+    """ Class for instantiating Size objects. """
 
     _NUMERIC_TYPES = (six.integer_types, Decimal)
     _STR_CONFIG = StrConfig()
