@@ -27,12 +27,7 @@ import unittest
 
 from decimal import Decimal
 
-from bytesize.errors import SizeConstructionError
-from bytesize.errors import SizeDisplayError
-from bytesize.errors import SizeNonsensicalOpError
-from bytesize.errors import SizeRoundingError
-from bytesize.errors import SizeUnrepresentableOpError
-from bytesize.size import Size
+from bytesize import Size
 from bytesize import B
 from bytesize import KiB
 from bytesize import MiB
@@ -41,6 +36,12 @@ from bytesize import TiB
 from bytesize import ROUND_DOWN
 from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP
+
+from bytesize.errors import SizeConstructionError
+from bytesize.errors import SizeDisplayError
+from bytesize.errors import SizeNonsensicalOpError
+from bytesize.errors import SizeRoundingError
+from bytesize.errors import SizeUnrepresentableOpError
 
 class SizeTestCase(unittest.TestCase):
 
