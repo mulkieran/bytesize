@@ -81,19 +81,28 @@ class Size(object):
 
             Must pass None as units argument if value has type Size.
         """
-        if isinstance(value, six.integer_types):
-            self._magnitude = value * (units or B).factor
-        elif isinstance(value, (Decimal, six.string_types)):
-            try:
-                self._magnitude = int((Decimal(value) * (units or B).factor).to_integral_value(rounding=decimal.ROUND_DOWN))
-            except InvalidOperation:
-                raise SizeConstructionError("invalid value %s for size magnitude" % value)
+        if isinstance(value, (six.integer_types, six.string_types, Decimal)):
+            factor = (units or B).factor
+
+            if isinstance(value, six.integer_types):
+                magnitude = value * factor
+            else:
+                try:
+                    magnitude = Decimal(value)
+                except InvalidOperation:
+                    raise SizeConstructionError("invalid value %s for size magnitude" % value)
+                magnitude = (magnitude * factor).to_integral_value(
+                   rounding=decimal.ROUND_DOWN
+                )
+
         elif isinstance(value, Size):
             if units is not None:
                 raise SizeConstructionError("units parameter is meaningless when Size value is passed")
-            self._magnitude = int(value)
+            magnitude = value
         else:
             raise SizeConstructionError("invalid value for size")
+
+        self._magnitude = int(magnitude)
 
     def __str__(self):
         res = self.humanReadableComponents(
