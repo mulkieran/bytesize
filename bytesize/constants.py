@@ -1,6 +1,3 @@
-# constants.py
-# Python module for rounding enumeration.
-#
 # Copyright (C) 2015  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,

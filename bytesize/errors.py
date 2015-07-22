@@ -1,6 +1,3 @@
-# errors.py
-# Exception classes for bytesize module.
-#
 # Copyright (C) 2015  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,

@@ -1,6 +1,3 @@
-# config.py
-# Python module to represent configuration choices for Size objects.
-#
 # Copyright (C) 2015  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,

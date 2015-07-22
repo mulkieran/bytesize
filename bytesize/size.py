@@ -1,6 +1,3 @@
-# size.py
-# Python module to represent sizes in bytes.
-#
 # Copyright (C) 2015  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
