@@ -47,7 +47,7 @@ class SizeNonsensicalOpError(SizeUnsupportedOpError):
 
 class SizeNonsensicalBinOpError(SizeNonsensicalOpError):
     """ Error when requesting a binary operation that doesn't make sense. """
-    _FMT_STR = "unsupported operand type(s) for %s: 'Size' and '%s'"
+    _FMT_STR = "nonsensical operand types for %s: 'Size' and '%s'"
 
     def __init__(self, operator, other):
         """ Initializer.

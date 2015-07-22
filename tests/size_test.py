@@ -39,6 +39,7 @@ from bytesize import ROUND_UP
 
 from bytesize.errors import SizeConstructionError
 from bytesize.errors import SizeDisplayError
+from bytesize.errors import SizeNonsensicalBinOpError
 from bytesize.errors import SizeNonsensicalOpError
 from bytesize.errors import SizeRoundingError
 from bytesize.errors import SizeUnrepresentableOpError
@@ -259,16 +260,16 @@ class UtilityMethodsTestCase(unittest.TestCase):
 
         # +
         self.assertEqual(s + s, Size(4, GiB))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             s + 2 # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             2 + s # pylint: disable=pointless-statement
 
         # -
         self.assertEqual(s - s, Size(0))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             s - 2 # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             2 - s # pylint: disable=pointless-statement
 
         # *
@@ -276,49 +277,49 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(2 * s, Size(4, GiB))
         with self.assertRaises(SizeUnrepresentableOpError):
             s * s # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             s * "str" # pylint: disable=pointless-statement
 
         # / truediv, retains fractional quantities
         self.assertEqual(s / s, Decimal(1))
         self.assertEqual(s / 2, Size(1, GiB))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             2 / s # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             s / "str" # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             "str" / s # pylint: disable=pointless-statement
 
         # // floordiv
         self.assertEqual(s // s, 1)
         self.assertEqual(s // 2, Size(1, GiB))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             2 // s # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             s // "str" # pylint: disable=pointless-statement
 
         # %
         self.assertEqual(s % s, Size(0))
         self.assertEqual(s % 2, Size(0))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             1024 % Size(127) # pylint: disable=expression-not-assigned, pointless-statement
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             s % "str" # pylint: disable=expression-not-assigned, pointless-statement
 
         # **
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             s ** Size(2) # pylint: disable=expression-not-assigned, pointless-statement
         with self.assertRaises(SizeUnrepresentableOpError):
             s ** 2 # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             2 ** Size(0) # pylint: disable=expression-not-assigned, pointless-statement
 
         # divmod
         self.assertEqual(divmod(Size(32, MiB), 2), (Size(16, MiB), Size(0)))
         self.assertEqual(divmod(Size(24, MiB), Size(16, MiB)), (1, Size(8, MiB)))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             divmod(2048, Size(12, B))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             divmod(s, "str")
 
     def testBinaryOperatorsBoolean(self):
@@ -326,30 +327,30 @@ class UtilityMethodsTestCase(unittest.TestCase):
 
         # <
         self.assertTrue(Size(0, MiB) < Size(32))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) < 1 # pylint: disable=expression-not-assigned
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             1 < Size(32, TiB) # pylint: disable=expression-not-assigned
 
         # <=
         self.assertTrue(Size(0, MiB) <= Size(32))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) <= 1 # pylint: disable=expression-not-assigned
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             1 <= Size(32, TiB) # pylint: disable=expression-not-assigned
 
         # >
         self.assertTrue(Size(32, MiB) > Size(32))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             Size(32) > 1 # pylint: disable=expression-not-assigned
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             1 > Size(0, TiB) # pylint: disable=expression-not-assigned
 
         # >=
         self.assertTrue(Size(32, MiB) >= Size(32))
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             Size(32) >= 1 # pylint: disable=expression-not-assigned
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeNonsensicalBinOpError):
             1 >= Size(0, TiB) # pylint: disable=expression-not-assigned
 
         # !=

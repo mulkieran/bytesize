@@ -38,6 +38,7 @@ from .config import StrConfig
 
 from .errors import SizeConstructionError
 from .errors import SizeDisplayError
+from .errors import SizeNonsensicalBinOpError
 from .errors import SizeNonsensicalOpError
 from .errors import SizeRoundingError
 from .errors import SizeUnrepresentableOpError
@@ -151,7 +152,7 @@ class Size(object):
     # BINARY OPERATIONS
     def __add__(self, other):
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for +: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("+", other)
         return Size(self._magnitude + int(other))
     __radd__ = __add__
 
@@ -166,7 +167,7 @@ class Size(object):
         if isinstance(other, self._NUMERIC_TYPES):
             (div, rem) = divmod(self._magnitude, other)
             return (Size(div), Size(rem))
-        raise SizeNonsensicalOpError("unsupported operand type(s) for divmod '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+        raise SizeNonsensicalBinOpError("divmod", other)
 
     def __rdivmod__(self, other):
         # self * div + rem = other
@@ -174,7 +175,7 @@ class Size(object):
         #            T(div) = int
         # and T(other) is Size
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for divmod '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("rdivmod", other)
         (div, rem) = divmod(int(other), self._magnitude)
         return (div, Size(rem))
 
@@ -189,33 +190,33 @@ class Size(object):
             return self._magnitude.__floordiv__(int(other))
         if isinstance(other, self._NUMERIC_TYPES):
             return Size(Decimal(self._magnitude).__floordiv__(other))
-        raise SizeNonsensicalOpError("unsupported operand type(s) for floordiv: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+        raise SizeNonsensicalBinOpError("floordiv", other)
 
     def __rfloordiv__(self, other):
         # self * floor + rem = other
         # Therefore, T(floor) = int and T(other) is Size
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for floordiv: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("rfloordiv", other)
         return int(other).__floordiv__(self._magnitude)
 
     def __ge__(self, other):
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for >: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError(">=", other)
         return self._magnitude >= int(other)
 
     def __gt__(self, other):
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for >=: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError(">", other)
         return self._magnitude > int(other)
 
     def __le__(self, other):
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for <=: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("<=", other)
         return self._magnitude <= int(other)
 
     def __lt__(self, other):
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for <: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("<", other)
         return self._magnitude < int(other)
 
     def __mod__(self, other):
@@ -225,13 +226,13 @@ class Size(object):
             return Size(self._magnitude % int(other))
         if isinstance(other, self._NUMERIC_TYPES):
             return Size(self._magnitude % other)
-        raise SizeNonsensicalOpError("unsupported operand type(s) for mod: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+        raise SizeNonsensicalBinOpError("%", other)
 
     def __rmod__(self, other):
         # self * div + mod = other
         # Therefore, T(mod) = T(other) and T(other) = Size.
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for mod: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("rmod", other)
         return Size(int(other) % self._magnitude)
 
     def __mul__(self, other):
@@ -241,22 +242,18 @@ class Size(object):
             return Size(self._magnitude * other)
         if isinstance(other, Size):
             raise SizeUnrepresentableOpError("unsupported operand type(s) for *: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
-        raise SizeNonsensicalOpError("unsupported operand type(s) for *: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+        raise SizeNonsensicalBinOpError("*", other)
     __rmul__ = __mul__
 
     def __pow__(self, other):
         # Cannot represent multiples of Sizes.
         if not isinstance(other, self._NUMERIC_TYPES):
-            raise SizeNonsensicalOpError(
-               "unsupported operand type(s) for **: '%s' and '%s'"
-               %
-               (type(self).__name__, type(other).__name__)
-            )
+            raise SizeNonsensicalBinOpError("**", other)
         raise SizeUnrepresentableOpError("cannot represent powers of bytes")
 
     def __rpow__(self, other):
         # A Size exponent is meaningless.
-        raise SizeNonsensicalOpError("unsupported operand type(s) for **: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+        raise SizeNonsensicalBinOpError("rpow", other)
 
     def __ne__(self, other):
         return not isinstance(other, Size) or self._magnitude != int(other)
@@ -265,14 +262,14 @@ class Size(object):
         # self - other = sub
         # Therefore, T(sub) = T(self) = Size and T(other) = Size.
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("-", other)
         return Size(self._magnitude - int(other))
 
     def __rsub__(self, other):
         # other - self = sub
         # Therefore, T(sub) = T(self) = Size and T(other) = Size.
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("rsub", other)
         return Size(int(other) - self._magnitude)
 
     def __truediv__(self, other):
@@ -283,7 +280,7 @@ class Size(object):
             return Decimal(self._magnitude).__truediv__(Decimal(int(other)))
         if isinstance(other, self._NUMERIC_TYPES):
             return Size(Decimal(self._magnitude).__truediv__(other))
-        raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+        raise SizeNonsensicalBinOpError("truediv", other)
 
     __div__ = __truediv__
 
@@ -291,7 +288,7 @@ class Size(object):
         # self * truediv = other
         # Therefore, T(truediv) = Decimal and T(other) = Size.
         if not isinstance(other, Size):
-            raise SizeNonsensicalOpError("unsupported operand type(s) for /: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeNonsensicalBinOpError("rtruediv", other)
         return Decimal(int(other)).__truediv__(Decimal(self._magnitude))
 
     __rdiv__ = __rtruediv__
