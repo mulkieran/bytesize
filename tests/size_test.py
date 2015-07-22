@@ -42,7 +42,7 @@ from bytesize.errors import SizeDisplayError
 from bytesize.errors import SizeNonsensicalBinOpError
 from bytesize.errors import SizeNonsensicalOpError
 from bytesize.errors import SizeRoundingError
-from bytesize.errors import SizeUnrepresentableResultError
+from bytesize.errors import SizePowerResultError
 
 class SizeTestCase(unittest.TestCase):
 
@@ -275,7 +275,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         # *
         self.assertEqual(s * 2, Size(4, GiB))
         self.assertEqual(2 * s, Size(4, GiB))
-        with self.assertRaises(SizeUnrepresentableResultError):
+        with self.assertRaises(SizePowerResultError):
             s * s # pylint: disable=pointless-statement
         with self.assertRaises(SizeNonsensicalBinOpError):
             s * "str" # pylint: disable=pointless-statement
@@ -309,7 +309,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         # **
         with self.assertRaises(SizeNonsensicalBinOpError):
             s ** Size(2) # pylint: disable=expression-not-assigned, pointless-statement
-        with self.assertRaises(SizeUnrepresentableResultError):
+        with self.assertRaises(SizePowerResultError):
             s ** 2 # pylint: disable=pointless-statement
         with self.assertRaises(SizeNonsensicalBinOpError):
             2 ** Size(0) # pylint: disable=expression-not-assigned, pointless-statement

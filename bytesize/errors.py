@@ -67,3 +67,9 @@ class SizeUnrepresentableResultError(SizeUnsupportedOpError):
         be represented with Size, e.g., when multiplying a Size by a Size.
     """
     pass
+
+class SizePowerResultError(SizeUnrepresentableResultError):
+    """ Error when requesting an operation that would yield a byte power. """
+
+    def __str__(self):
+        return  "requested operation result requires non-unit power of bytes"
