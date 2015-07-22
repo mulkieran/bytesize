@@ -25,17 +25,31 @@ class SizeError(Exception):
     """ Generic Size error. """
     pass
 
-class SizeConstructionError(SizeError):
-    """ Error that occurs while constructing a Size object. """
-    pass
+class SizeValueError(SizeError):
+    """ Raised when a parameter has an unacceptable value.
 
-class SizeDisplayError(SizeError):
-    """ Error while displaying Size object. """
-    pass
+        May also be raised when the parameter has an unacceptable type.
+    """
 
-class SizeRoundingError(SizeError):
-    """ Error while rounding Size object. """
-    pass
+    _FMT_STR = "value '%s' for parameter %s is unacceptable"
+
+    def __init__(self, value, param, msg=None):
+        """ Initializer.
+
+            :param object value: the value
+            :param str param: the parameter
+            :param str msg: an explanatory message
+        """
+        # pylint: disable=super-init-not-called
+        self._value = value
+        self._param = param
+        self._msg = msg
+
+    def __str__(self):
+        if self._msg:
+            return (self._FMT_STR + ": %s") % (self._value, self._param, self._msg)
+        else:
+            return self._FMT_STR % (self._value, self._param)
 
 class SizeUnsupportedOpError(SizeError):
     """ Error when executing unsupported operation on Size. """

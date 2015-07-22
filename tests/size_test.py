@@ -37,12 +37,10 @@ from bytesize import ROUND_DOWN
 from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP
 
-from bytesize.errors import SizeConstructionError
-from bytesize.errors import SizeDisplayError
 from bytesize.errors import SizeNonsensicalBinOpError
 from bytesize.errors import SizeNonsensicalOpError
-from bytesize.errors import SizeRoundingError
 from bytesize.errors import SizePowerResultError
+from bytesize.errors import SizeValueError
 
 class SizeTestCase(unittest.TestCase):
 
@@ -51,9 +49,9 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(zero, Size("0.0"))
 
         s = Size(500)
-        with self.assertRaises(SizeDisplayError):
+        with self.assertRaises(SizeValueError):
             s.humanReadableComponents(max_places=-1)
-        with self.assertRaises(SizeDisplayError):
+        with self.assertRaises(SizeValueError):
             s.humanReadableComponents(min_value=-1)
 
         self.assertEqual(s.humanReadableComponents(max_places=0), ("500", ""))
@@ -177,7 +175,7 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(Size(512).convertTo(Size(1024)), Decimal("0.5"))
         self.assertEqual(Size(1024).convertTo(Size(512)), Decimal(2))
 
-        with self.assertRaises(SizeNonsensicalOpError):
+        with self.assertRaises(SizeValueError):
             s.convertTo(Size(0))
 
     def testNegative(self):
@@ -191,12 +189,12 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(Size(1/Decimal(1023), KiB), Size(1))
 
     def testConstructor(self):
-        with self.assertRaises(SizeConstructionError):
+        with self.assertRaises(SizeValueError):
             Size("1.1.1", KiB)
         self.assertEqual(Size(Size(0)), Size(0))
-        with self.assertRaises(SizeConstructionError):
+        with self.assertRaises(SizeValueError):
             Size(Size(0), KiB)
-        with self.assertRaises(SizeConstructionError):
+        with self.assertRaises(SizeValueError):
             Size(B)
 
     def testNoUnitsInString(self):
@@ -217,12 +215,12 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(s.roundToNearest(MiB, rounding=ROUND_UP),
                          Size(10548, MiB))
         self.assertIsInstance(s.roundToNearest(MiB, rounding=ROUND_HALF_UP), Size)
-        with self.assertRaises(SizeRoundingError):
+        with self.assertRaises(SizeValueError):
             s.roundToNearest(MiB, rounding='abc')
 
         # arbitrary decimal rounding constants are not allowed
         from decimal import ROUND_HALF_DOWN
-        with self.assertRaises(SizeRoundingError):
+        with self.assertRaises(SizeValueError):
             s.roundToNearest(MiB, rounding=ROUND_HALF_DOWN)
 
         s = Size("10.51", GiB)
@@ -248,7 +246,7 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(s.roundToNearest(Size(0), rounding=ROUND_HALF_UP), Size(0))
         self.assertEqual(s.roundToNearest(Size(13, GiB), rounding=ROUND_HALF_UP), Size(507, GiB))
 
-        with self.assertRaises(SizeRoundingError):
+        with self.assertRaises(SizeValueError):
             s.roundToNearest(Size(-1, B), rounding=ROUND_HALF_UP)
 
 

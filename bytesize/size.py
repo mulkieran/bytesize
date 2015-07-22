@@ -36,12 +36,9 @@ import six
 
 from .config import StrConfig
 
-from .errors import SizeConstructionError
-from .errors import SizeDisplayError
 from .errors import SizeNonsensicalBinOpError
-from .errors import SizeNonsensicalOpError
 from .errors import SizePowerResultError
-from .errors import SizeRoundingError
+from .errors import SizeValueError
 
 from .constants import B
 from .constants import BinaryUnits
@@ -92,21 +89,21 @@ class Size(object):
                 try:
                     magnitude = Decimal(value)
                 except InvalidOperation:
-                    raise SizeConstructionError(
-                       "invalid value %s for size magnitude" % value
-                    )
+                    raise SizeValueError(value, "value")
                 magnitude = (magnitude * factor).to_integral_value(
                    rounding=decimal.ROUND_DOWN
                 )
 
         elif isinstance(value, Size):
             if units is not None:
-                raise SizeConstructionError(
-                   "units parameter is meaningless when Size value is passed"
+                raise SizeValueError(
+                   units,
+                   "units",
+                   "meaningless when Size value is passed"
                 )
             magnitude = value
         else:
-            raise SizeConstructionError("invalid value for size")
+            raise SizeValueError(value, "value")
 
         self._magnitude = int(magnitude)
 
@@ -300,13 +297,17 @@ class Size(object):
             :type spec: a units specifier or :class:`Size`
             :returns: a numeric value in the units indicated by the specifier
             :rtype: Decimal
-            :raises SizeNonsensicalOpError: if unit specifier is non-positive
+            :raises SizeValueError: if unit specifier is non-positive
         """
         spec = B if spec is None else spec
         factor = Decimal(int(getattr(spec, "factor", spec)))
 
         if factor <= 0:
-            raise SizeNonsensicalOpError("can not convert to non-positive unit %s" % factor)
+            raise SizeValueError(
+               factor,
+               "factor",
+               "can not convert to non-positive unit %s"
+            )
 
         return self._magnitude / factor
 
@@ -318,10 +319,14 @@ class Size(object):
             :type min_value: A precise numeric type: int, long, or Decimal
             :returns: a pair of a decimal value and a unit
             :rtype: tuple of Decimal and unit
-            :raises SizeDisplayError: if min_value is not usable
+            :raises SizeValueError: if min_value is not usable
         """
         if min_value < 0 or not isinstance(min_value, self._NUMERIC_TYPES):
-            raise SizeDisplayError("min_value must be a precise positive numeric value.")
+            raise SizeValueError(
+               min_value,
+               "min_value",
+               "must be a precise positive numeric value."
+            )
 
         # Find the smallest prefix which will allow a number less than
         # FACTOR * min_value to the left of the decimal point.
@@ -352,6 +357,7 @@ class Size(object):
             :type min_value: A precise numeric type: int, long, or Decimal
             :returns: a representation of the size as a pair of strings
             :rtype: tuple of str * str
+            :raises SizeValueError:
 
             The meaning of the parameters is the same as for
             :class:`.config.StrConfig`.
@@ -367,8 +373,10 @@ class Size(object):
         """
         if max_places is not None and \
            (max_places < 0 or not isinstance(max_places, six.integer_types)):
-            raise SizeDisplayError(
-               "max_places must be None or an non-negative integer value"
+            raise SizeValueError(
+               max_places,
+               "max_places",
+               "must be None or a non-negative integer value"
             )
 
         (magnitude, unit) = self.components(min_value)
@@ -392,14 +400,14 @@ class Size(object):
             :type rounding: :class:`constants.RoundingMethod`
             :returns: Size rounded to nearest whole specified unit
             :rtype: :class:`Size`
-            :raises SizeRoundingError: on unusable input
+            :raises SizeValueError: on unusable arguments
 
             If unit is Size(0), returns Size(0).
         """
         factor = Decimal(int(getattr(unit, "factor", unit)))
 
         if factor < 0:
-            raise SizeRoundingError("invalid rounding unit: %s" % factor)
+            raise SizeValueError(factor, "factor")
 
         if factor == 0:
             return Size(0)
@@ -408,7 +416,7 @@ class Size(object):
         try:
             rounding = self._rounding_map[rounding]
         except KeyError:
-            raise SizeRoundingError("invalid rounding method: %s" % rounding)
+            raise SizeValueError(rounding, "rounding")
 
         rounded = magnitude.to_integral_value(rounding=rounding)
         return Size(rounded * factor)
