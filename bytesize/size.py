@@ -41,7 +41,7 @@ from .errors import SizeDisplayError
 from .errors import SizeNonsensicalBinOpError
 from .errors import SizeNonsensicalOpError
 from .errors import SizeRoundingError
-from .errors import SizeUnrepresentableOpError
+from .errors import SizeUnrepresentableResultError
 
 from .constants import B
 from .constants import BinaryUnits
@@ -241,7 +241,7 @@ class Size(object):
         if isinstance(other, self._NUMERIC_TYPES):
             return Size(self._magnitude * other)
         if isinstance(other, Size):
-            raise SizeUnrepresentableOpError("unsupported operand type(s) for *: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
+            raise SizeUnrepresentableResultError("unsupported operand type(s) for *: '%s' and '%s'" % (type(self).__name__, type(other).__name__))
         raise SizeNonsensicalBinOpError("*", other)
     __rmul__ = __mul__
 
@@ -249,7 +249,7 @@ class Size(object):
         # Cannot represent multiples of Sizes.
         if not isinstance(other, self._NUMERIC_TYPES):
             raise SizeNonsensicalBinOpError("**", other)
-        raise SizeUnrepresentableOpError("cannot represent powers of bytes")
+        raise SizeUnrepresentableResultError("cannot represent powers of bytes")
 
     def __rpow__(self, other):
         # A Size exponent is meaningless.

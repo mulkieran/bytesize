@@ -62,7 +62,7 @@ class SizeNonsensicalBinOpError(SizeNonsensicalOpError):
     def __str__(self):
         return self._FMT_STR % (self._operator, type(self._other).__name__)
 
-class SizeUnrepresentableOpError(SizeUnsupportedOpError):
+class SizeUnrepresentableResultError(SizeUnsupportedOpError):
     """ Error when requesting an operation that yields units that cannot
         be represented with Size, e.g., when multiplying a Size by a Size.
     """
