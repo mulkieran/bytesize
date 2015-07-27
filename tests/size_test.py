@@ -47,18 +47,11 @@ from bytesize.errors import SizeValueError
 class ConstructionTestCase(unittest.TestCase):
     """ Test construction of Size objects. """
 
-    def testExceptions(self):
-        """ Test exceptions raised on construction. """
+    def testZero(self):
+        """ Test construction with 0 as decimal. """
         zero = Size(0)
         self.assertEqual(zero, Size("0.0"))
 
-        s = Size(500)
-        with self.assertRaises(SizeValueError):
-            s.humanReadableComponents(max_places=-1)
-        with self.assertRaises(SizeValueError):
-            s.humanReadableComponents(min_value=-1)
-
-        self.assertEqual(s.humanReadableComponents(max_places=0), ("500", ""))
 
     def testNegative(self):
         """ Test construction of negative sizes. """
@@ -207,6 +200,19 @@ class DisplayTestCase(unittest.TestCase):
            s.humanReadableComponents(max_places=2, min_value=Decimal(1)),
            ("512", "Mi")
         )
+
+    def testExceptionValues(self):
+        """ Test that exceptions are properly raised on bad params. """
+        s = Size(500)
+        with self.assertRaises(SizeValueError):
+            s.humanReadableComponents(max_places=-1)
+        with self.assertRaises(SizeValueError):
+            s.humanReadableComponents(min_value=-1)
+
+    def testRoundingToBytes(self):
+        """ Test that second part is empty when units is bytes. """
+        s = Size(500)
+        self.assertEqual(s.humanReadableComponents(max_places=0), ("500", ""))
 
 class SpecialMethodsTestCase(unittest.TestCase):
     """ Test specially named, non-operator methods. """
