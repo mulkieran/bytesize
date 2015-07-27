@@ -57,3 +57,10 @@ class StrConfig(object):
     max_places = property(lambda s: s._max_places)
     min_value = property(lambda s: s._min_value)
     strip = property(lambda s: s._strip)
+
+class Defaults(object):
+    """ Configuration defaults. """
+    # pylint: disable=too-few-public-methods
+
+    STR_CONFIG = StrConfig(2, False, 1)
+    """ Default configuration for string display. """

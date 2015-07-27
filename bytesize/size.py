@@ -31,6 +31,7 @@ from decimal import InvalidOperation
 
 import six
 
+from .config import Defaults
 from .config import StrConfig
 
 from .errors import SizeNonsensicalBinOpError
@@ -47,7 +48,7 @@ class Size(object):
     """ Class for instantiating Size objects. """
 
     _NUMERIC_TYPES = (six.integer_types, Decimal)
-    _STR_CONFIG = StrConfig()
+    _STR_CONFIG = Defaults.STR_CONFIG
     _rounding_map = {
         RoundingMethods.ROUND_DOWN: decimal.ROUND_DOWN,
         RoundingMethods.ROUND_HALF_DOWN: decimal.ROUND_HALF_DOWN,

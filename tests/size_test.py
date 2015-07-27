@@ -39,6 +39,8 @@ from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP
 from bytesize import StrConfig
 
+from bytesize.config import Defaults
+
 from bytesize.errors import SizeNonsensicalBinOpError
 from bytesize.errors import SizeNonsensicalOpError
 from bytesize.errors import SizePowerResultError
@@ -471,7 +473,7 @@ class ConfigurationTestCase(unittest.TestCase):
 
     def tearDown(self):
         """ Reset configuration to default. """
-        Size.set_str_config(StrConfig())
+        Size.set_str_config(Defaults.STR_CONFIG)
 
     def testSettingConfiguration(self):
         """ Test that setting configuration to different values has effect. """
