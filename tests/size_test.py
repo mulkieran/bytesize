@@ -37,6 +37,7 @@ from bytesize import TiB
 from bytesize import ROUND_DOWN
 from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP
+from bytesize import StrConfig
 
 from bytesize.errors import SizeNonsensicalBinOpError
 from bytesize.errors import SizeNonsensicalOpError
@@ -458,3 +459,19 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(s.__rsub__(s), Size(0))
         with self.assertRaises(SizeNonsensicalOpError):
             s.__rsub__(2) # pylint: disable=pointless-statement
+
+class ConfigurationTestCase(unittest.TestCase):
+    """ Test setting configuration for display. """
+
+    def tearDown(self):
+        """ Reset configuration to default. """
+        Size.set_str_config(StrConfig())
+
+    def testSettingConfiguration(self):
+        """ Test that setting configuration to different values has effect. """
+        s = Size(64, GiB)
+        s.set_str_config(StrConfig(strip=False))
+        prev = str(s)
+        s.set_str_config(StrConfig(strip=True))
+        subs = str(s)
+        self.assertTrue(subs != prev)
