@@ -19,8 +19,9 @@
 # License and may only be used or replicated with the express permission of
 # Red Hat, Inc.
 #
-# Red Hat Author(s): David Cantrell <dcantrell@redhat.com>
-#                    Anne Mulhern <amulhern@redhat.com>
+# Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
+
+""" Tests for behavior of Size objects. """
 
 import copy
 import unittest
@@ -42,9 +43,11 @@ from bytesize.errors import SizeNonsensicalOpError
 from bytesize.errors import SizePowerResultError
 from bytesize.errors import SizeValueError
 
-class SizeTestCase(unittest.TestCase):
+class ConstructionTestCase(unittest.TestCase):
+    """ Test construction of Size objects. """
 
     def testExceptions(self):
+        """ Test exceptions raised on construction. """
         zero = Size(0)
         self.assertEqual(zero, Size("0.0"))
 
@@ -56,7 +59,37 @@ class SizeTestCase(unittest.TestCase):
 
         self.assertEqual(s.humanReadableComponents(max_places=0), ("500", ""))
 
+    def testNegative(self):
+        """ Test construction of negative sizes. """
+        s = Size(-500, MiB)
+        self.assertEqual(s.humanReadableComponents(), ("-500", "Mi"))
+        self.assertEqual(s.convertTo(B), -524288000)
+
+    def testPartialBytes(self):
+        """ Test rounding of partial bytes in constructor. """
+        self.assertEqual(Size("1024.6"), Size(1024))
+        self.assertEqual(Size(1/Decimal(1025), KiB), Size(0))
+        self.assertEqual(Size(1/Decimal(1023), KiB), Size(1))
+
+    def testConstructor(self):
+        """ Test error checking in constructo. """
+        with self.assertRaises(SizeValueError):
+            Size("1.1.1", KiB)
+        self.assertEqual(Size(Size(0)), Size(0))
+        with self.assertRaises(SizeValueError):
+            Size(Size(0), KiB)
+        with self.assertRaises(SizeValueError):
+            Size(B)
+
+    def testNoUnitsInString(self):
+        """ Test construction w/ no units specified. """
+        self.assertEqual(Size("1024"), Size(1, KiB))
+
+class DisplayTestCase(unittest.TestCase):
+    """ Test formatting Size for display. """
+
     def testHumanReadable(self):
+        """ Test construction of display components. """
         s = Size(58929971)
         self.assertEqual(s.humanReadableComponents(), ("56.2", "Mi"))
 
@@ -102,7 +135,10 @@ class SizeTestCase(unittest.TestCase):
 
         # if max_places is set to None, all digits are displayed
         s = Size(0xfffffffffffff)
-        self.assertEqual(s.humanReadableComponents(max_places=None), ("3.9999999999999991118215803", "Pi"))
+        self.assertEqual(
+           s.humanReadableComponents(max_places=None),
+           ("3.9999999999999991118215803", "Pi")
+        )
         s = Size(0x10000)
         self.assertEqual(s.humanReadableComponents(max_places=None), ("64", "Ki"))
         s = Size(0x10001)
@@ -119,6 +155,7 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(s.humanReadableComponents(max_places=2), ("1048576", "Yi"))
 
     def testHumanReadableFractionalQuantities(self):
+        """ Test behavior when the displayed value is a fraction of units. """
         s = Size(0xfffffffffffff)
         self.assertEqual(s.humanReadableComponents(max_places=2), ("4", "Pi"))
         s = Size(0xfffff)
@@ -150,18 +187,31 @@ class SizeTestCase(unittest.TestCase):
         s = Size(0x10000000000000)
         self.assertEqual(s.humanReadableComponents(max_places=2), ("4", "Pi"))
 
-
     def testMinValue(self):
+        """ Test behavior on min_value parameter. """
         s = Size(9, MiB)
         self.assertEqual(s.humanReadableComponents(), ("9", "Mi"))
         self.assertEqual(s.humanReadableComponents(min_value=10), ("9216", "Ki"))
 
         s = Size("0.5", GiB)
-        self.assertEqual(s.humanReadableComponents(max_places=2, min_value=1), ("512", "Mi"))
-        self.assertEqual(s.humanReadableComponents(max_places=2, min_value=Decimal("0.1")), ("0.5", "Gi"))
-        self.assertEqual(s.humanReadableComponents(max_places=2, min_value=Decimal(1)), ("512", "Mi"))
+        self.assertEqual(
+           s.humanReadableComponents(max_places=2, min_value=1),
+           ("512", "Mi")
+        )
+        self.assertEqual(s.humanReadableComponents(
+           max_places=2, min_value=Decimal("0.1")),
+           ("0.5", "Gi")
+        )
+        self.assertEqual(
+           s.humanReadableComponents(max_places=2, min_value=Decimal(1)),
+           ("512", "Mi")
+        )
+
+class SpecialMethodsTestCase(unittest.TestCase):
+    """ Test specially named, non-operator methods. """
 
     def testConvertToPrecision(self):
+        """ Test convertTo method. """
         s = Size(1835008)
         self.assertEqual(s.convertTo(None), 1835008)
         self.assertEqual(s.convertTo(B), 1835008)
@@ -169,6 +219,7 @@ class SizeTestCase(unittest.TestCase):
         self.assertEqual(s.convertTo(MiB), 1.75)
 
     def testConvertToWithSize(self):
+        """ Test convertTo method when conversion target is a Size. """
         s = Size(1835008)
         self.assertEqual(s.convertTo(Size(1)), s.convertTo(B))
         self.assertEqual(s.convertTo(Size(1024)), s.convertTo(KiB))
@@ -178,29 +229,9 @@ class SizeTestCase(unittest.TestCase):
         with self.assertRaises(SizeValueError):
             s.convertTo(Size(0))
 
-    def testNegative(self):
-        s = Size(-500, MiB)
-        self.assertEqual(s.humanReadableComponents(), ("-500", "Mi"))
-        self.assertEqual(s.convertTo(B), -524288000)
-
-    def testPartialBytes(self):
-        self.assertEqual(Size("1024.6"), Size(1024))
-        self.assertEqual(Size(1/Decimal(1025), KiB), Size(0))
-        self.assertEqual(Size(1/Decimal(1023), KiB), Size(1))
-
-    def testConstructor(self):
-        with self.assertRaises(SizeValueError):
-            Size("1.1.1", KiB)
-        self.assertEqual(Size(Size(0)), Size(0))
-        with self.assertRaises(SizeValueError):
-            Size(Size(0), KiB)
-        with self.assertRaises(SizeValueError):
-            Size(B)
-
-    def testNoUnitsInString(self):
-        self.assertEqual(Size("1024"), Size(1, KiB))
-
     def testRoundToNearest(self):
+        """ Test roundToNearest method. """
+
         s = Size("10.3", GiB)
         self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_HALF_UP), Size(10, GiB))
         self.assertEqual(s.roundToNearest(GiB, rounding=ROUND_HALF_UP),
@@ -251,6 +282,7 @@ class SizeTestCase(unittest.TestCase):
 
 
 class UtilityMethodsTestCase(unittest.TestCase):
+    """ Test operator methods and other methods with an '_'. """
 
     def testBinaryOperatorsSize(self):
         """ Test binary operators with a possible Size result. """
@@ -361,6 +393,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(False or Size(5, MiB), Size(5, MiB))
 
     def testUnaryOperators(self):
+        """ Test unary operators. """
         s = Size(2, GiB)
 
         # unary +/-
@@ -372,12 +405,14 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(abs(s), s)
         self.assertEqual(abs(Size(-32, TiB)), Size(32, TiB))
 
+    def testOtherMethods(self):
+        """ Test miscellaneous non-operator methods. """
+
         # conversions
         self.assertIsInstance(int(Size(32, MiB)), int)
         self.assertFalse(bool(Size(0)))
         self.assertTrue(bool(Size(1)))
 
-    def testOtherMethods(self):
         self.assertEqual(str(Size(0)), "0.00 B")
         self.assertEqual(str(Size(1024)), "1.00 KiB")
 
