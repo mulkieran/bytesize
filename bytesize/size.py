@@ -40,6 +40,7 @@ from .errors import SizeValueError
 
 from .constants import B
 from .constants import BinaryUnits
+from .constants import DecimalUnits
 from .constants import RoundingMethods
 
 _BYTES_SYMBOL = "B"
@@ -65,7 +66,8 @@ class Size(object):
         cls._STR_CONFIG = StrConfig(
             max_places=config.max_places,
             strip=config.strip,
-            min_value=config.min_value
+            min_value=config.min_value,
+            binary_units=config.binary_units
         )
 
     def __init__(self, value=0, units=None):
@@ -309,12 +311,13 @@ class Size(object):
 
         return self._magnitude / factor
 
-    def components(self, min_value=1):
+    def components(self, min_value=1, binary_units=True):
         """ Return a representation of this size, decomposed into a
             Decimal value and a unit specifier tuple.
 
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int, long, or Decimal
+            :param bool binary_units: binary units if True, else SI
             :returns: a pair of a decimal value and a unit
             :rtype: tuple of Decimal and unit
             :raises SizeValueError: if min_value is not usable
@@ -326,12 +329,14 @@ class Size(object):
                "must be a precise positive numeric value."
             )
 
+        units = BinaryUnits if binary_units else DecimalUnits
+
         # Find the smallest prefix which will allow a number less than
         # FACTOR * min_value to the left of the decimal point.
         # If the number is so large that no prefix will satisfy this
         # requirement use the largest prefix.
-        limit = BinaryUnits.FACTOR * min_value
-        for unit in [B] + BinaryUnits.UNITS:
+        limit = units.FACTOR * min_value
+        for unit in [B] + units.UNITS:
             newcheck = self.convertTo(unit)
 
             if abs(newcheck) < limit:
@@ -340,7 +345,13 @@ class Size(object):
         # pylint: disable=undefined-loop-variable
         return (newcheck, unit)
 
-    def humanReadableComponents(self, max_places=2, strip=True, min_value=1):
+    def humanReadableComponents(
+       self,
+       max_places=2,
+       strip=True,
+       min_value=1,
+       binary_units=True
+    ):
         """ Return a string representation of components with appropriate
             size specifier and in the specified number of decimal places.
             Values are always represented using binary not decimal units.
@@ -353,6 +364,7 @@ class Size(object):
             :param bool strip: True if trailing zeros are to be stripped.
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int, long, or Decimal
+            :param bool binary_units: binary units if True, else SI
             :returns: a representation of the size as a pair of strings
             :rtype: tuple of str * str
             :raises SizeValueError:
@@ -377,7 +389,7 @@ class Size(object):
                "must be None or a non-negative integer value"
             )
 
-        (magnitude, unit) = self.components(min_value)
+        (magnitude, unit) = self.components(min_value, binary_units)
 
         if max_places is not None:
             magnitude = magnitude.quantize(Decimal(10) ** -max_places)

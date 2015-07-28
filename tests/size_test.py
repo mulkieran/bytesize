@@ -34,6 +34,7 @@ from bytesize import KiB
 from bytesize import MiB
 from bytesize import GiB
 from bytesize import TiB
+from bytesize import KB
 from bytesize import ROUND_DOWN
 from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP
@@ -53,7 +54,6 @@ class ConstructionTestCase(unittest.TestCase):
         """ Test construction with 0 as decimal. """
         zero = Size(0)
         self.assertEqual(zero, Size("0.0"))
-
 
     def testNegative(self):
         """ Test construction of negative sizes. """
@@ -215,6 +215,11 @@ class DisplayTestCase(unittest.TestCase):
         """ Test that second part is empty when units is bytes. """
         s = Size(500)
         self.assertEqual(s.humanReadableComponents(max_places=0), ("500", ""))
+
+    def testSIUnits(self):
+        """ Test binary_units param. """
+        s = Size(1000)
+        self.assertEqual(s.components(binary_units=False), (1, KB))
 
 class SpecialMethodsTestCase(unittest.TestCase):
     """ Test specially named, non-operator methods. """

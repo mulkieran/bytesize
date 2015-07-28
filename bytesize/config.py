@@ -41,7 +41,13 @@ class StrConfig(object):
     """
     # pylint: disable=too-few-public-methods
 
-    def __init__(self, max_places=2, strip=False, min_value=1):
+    def __init__(
+       self,
+       max_places=2,
+       strip=False,
+       min_value=1,
+       binary_units=True
+    ):
         """ Initializer.
 
             :param max_places: number of decimal places to use, default is 2
@@ -49,18 +55,21 @@ class StrConfig(object):
             :param bool strip: True if trailing zeros are to be stripped.
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int or Decimal
+            :param bool binary_units: binary units if True, else SI
         """
         self._max_places = max_places
         self._strip = strip
         self._min_value = min_value
+        self._binary_units = binary_units
 
     max_places = property(lambda s: s._max_places)
     min_value = property(lambda s: s._min_value)
     strip = property(lambda s: s._strip)
+    binary_units = property(lambda s: s._binary_units)
 
 class Defaults(object):
     """ Configuration defaults. """
     # pylint: disable=too-few-public-methods
 
-    STR_CONFIG = StrConfig(2, False, 1)
+    STR_CONFIG = StrConfig(2, False, 1, True)
     """ Default configuration for string display. """
