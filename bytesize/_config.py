@@ -41,6 +41,13 @@ class StrConfig(object):
     """
     # pylint: disable=too-few-public-methods
 
+    _FMT_STR = ", ".join([
+       "binary_units=%(binary_units)s",
+       "max_places=%(max_places)s",
+       "min_value=%(strip)s",
+       "strip=%(strip)s"
+    ])
+
     def __init__(
        self,
        max_places=2,
@@ -66,6 +73,16 @@ class StrConfig(object):
     min_value = property(lambda s: s._min_value)
     strip = property(lambda s: s._strip)
     binary_units = property(lambda s: s._binary_units)
+
+    def __str__(self):
+        values = {
+           'binary_units' : self.binary_units,
+           'max_places' : self.max_places,
+           'min_value' : self.min_value,
+           'strip' : self.strip
+        }
+        return "StrConfig(%s)" % (self._FMT_STR % values)
+    __repr__ = __str__
 
 class Defaults(object):
     """ Configuration defaults. """
