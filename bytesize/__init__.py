@@ -51,13 +51,13 @@
        - ROUND_UP
 
     * Configuration classes:
-       - :class:`.config.StrConfig`
+       - :class:`._config.StrConfig`
 
     * Exception classes:
-       - :class:`.errors.SizeError`
+       - :class:`._errors.SizeError`
 
     * Size classes:
-       - :class:`.size.Size`
+       - :class:`._size.Size`
 
     All parts of the public interface of bytesize must be imported directly
     from the top-level bytesize module, as::
@@ -75,9 +75,9 @@
 # pylint: disable=invalid-name
 
 # UNIT CONSTANTS
-from .constants import B
+from ._constants import B
 
-from .constants import DecimalUnits as _DecimalUnits
+from ._constants import DecimalUnits as _DecimalUnits
 KB = _DecimalUnits.KB
 MB = _DecimalUnits.MB
 GB = _DecimalUnits.GB
@@ -87,7 +87,7 @@ EB = _DecimalUnits.EB
 ZB = _DecimalUnits.ZB
 YB = _DecimalUnits.YB
 
-from .constants import BinaryUnits as _BinaryUnits
+from ._constants import BinaryUnits as _BinaryUnits
 KiB = _BinaryUnits.KiB
 MiB = _BinaryUnits.MiB
 GiB = _BinaryUnits.GiB
@@ -98,17 +98,17 @@ ZiB = _BinaryUnits.ZiB
 YiB = _BinaryUnits.YiB
 
 # ROUNDING CONSTANTS
-from .constants import RoundingMethods as _RoundingMethods
+from ._constants import RoundingMethods as _RoundingMethods
 ROUND_DOWN = _RoundingMethods.ROUND_DOWN
 ROUND_HALF_DOWN = _RoundingMethods.ROUND_HALF_DOWN
 ROUND_HALF_UP = _RoundingMethods.ROUND_HALF_UP
 ROUND_UP = _RoundingMethods.ROUND_UP
 
 # CONFIGURATION
-from .config import StrConfig
+from ._config import StrConfig
 
 # EXCEPTIONS
-from .errors import SizeError
+from ._errors import SizeError
 
 # SIZE
-from .size import Size
+from ._size import Size

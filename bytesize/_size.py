@@ -31,17 +31,17 @@ from decimal import InvalidOperation
 
 import six
 
-from .config import Defaults
-from .config import StrConfig
+from ._config import Defaults
+from ._config import StrConfig
 
-from .errors import SizeNonsensicalBinOpError
-from .errors import SizePowerResultError
-from .errors import SizeValueError
+from ._errors import SizeNonsensicalBinOpError
+from ._errors import SizePowerResultError
+from ._errors import SizeValueError
 
-from .constants import B
-from .constants import BinaryUnits
-from .constants import DecimalUnits
-from .constants import RoundingMethods
+from ._constants import B
+from ._constants import BinaryUnits
+from ._constants import DecimalUnits
+from ._constants import RoundingMethods
 
 _BYTES_SYMBOL = "B"
 
@@ -61,7 +61,7 @@ class Size(object):
     def set_str_config(cls, config):
         """ Set the configuration for __str__ method for all Size objects.
 
-            :param :class:`.config.StrConfig` config: a configuration object
+            :param :class:`._config.StrConfig` config: a configuration object
         """
         cls._STR_CONFIG = StrConfig(
             max_places=config.max_places,
@@ -370,7 +370,7 @@ class Size(object):
             :raises SizeValueError:
 
             The meaning of the parameters is the same as for
-            :class:`.config.StrConfig`.
+            :class:`._config.StrConfig`.
 
             humanReadable() is a function that evaluates to a number which
             represents a range of values. For a constant choice of max_places,
@@ -407,7 +407,7 @@ class Size(object):
             :param unit: a unit specifier
             :type unit: a named constant like KiB, or any non-negative Size
             :keyword rounding: which direction to round
-            :type rounding: :class:`constants.RoundingMethod`
+            :type rounding: :class:`_constants.RoundingMethod`
             :returns: Size rounded to nearest whole specified unit
             :rtype: :class:`Size`
             :raises SizeValueError: on unusable arguments

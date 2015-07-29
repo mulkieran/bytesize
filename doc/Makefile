@@ -4,6 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+SPHINXAPIOPTS = --private --separate
 SPHINXAPIDOC  = sphinx-apidoc
 PAPER         =
 BUILDDIR      = _build
@@ -46,8 +47,8 @@ clean:
 	-rm -rf ./bytesize
 
 apidoc:
-	$(SPHINXAPIDOC) -o ./bytesize $(SOURCEDIR)
-	$(SPHINXAPIDOC) -o ./tests $(TESTDIR)
+	$(SPHINXAPIDOC) $(SPHINXAPIOPTS) -o ./bytesize $(SOURCEDIR)
+	$(SPHINXAPIDOC) $(SPHINXAPIOPTS) -o ./tests $(TESTDIR)
 
 html: apidoc
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

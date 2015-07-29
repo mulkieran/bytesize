@@ -40,12 +40,12 @@ from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP
 from bytesize import StrConfig
 
-from bytesize.config import Defaults
+from bytesize._config import Defaults
 
-from bytesize.errors import SizeNonsensicalBinOpError
-from bytesize.errors import SizeNonsensicalOpError
-from bytesize.errors import SizePowerResultError
-from bytesize.errors import SizeValueError
+from bytesize._errors import SizeNonsensicalBinOpError
+from bytesize._errors import SizeNonsensicalOpError
+from bytesize._errors import SizePowerResultError
+from bytesize._errors import SizeValueError
 
 class ConstructionTestCase(unittest.TestCase):
     """ Test construction of Size objects. """

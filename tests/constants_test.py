@@ -19,8 +19,8 @@
 """ Test for constants classes. """
 import unittest
 
-from bytesize.constants import DecimalUnits
-from bytesize.constants import RoundingMethods
+from bytesize._constants import DecimalUnits
+from bytesize._constants import RoundingMethods
 
 class ConstantsTestCase(unittest.TestCase):
     """ Exercise methods of constants classes. """

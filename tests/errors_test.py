@@ -19,9 +19,9 @@
 """ Test for error classes. """
 import unittest
 
-from bytesize.errors import SizeNonsensicalBinOpError
-from bytesize.errors import SizePowerResultError
-from bytesize.errors import SizeValueError
+from bytesize._errors import SizeNonsensicalBinOpError
+from bytesize._errors import SizePowerResultError
+from bytesize._errors import SizeValueError
 
 class ErrorTestCase(unittest.TestCase):
     """ Exercise methods of error classes. """
