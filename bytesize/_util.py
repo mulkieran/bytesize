@@ -19,9 +19,11 @@
 """ Utilities for bytesize package. """
 
 from decimal import Decimal
+from fractions import Fraction
 
 import six
 
+from ._constants import RoundingMethods
 from ._errors import SizeValueError
 
 def format_magnitude(value, max_places=2, strip=False):
@@ -62,3 +64,45 @@ def format_magnitude(value, max_places=2, strip=False):
         retval_str = retval_str.rstrip("0").rstrip(".")
 
     return retval_str
+
+def round_fraction(value, rounding):
+    """ Round a fraction to an integer according to rounding method.
+
+        :param Fraction value: value to round
+        :param rounding: rounding method
+        :type rounding: a member of RoundingMethods
+        :return: a rounded integer
+        :rtype: int
+    """
+    # pylint: disable=too-many-return-statements
+    (base, rest) = divmod(value.numerator, value.denominator)
+    if rest == 0:
+        return base
+
+    if rounding == RoundingMethods.ROUND_UP:
+        return base + 1
+
+    if rounding == RoundingMethods.ROUND_DOWN:
+        return base
+
+    half_methods = (
+       RoundingMethods.ROUND_HALF_UP,
+       RoundingMethods.ROUND_HALF_DOWN
+    )
+    if rounding in half_methods:
+        fraction = Fraction(rest, value.denominator)
+        half = Fraction(1, 2)
+
+        if fraction < half:
+            return base
+        elif fraction > half:
+            return base + 1
+        else:
+            if rounding == RoundingMethods.ROUND_HALF_UP:
+                return base + 1
+            elif rounding == RoundingMethods.ROUND_HALF_DOWN:
+                return base
+    else:
+        raise SizeValueError(rounding, "rounding")
+
+    assert False

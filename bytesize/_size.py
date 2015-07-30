@@ -42,9 +42,9 @@ from ._errors import SizeValueError
 from ._constants import B
 from ._constants import BinaryUnits
 from ._constants import DecimalUnits
-from ._constants import RoundingMethods
 
 from ._util import format_magnitude
+from ._util import round_fraction
 
 _BYTES_SYMBOL = "B"
 
@@ -53,12 +53,6 @@ class Size(object):
 
     _NUMERIC_TYPES = (six.integer_types, Decimal)
     _STR_CONFIG = Defaults.STR_CONFIG
-    _rounding_map = {
-        RoundingMethods.ROUND_DOWN: decimal.ROUND_DOWN,
-        RoundingMethods.ROUND_HALF_DOWN: decimal.ROUND_HALF_DOWN,
-        RoundingMethods.ROUND_HALF_UP: decimal.ROUND_HALF_UP,
-        RoundingMethods.ROUND_UP: decimal.ROUND_UP
-    }
 
     @classmethod
     def set_str_config(cls, config):
@@ -369,7 +363,7 @@ class Size(object):
 
             If unit is Size(0), returns Size(0).
         """
-        factor = Decimal(int(getattr(unit, "factor", unit)))
+        factor = int(getattr(unit, "factor", unit))
 
         if factor < 0:
             raise SizeValueError(factor, "factor")
@@ -377,11 +371,6 @@ class Size(object):
         if factor == 0:
             return Size(0)
 
-        magnitude = (self._magnitude / factor)
-        try:
-            rounding = self._rounding_map[rounding]
-        except KeyError:
-            raise SizeValueError(rounding, "rounding")
-
-        rounded = magnitude.to_integral_value(rounding=rounding)
+        magnitude = self._magnitude / Fraction(factor)
+        rounded = round_fraction(magnitude, rounding)
         return Size(rounded * factor)

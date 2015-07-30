@@ -20,9 +20,12 @@
 import unittest
 
 from decimal import Decimal
+from fractions import Fraction
 
+from bytesize._constants import RoundingMethods
 from bytesize._errors import SizeValueError
 from bytesize._util import format_magnitude
+from bytesize._util import round_fraction
 
 class FormatTestCase(unittest.TestCase):
     """ Test formatting. """
@@ -34,3 +37,33 @@ class FormatTestCase(unittest.TestCase):
             format_magnitude(Decimal(200), max_places=-1)
         with self.assertRaises(SizeValueError):
             format_magnitude(0.1)
+
+class RoundingTestCase(unittest.TestCase):
+    """ Test rounding of fraction. """
+    # pylint: disable=too-few-public-methods
+
+    def testExceptions(self):
+        """ Raises exception on bad input. """
+        with self.assertRaises(SizeValueError):
+            round_fraction(Fraction(13, 32), "a string")
+        with self.assertRaises(SizeValueError):
+            round_fraction(Fraction(16, 32), "a string")
+
+    def testRounding(self):
+        """ Rounding various values according to various methods. """
+        for i in range(1, 10):
+            f = Fraction(i, 10)
+            self.assertEqual(round_fraction(f, RoundingMethods.ROUND_DOWN), 0)
+            self.assertEqual(round_fraction(f, RoundingMethods.ROUND_UP), 1)
+
+            r = round_fraction(f, RoundingMethods.ROUND_HALF_UP)
+            if i < 5:
+                self.assertEqual(r, 0)
+            else:
+                self.assertEqual(r, 1)
+
+            r = round_fraction(f, RoundingMethods.ROUND_HALF_DOWN)
+            if i > 5:
+                self.assertEqual(r, 1)
+            else:
+                self.assertEqual(r, 0)
