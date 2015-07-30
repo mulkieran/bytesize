@@ -42,6 +42,8 @@ from bytesize import StrConfig
 
 from bytesize._config import Defaults
 
+from bytesize._constants import BinaryUnits
+
 from bytesize._errors import SizeNonsensicalBinOpError
 from bytesize._errors import SizeNonsensicalOpError
 from bytesize._errors import SizePowerResultError
@@ -171,6 +173,14 @@ class SpecialMethodsTestCase(unittest.TestCase):
 
         with self.assertRaises(SizeValueError):
             s.convertTo(Size(0))
+
+    @unittest.expectedFailure
+    def testConvertToLargeSize(self):
+        """ Test that conversion maintains precision for large sizes. """
+        s = Size(0xfffffffffffff)
+        decimal_value = Decimal(int(s))
+        for u in BinaryUnits.UNITS():
+            self.assertEqual(s.convertTo(u) * u.factor, decimal_value)
 
     def testRoundToNearest(self):
         """ Test roundToNearest method. """
