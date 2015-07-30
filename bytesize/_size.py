@@ -25,9 +25,7 @@
     will cause an exception to be raised.
 """
 
-import decimal
 from decimal import Decimal
-from decimal import InvalidOperation
 from fractions import Fraction
 
 import six
@@ -42,6 +40,7 @@ from ._errors import SizeValueError
 from ._constants import B
 from ._constants import BinaryUnits
 from ._constants import DecimalUnits
+from ._constants import RoundingMethods
 
 from ._util import format_magnitude
 from ._util import round_fraction
@@ -77,18 +76,19 @@ class Size(object):
 
             Must pass None as units argument if value has type Size.
         """
-        if isinstance(value, (six.integer_types, six.string_types, Decimal)):
+        if isinstance(value, (six.integer_types, six.string_types, Decimal, Fraction)):
             factor = (units or B).factor
 
             if isinstance(value, six.integer_types):
                 magnitude = value * factor
             else:
                 try:
-                    magnitude = Decimal(value)
-                except InvalidOperation:
+                    magnitude = Fraction(value)
+                except ValueError:
                     raise SizeValueError(value, "value")
-                magnitude = (magnitude * factor).to_integral_value(
-                   rounding=decimal.ROUND_DOWN
+                magnitude = round_fraction(
+                   magnitude * factor,
+                   rounding=RoundingMethods.ROUND_DOWN
                 )
 
         elif isinstance(value, Size):

@@ -80,6 +80,13 @@ class ConstructionTestCase(unittest.TestCase):
         """ Test construction w/ no units specified. """
         self.assertEqual(Size("1024"), Size(1, KiB))
 
+    def testFraction(self):
+        """ Test creating Size with Fraction. """
+        self.assertEqual(
+           Size(Fraction(1024, 2), KiB),
+           Size(Fraction(1, 2), MiB)
+        )
+
 class DisplayTestCase(unittest.TestCase):
     """ Test formatting Size for display. """
 
