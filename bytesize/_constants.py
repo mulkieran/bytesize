@@ -88,7 +88,12 @@ class DecimalUnits(object):
     ZB = Unit(FACTOR ** 7, "zetta", "Z")
     YB = Unit(FACTOR ** 8, "yotta", "Y")
 
-    UNITS = [KB, MB, GB, TB, PB, EB, ZB, YB]
+    _UNITS = [KB, MB, GB, TB, PB, EB, ZB, YB]
+
+    @classmethod
+    def UNITS(cls):
+        """ Units of this class. """
+        return cls._UNITS[:]
 
 class BinaryUnits(object):
     """ Class to store binary unit constants. """
@@ -105,4 +110,9 @@ class BinaryUnits(object):
     ZiB = Unit(FACTOR ** 7, "zebi", "Zi")
     YiB = Unit(FACTOR ** 8, "yobi", "Yi")
 
-    UNITS = [KiB, MiB, GiB, TiB, PiB, EiB, ZiB, YiB]
+    _UNITS = [KiB, MiB, GiB, TiB, PiB, EiB, ZiB, YiB]
+
+    @classmethod
+    def UNITS(cls):
+        """ Units of this class. """
+        return cls._UNITS[:]

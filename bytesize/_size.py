@@ -345,7 +345,7 @@ class Size(object):
         # If the number is so large that no prefix will satisfy this
         # requirement use the largest prefix.
         limit = units.FACTOR * min_value
-        for unit in [B] + units.UNITS:
+        for unit in [B] + units.UNITS():
             newcheck = self.convertTo(unit)
 
             if abs(newcheck) < limit:
