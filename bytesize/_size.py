@@ -360,7 +360,7 @@ class Size(object):
             :param unit: a unit specifier
             :type unit: a named constant like KiB, or any non-negative Size
             :keyword rounding: which direction to round
-            :type rounding: :class:`_constants.RoundingMethod`
+            :type rounding: a field of :class:`._constants.RoundingMethods`
             :returns: Size rounded to nearest whole specified unit
             :rtype: :class:`Size`
             :raises SizeValueError: on unusable arguments

@@ -23,7 +23,7 @@
      * Size units, e.g., Ki, Mi
 """
 
-class RoundingMethod(object):
+class _RoundingMethod(object):
     """ Class to generate rounding method enumeration. """
     # pylint: disable=too-few-public-methods
 
@@ -44,10 +44,10 @@ class RoundingMethods(object):
     """ Static class for accessing rounding methods. """
     # pylint: disable=too-few-public-methods
 
-    ROUND_DOWN = RoundingMethod("Round down.")
-    ROUND_HALF_DOWN = RoundingMethod("Round to nearest, down on a tie.")
-    ROUND_HALF_UP = RoundingMethod("Round to nearest, up on a tie.")
-    ROUND_UP = RoundingMethod("Round up.")
+    ROUND_DOWN = _RoundingMethod("Round down.")
+    ROUND_HALF_DOWN = _RoundingMethod("Round to nearest, down on a tie.")
+    ROUND_HALF_UP = _RoundingMethod("Round to nearest, up on a tie.")
+    ROUND_UP = _RoundingMethod("Round up.")
 
 class Unit(object):
     """ Class to encapsulate unit information. """
