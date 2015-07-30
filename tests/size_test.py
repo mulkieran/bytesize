@@ -27,6 +27,7 @@ import copy
 import unittest
 
 from decimal import Decimal
+from fractions import Fraction
 
 from bytesize import Size
 from bytesize import B
@@ -60,7 +61,7 @@ class ConstructionTestCase(unittest.TestCase):
     def testNegative(self):
         """ Test construction of negative sizes. """
         s = Size(-500, MiB)
-        self.assertEqual(s.components(), (Decimal("-500"), MiB))
+        self.assertEqual(s.components(), (Fraction(-500, 1), MiB))
         self.assertEqual(s.convertTo(B), -524288000)
 
     def testPartialBytes(self):
@@ -109,18 +110,18 @@ class DisplayTestCase(unittest.TestCase):
     def testMinValue(self):
         """ Test behavior on min_value parameter. """
         s = Size(9, MiB)
-        self.assertEqual(s.components(), (Decimal(9), MiB))
-        self.assertEqual(s.components(min_value=10), (Decimal(9216), KiB))
+        self.assertEqual(s.components(), (Fraction(9, 1), MiB))
+        self.assertEqual(s.components(min_value=10), (Fraction(9216, 1), KiB))
 
         s = Size("0.5", GiB)
-        self.assertEqual(s.components(min_value=1), (Decimal(512), MiB))
+        self.assertEqual(s.components(min_value=1), (Fraction(512, 1), MiB))
         self.assertEqual(
            s.components(min_value=Decimal("0.1")),
-           (Decimal("0.5"), GiB)
+           (Fraction(1, 2), GiB)
         )
         self.assertEqual(
            s.components(min_value=Decimal(1)),
-           (Decimal(512), MiB)
+           (Fraction(512, 1), MiB)
         )
 
         # when min_value is 10 and single digit on left of decimal, display
@@ -134,7 +135,7 @@ class DisplayTestCase(unittest.TestCase):
 
         # when min value is 100 and two digits on left of decimal
         s = Size('14', MiB)
-        self.assertEqual(s.components(min_value=100), (Decimal(14 * 1024), KiB))
+        self.assertEqual(s.components(min_value=100), (Fraction(14 * 1024, 1), KiB))
 
     def testExceptionValues(self):
         """ Test that exceptions are properly raised on bad params. """
@@ -168,19 +169,18 @@ class SpecialMethodsTestCase(unittest.TestCase):
         s = Size(1835008)
         self.assertEqual(s.convertTo(Size(1)), s.convertTo(B))
         self.assertEqual(s.convertTo(Size(1024)), s.convertTo(KiB))
-        self.assertEqual(Size(512).convertTo(Size(1024)), Decimal("0.5"))
-        self.assertEqual(Size(1024).convertTo(Size(512)), Decimal(2))
+        self.assertEqual(Size(512).convertTo(Size(1024)), Fraction(1, 2))
+        self.assertEqual(Size(1024).convertTo(Size(512)), Fraction(2, 1))
 
         with self.assertRaises(SizeValueError):
             s.convertTo(Size(0))
 
-    @unittest.expectedFailure
     def testConvertToLargeSize(self):
         """ Test that conversion maintains precision for large sizes. """
         s = Size(0xfffffffffffff)
-        decimal_value = Decimal(int(s))
+        value = int(s)
         for u in BinaryUnits.UNITS():
-            self.assertEqual(s.convertTo(u) * u.factor, decimal_value)
+            self.assertEqual(s.convertTo(u) * u.factor, value)
 
     def testRoundToNearest(self):
         """ Test roundToNearest method. """

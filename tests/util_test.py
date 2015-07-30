@@ -32,3 +32,5 @@ class FormatTestCase(unittest.TestCase):
         """ Raises exception on bad input. """
         with self.assertRaises(SizeValueError):
             format_magnitude(Decimal(200), max_places=-1)
+        with self.assertRaises(SizeValueError):
+            format_magnitude(0.1)

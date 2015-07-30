@@ -27,7 +27,8 @@ from ._errors import SizeValueError
 def format_magnitude(value, max_places=2, strip=False):
     """ Format a numeric value.
 
-        :param Decimal value: any value
+        :param value: any value
+        :type value: a numeric value, convertible to Decimal, not a float
         :param max_places: number of decimal places to use, default is 2
         :type max_place: an integer type or NoneType
         :param bool strip: True if trailing zeros are to be stripped
@@ -42,6 +43,15 @@ def format_magnitude(value, max_places=2, strip=False):
            "max_places",
            "must be None or a non-negative integer value"
         )
+
+    if isinstance(value, float):
+        raise SizeValueError(
+           value,
+           "value",
+           "must not be a float"
+        )
+
+    value = Decimal(value)
 
     if max_places is not None:
         value = value.quantize(Decimal(10) ** -max_places)

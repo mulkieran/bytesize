@@ -28,6 +28,7 @@
 import decimal
 from decimal import Decimal
 from decimal import InvalidOperation
+from fractions import Fraction
 
 import six
 
@@ -114,8 +115,9 @@ class Size(object):
            min_value=self._STR_CONFIG.min_value,
            binary_units=self._STR_CONFIG.binary_units
         )
+        res = Decimal(magnitude.numerator) / Decimal(magnitude.denominator)
         res = format_magnitude(
-           magnitude,
+           res,
            max_places=self._STR_CONFIG.max_places,
            strip=self._STR_CONFIG.strip
         )
@@ -126,7 +128,7 @@ class Size(object):
 
     def __deepcopy__(self, memo):
         # pylint: disable=unused-argument
-        return Size(self.convertTo())
+        return Size(self._magnitude)
 
     def __nonzero__(self):
         return self._magnitude != 0
@@ -302,11 +304,11 @@ class Size(object):
             :param spec: a units specifier
             :type spec: a units specifier or :class:`Size`
             :returns: a numeric value in the units indicated by the specifier
-            :rtype: Decimal
+            :rtype: Fraction
             :raises SizeValueError: if unit specifier is non-positive
         """
         spec = B if spec is None else spec
-        factor = Decimal(int(getattr(spec, "factor", spec)))
+        factor = Fraction(int(getattr(spec, "factor", spec)))
 
         if factor <= 0:
             raise SizeValueError(
@@ -319,13 +321,13 @@ class Size(object):
 
     def components(self, min_value=1, binary_units=True):
         """ Return a representation of this size, decomposed into a
-            Decimal value and a unit specifier tuple.
+            Fraction value and a unit specifier tuple.
 
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int, long, or Decimal
             :param bool binary_units: binary units if True, else SI
             :returns: a pair of a decimal value and a unit
-            :rtype: tuple of Decimal and unit
+            :rtype: tuple of Fraction and unit
             :raises SizeValueError: if min_value is not usable
 
             The meaning of the parameters is the same as for
@@ -344,7 +346,7 @@ class Size(object):
         # FACTOR * min_value to the left of the decimal point.
         # If the number is so large that no prefix will satisfy this
         # requirement use the largest prefix.
-        limit = units.FACTOR * min_value
+        limit = units.FACTOR * Fraction(min_value)
         for unit in [B] + units.UNITS():
             newcheck = self.convertTo(unit)
 
