@@ -112,3 +112,6 @@ from ._errors import SizeError
 
 # SIZE
 from ._size import Size
+
+# FORMATTING
+from ._util import format_magnitude

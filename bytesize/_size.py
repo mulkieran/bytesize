@@ -43,6 +43,8 @@ from ._constants import BinaryUnits
 from ._constants import DecimalUnits
 from ._constants import RoundingMethods
 
+from ._util import format_magnitude
+
 _BYTES_SYMBOL = "B"
 
 class Size(object):
@@ -108,12 +110,16 @@ class Size(object):
         self._magnitude = int(magnitude)
 
     def __str__(self):
-        res = self.humanReadableComponents(
-           max_places=self._STR_CONFIG.max_places,
-           strip=self._STR_CONFIG.strip,
-           min_value=self._STR_CONFIG.min_value
+        (magnitude, units) = self.components(
+           min_value=self._STR_CONFIG.min_value,
+           binary_units=self._STR_CONFIG.binary_units
         )
-        return " ".join(res) + _BYTES_SYMBOL
+        res = format_magnitude(
+           magnitude,
+           max_places=self._STR_CONFIG.max_places,
+           strip=self._STR_CONFIG.strip
+        )
+        return res + " " + units.abbr + _BYTES_SYMBOL
 
     def __repr__(self):
         return "Size('%s')" % self._magnitude
@@ -321,6 +327,9 @@ class Size(object):
             :returns: a pair of a decimal value and a unit
             :rtype: tuple of Decimal and unit
             :raises SizeValueError: if min_value is not usable
+
+            The meaning of the parameters is the same as for
+            :class:`._config.StrConfig`.
         """
         if min_value < 0 or not isinstance(min_value, self._NUMERIC_TYPES):
             raise SizeValueError(
@@ -344,62 +353,6 @@ class Size(object):
 
         # pylint: disable=undefined-loop-variable
         return (newcheck, unit)
-
-    def humanReadableComponents(
-       self,
-       max_places=2,
-       strip=True,
-       min_value=1,
-       binary_units=True
-    ):
-        """ Return a string representation of components with appropriate
-            size specifier and in the specified number of decimal places.
-            Values are always represented using binary not decimal units.
-            For example, if the number of bytes represented by this size
-            is 65531, expect the representation to be something like
-            64.00 KiB, not 65.53 KB.
-
-            :param max_places: number of decimal places to use, default is 2
-            :type max_places: an integer type or NoneType
-            :param bool strip: True if trailing zeros are to be stripped.
-            :param min_value: Lower bound for value, default is 1.
-            :type min_value: A precise numeric type: int, long, or Decimal
-            :param bool binary_units: binary units if True, else SI
-            :returns: a representation of the size as a pair of strings
-            :rtype: tuple of str * str
-            :raises SizeValueError:
-
-            The meaning of the parameters is the same as for
-            :class:`._config.StrConfig`.
-
-            humanReadable() is a function that evaluates to a number which
-            represents a range of values. For a constant choice of max_places,
-            all ranges are of equal size, and are bisected by the result. So,
-            if n.humanReadable() == x U and b is the number of bytes in 1 U,
-            and e = 1/2 * 1/(10^max_places) * b, then x - e < n < x + e.
-
-            The second part of the tuple is the unit prefix, e.g., "M", "Gi".
-            The B (for bytes) is implicit.
-        """
-        if max_places is not None and \
-           (max_places < 0 or not isinstance(max_places, six.integer_types)):
-            raise SizeValueError(
-               max_places,
-               "max_places",
-               "must be None or a non-negative integer value"
-            )
-
-        (magnitude, unit) = self.components(min_value, binary_units)
-
-        if max_places is not None:
-            magnitude = magnitude.quantize(Decimal(10) ** -max_places)
-
-        retval_str = str(magnitude)
-
-        if '.' in retval_str and strip:
-            retval_str = retval_str.rstrip("0").rstrip(".")
-
-        return (retval_str, unit.abbr)
 
     def roundToNearest(self, unit, rounding):
         """ Rounds to nearest unit specified as a named constant or a Size.
