@@ -26,7 +26,7 @@
 import copy
 import unittest
 
-from decimal import Decimal
+from fractions import Fraction
 
 from bytesize import Size
 from bytesize import B
@@ -68,7 +68,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
             s * "str" # pylint: disable=pointless-statement
 
         # / truediv, retains fractional quantities
-        self.assertEqual(s / s, Decimal(1))
+        self.assertEqual(s / s, Fraction(1))
         self.assertEqual(s / 2, Size(1, GiB))
         with self.assertRaises(SizeNonsensicalBinOpError):
             2 / s # pylint: disable=pointless-statement
@@ -192,7 +192,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         s = Size(2, GiB)
 
         # rtruediv, retains fractional quantities
-        self.assertEqual(s.__rtruediv__(s), Decimal(1))
+        self.assertEqual(s.__rtruediv__(s), Fraction(1))
         with self.assertRaises(SizeNonsensicalOpError):
             s.__rtruediv__("str") # pylint: disable=pointless-statement
 

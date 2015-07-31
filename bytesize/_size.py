@@ -50,7 +50,7 @@ _BYTES_SYMBOL = "B"
 class Size(object):
     """ Class for instantiating Size objects. """
 
-    _NUMERIC_TYPES = (six.integer_types, Decimal)
+    _NUMERIC_TYPES = (six.integer_types, Decimal, Fraction)
     _STR_CONFIG = Defaults.STR_CONFIG
 
     @classmethod
@@ -274,21 +274,21 @@ class Size(object):
     def __truediv__(self, other):
         # other * truediv = self
         # Therefore, T(truediv) = Size, if T(other) is numeric
-        #                       = Decimal, if T(other) is Size
+        #                       = Fraction, if T(other) is Size
         if isinstance(other, Size):
-            return Decimal(self._magnitude).__truediv__(Decimal(int(other)))
+            return Fraction(self._magnitude).__truediv__(int(other))
         if isinstance(other, self._NUMERIC_TYPES):
-            return Size(Decimal(self._magnitude).__truediv__(other))
+            return Size(Fraction(self._magnitude).__truediv__(Fraction(other)))
         raise SizeNonsensicalBinOpError("truediv", other)
 
     __div__ = __truediv__
 
     def __rtruediv__(self, other):
         # self * truediv = other
-        # Therefore, T(truediv) = Decimal and T(other) = Size.
+        # Therefore, T(truediv) = Fraction and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rtruediv", other)
-        return Decimal(int(other)).__truediv__(Decimal(self._magnitude))
+        return Fraction(int(other)).__truediv__(self._magnitude)
 
     __rdiv__ = __rtruediv__
 
