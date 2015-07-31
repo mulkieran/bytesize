@@ -1,8 +1,3 @@
-#!/usr/bin/python
-#
-# size_tests.py
-# Size test cases for bytesize package.
-#
 # Copyright (C) 2015  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
@@ -21,7 +16,7 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
-""" Tests for behavior of Size objects. """
+""" Tests for operations on Size objects. """
 
 import copy
 import unittest
@@ -66,16 +61,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
             s * s # pylint: disable=pointless-statement
         with self.assertRaises(SizeNonsensicalBinOpError):
             s * "str" # pylint: disable=pointless-statement
-
-        # / truediv, retains fractional quantities
-        self.assertEqual(s / s, Fraction(1))
-        self.assertEqual(s / 2, Size(1, GiB))
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            2 / s # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            s / "str" # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            "str" / s # pylint: disable=pointless-statement
 
         # // floordiv
         self.assertEqual(s // s, 1)
@@ -215,3 +200,29 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(s.__rsub__(s), Size(0))
         with self.assertRaises(SizeNonsensicalOpError):
             s.__rsub__(2) # pylint: disable=pointless-statement
+
+class DivisionTestCase(unittest.TestCase):
+    """ Test division operations. """
+    # pylint: disable=too-few-public-methods
+
+    def testTrueDiv(self):
+        """ __truediv__ retains fractional quantities """
+        s = Size(2, TiB)
+
+        # unity
+        self.assertEqual(s / s, Fraction(1))
+
+        # fractional quantities
+        div = Size(37)
+        res = s / div
+        self.assertEqual(res * div, s)
+
+        # exceptions
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            s / 2 # pylint: disable=pointless-statement
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            2 / s # pylint: disable=pointless-statement
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            s / "str" # pylint: disable=pointless-statement
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            "str" / s # pylint: disable=pointless-statement

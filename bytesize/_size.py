@@ -273,12 +273,12 @@ class Size(object):
 
     def __truediv__(self, other):
         # other * truediv = self
-        # Therefore, T(truediv) = Size, if T(other) is numeric
-        #                       = Fraction, if T(other) is Size
+        # Therefore, T(truediv) = Fraction, if T(other) is Size
+        #
+        # Numeric type other is not allowed, because it results
+        # in a fractional size, in the general case.
         if isinstance(other, Size):
             return Fraction(self._magnitude).__truediv__(int(other))
-        if isinstance(other, self._NUMERIC_TYPES):
-            return Size(Fraction(self._magnitude).__truediv__(Fraction(other)))
         raise SizeNonsensicalBinOpError("truediv", other)
 
     __div__ = __truediv__
