@@ -350,14 +350,14 @@ class Size(object):
         # pylint: disable=undefined-loop-variable
         return (newcheck, unit)
 
-    def roundToNearest(self, unit, rounding):
-        """ Rounds to nearest unit specified as a named constant or a Size.
+    def roundTo(self, unit, rounding):
+        """ Rounds to unit specified as a named constant or a Size.
 
             :param unit: a unit specifier
             :type unit: a named constant like KiB, or any non-negative Size
-            :keyword rounding: which direction to round
+            :keyword rounding: rounding mode to use
             :type rounding: a field of :class:`._constants.RoundingMethods`
-            :returns: Size rounded to nearest whole specified unit
+            :returns: appropriately rounded Size
             :rtype: :class:`Size`
             :raises SizeValueError: on unusable arguments
 
