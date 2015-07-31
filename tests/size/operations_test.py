@@ -150,13 +150,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
     def testOtherMethods(self):
         """ Test miscellaneous non-operator methods. """
 
-        # conversions
-        self.assertIsInstance(int(Size(32, MiB)), int)
-        self.assertFalse(bool(Size(0)))
-        self.assertTrue(bool(Size(1)))
-
-        self.assertEqual(str(Size(0)), "0.00 B")
-        self.assertEqual(str(Size(1024)), "1.00 KiB")
 
         self.assertEqual(repr(Size(0)), "Size('0')")
         self.assertEqual(repr(Size(1024)), "Size('1024')")
@@ -200,6 +193,34 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(s.__rsub__(s), Size(0))
         with self.assertRaises(SizeNonsensicalOpError):
             s.__rsub__(2) # pylint: disable=pointless-statement
+
+class ConversionTestCase(unittest.TestCase):
+    """ Test conversions. """
+
+    def testBool(self):
+        """ Test conversion to bool.
+
+            Note that bool calls __bool__() in Python 3, __nonzero__ in Python2.
+        """
+        self.assertFalse(bool(Size(0)))
+        self.assertFalse(Size(0).__bool__())
+
+        self.assertTrue(bool(Size(1)))
+        self.assertTrue(Size(1).__bool__())
+
+    def testInt(self):
+        """ Test integer conversions. """
+        self.assertIsInstance(int(Size(32, MiB)), int)
+        self.assertEqual(int(Size(32, MiB)), 32 * MiB.factor)
+
+    def testFloat(self):
+        """ Test float conversion.
+
+            Converting a Size to a float should require some effort.
+        """
+        with self.assertRaises(TypeError):
+            float(Size(32))
+        self.assertEqual(float(int(Size(32))), float(32))
 
 class DivisionTestCase(unittest.TestCase):
     """ Test division operations. """
