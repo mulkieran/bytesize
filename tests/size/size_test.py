@@ -1,8 +1,3 @@
-#!/usr/bin/python
-#
-# size_tests.py
-# Size test cases for bytesize package.
-#
 # Copyright (C) 2015  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
@@ -35,14 +30,9 @@ from bytesize import MiB
 from bytesize import GiB
 from bytesize import TiB
 from bytesize import KB
-from bytesize import ROUND_DOWN
-from bytesize import ROUND_HALF_UP
-from bytesize import ROUND_UP
 from bytesize import StrConfig
 
 from bytesize._config import Defaults
-
-from bytesize._constants import BinaryUnits
 
 from bytesize._errors import SizeValueError
 
@@ -155,86 +145,6 @@ class DisplayTestCase(unittest.TestCase):
         """ Test binary_units param. """
         s = Size(1000)
         self.assertEqual(s.components(binary_units=False), (1, KB))
-
-class SpecialMethodsTestCase(unittest.TestCase):
-    """ Test specially named, non-operator methods. """
-
-    def testConvertToPrecision(self):
-        """ Test convertTo method. """
-        s = Size(1835008)
-        self.assertEqual(s.convertTo(None), 1835008)
-        self.assertEqual(s.convertTo(B), 1835008)
-        self.assertEqual(s.convertTo(KiB), 1792)
-        self.assertEqual(s.convertTo(MiB), 1.75)
-
-    def testConvertToWithSize(self):
-        """ Test convertTo method when conversion target is a Size. """
-        s = Size(1835008)
-        self.assertEqual(s.convertTo(Size(1)), s.convertTo(B))
-        self.assertEqual(s.convertTo(Size(1024)), s.convertTo(KiB))
-        self.assertEqual(Size(512).convertTo(Size(1024)), Fraction(1, 2))
-        self.assertEqual(Size(1024).convertTo(Size(512)), Fraction(2, 1))
-
-        with self.assertRaises(SizeValueError):
-            s.convertTo(Size(0))
-
-    def testConvertToLargeSize(self):
-        """ Test that conversion maintains precision for large sizes. """
-        s = Size(0xfffffffffffff)
-        value = int(s)
-        for u in BinaryUnits.UNITS():
-            self.assertEqual(s.convertTo(u) * u.factor, value)
-
-    def testRoundTo(self):
-        """ Test roundTo method. """
-
-        s = Size("10.3", GiB)
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP), Size(10, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP),
-                         Size(10, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_DOWN),
-                         Size(10, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_UP),
-                         Size(11, GiB))
-        # >>> Size("10.3 GiB").convertTo(MiB)
-        # Decimal('10547.19999980926513671875')
-        self.assertEqual(s.roundTo(MiB, rounding=ROUND_HALF_UP), Size(10547, MiB))
-        self.assertEqual(s.roundTo(MiB, rounding=ROUND_UP),
-                         Size(10548, MiB))
-        self.assertIsInstance(s.roundTo(MiB, rounding=ROUND_HALF_UP), Size)
-        with self.assertRaises(SizeValueError):
-            s.roundTo(MiB, rounding='abc')
-
-        # arbitrary decimal rounding constants are not allowed
-        from decimal import ROUND_HALF_DOWN
-        with self.assertRaises(SizeValueError):
-            s.roundTo(MiB, rounding=ROUND_HALF_DOWN)
-
-        s = Size("10.51", GiB)
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP), Size(11, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP),
-                         Size(11, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_DOWN),
-                         Size(10, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_UP),
-                         Size(11, GiB))
-
-        s = Size(513, GiB)
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP), s)
-        self.assertEqual(s.roundTo(TiB, rounding=ROUND_HALF_UP), Size(1, TiB))
-        self.assertEqual(s.roundTo(TiB, rounding=ROUND_DOWN),
-                         Size(0))
-
-        # test Size parameters
-        self.assertEqual(s.roundTo(Size(128, GiB), rounding=ROUND_HALF_UP), Size(512, GiB))
-        self.assertEqual(s.roundTo(Size(1, KiB), rounding=ROUND_HALF_UP), Size(513, GiB))
-        self.assertEqual(s.roundTo(Size(1, TiB), rounding=ROUND_HALF_UP), Size(1, TiB))
-        self.assertEqual(s.roundTo(Size(1, TiB), rounding=ROUND_DOWN), Size(0))
-        self.assertEqual(s.roundTo(Size(0), rounding=ROUND_HALF_UP), Size(0))
-        self.assertEqual(s.roundTo(Size(13, GiB), rounding=ROUND_HALF_UP), Size(507, GiB))
-
-        with self.assertRaises(SizeValueError):
-            s.roundTo(Size(-1, B), rounding=ROUND_HALF_UP)
 
 class ConfigurationTestCase(unittest.TestCase):
     """ Test setting configuration for display. """
