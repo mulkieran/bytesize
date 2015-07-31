@@ -100,9 +100,7 @@ def round_fraction(value, rounding):
         else:
             if rounding == RoundingMethods.ROUND_HALF_UP:
                 return base + 1
-            elif rounding == RoundingMethods.ROUND_HALF_DOWN:
+            else:
                 return base
-    else:
-        raise SizeValueError(rounding, "rounding")
 
-    assert False
+    raise SizeValueError(rounding, "rounding")
