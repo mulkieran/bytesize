@@ -19,8 +19,11 @@
 """ Test for constants classes. """
 import unittest
 
+from bytesize._constants import B
+from bytesize._constants import BinaryUnits
 from bytesize._constants import DecimalUnits
 from bytesize._constants import RoundingMethods
+from bytesize._constants import UNITS
 
 class ConstantsTestCase(unittest.TestCase):
     """ Exercise methods of constants classes. """
@@ -33,3 +36,9 @@ class ConstantsTestCase(unittest.TestCase):
         """ Miscellaneous tests for units constants. """
         self.assertIsNotNone(str(DecimalUnits.KB))
         self.assertIsNotNone(DecimalUnits.KB.prefix)
+
+    def testUnitsMethod(self):
+        """ Test that all units constansts are in UNITS(). """
+        self.assertTrue(set(DecimalUnits.UNITS()).issubset(set(UNITS())))
+        self.assertTrue(set(BinaryUnits.UNITS()).issubset(set(UNITS())))
+        self.assertTrue(B in UNITS())

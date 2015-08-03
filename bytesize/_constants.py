@@ -116,3 +116,7 @@ class BinaryUnits(object):
     def UNITS(cls):
         """ Units of this class. """
         return cls._UNITS[:]
+
+def UNITS():
+    """ All unit constants. """
+    return ([B] + BinaryUnits.UNITS() + DecimalUnits.UNITS())[:]

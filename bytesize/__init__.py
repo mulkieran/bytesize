@@ -97,6 +97,8 @@ EiB = _BinaryUnits.EiB
 ZiB = _BinaryUnits.ZiB
 YiB = _BinaryUnits.YiB
 
+from ._constants import UNITS
+
 # ROUNDING CONSTANTS
 from ._constants import RoundingMethods as _RoundingMethods
 ROUND_DOWN = _RoundingMethods.ROUND_DOWN
