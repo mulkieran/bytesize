@@ -298,7 +298,7 @@ class Size(object):
             :param spec: a units specifier
             :type spec: a units specifier or :class:`Size`
             :returns: a numeric value in the units indicated by the specifier
-            :rtype: Fraction
+            :rtype: :class:`fractions.Fraction`
             :raises SizeValueError: if unit specifier is non-positive
         """
         spec = B if spec is None else spec
@@ -354,7 +354,7 @@ class Size(object):
         """ Rounds to unit specified as a named constant or a Size.
 
             :param unit: a unit specifier
-            :type unit: a named constant like KiB, or any non-negative Size
+            :type unit: any non-negative :class:`Size` or element in :func:`._constants.UNITS`
             :keyword rounding: rounding mode to use
             :type rounding: a field of :class:`._constants.RoundingMethods`
             :returns: appropriately rounded Size
