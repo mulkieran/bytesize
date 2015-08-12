@@ -3,3 +3,7 @@
 doc/_build
 doc/bytesize
 doc/tests
+
+htmlcov
+_pyreverse
+.coverage
