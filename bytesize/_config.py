@@ -69,11 +69,6 @@ class StrConfig(object):
         self._min_value = min_value
         self._binary_units = binary_units
 
-    max_places = property(lambda s: s._max_places)
-    min_value = property(lambda s: s._min_value)
-    strip = property(lambda s: s._strip)
-    binary_units = property(lambda s: s._binary_units)
-
     def __str__(self):
         values = {
            'binary_units' : self.binary_units,
@@ -83,6 +78,12 @@ class StrConfig(object):
         }
         return "StrConfig(%s)" % (self._FMT_STR % values)
     __repr__ = __str__
+
+    # pylint: disable=protected-access
+    max_places = property(lambda s: s._max_places)
+    min_value = property(lambda s: s._min_value)
+    strip = property(lambda s: s._strip)
+    binary_units = property(lambda s: s._binary_units)
 
 class Defaults(object):
     """ Configuration defaults. """

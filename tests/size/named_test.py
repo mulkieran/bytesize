@@ -81,7 +81,10 @@ class RoundingTestCase(unittest.TestCase):
                          Size(11, GiB))
         # >>> Size("10.3 GiB").convertTo(MiB)
         # Decimal('10547.19999980926513671875')
-        self.assertEqual(s.roundTo(MiB, rounding=ROUND_HALF_UP), Size(10547, MiB))
+        self.assertEqual(
+           s.roundTo(MiB, rounding=ROUND_HALF_UP),
+           Size(10547, MiB)
+        )
         self.assertEqual(s.roundTo(MiB, rounding=ROUND_UP),
                          Size(10548, MiB))
         self.assertIsInstance(s.roundTo(MiB, rounding=ROUND_HALF_UP), Size)
@@ -111,12 +114,24 @@ class RoundingTestCase(unittest.TestCase):
     def testSizeParams(self):
         """ Test rounding with Size parameters. """
         s = Size(513, GiB)
-        self.assertEqual(s.roundTo(Size(128, GiB), rounding=ROUND_HALF_UP), Size(512, GiB))
-        self.assertEqual(s.roundTo(Size(1, KiB), rounding=ROUND_HALF_UP), Size(513, GiB))
-        self.assertEqual(s.roundTo(Size(1, TiB), rounding=ROUND_HALF_UP), Size(1, TiB))
+        self.assertEqual(
+           s.roundTo(Size(128, GiB), rounding=ROUND_HALF_UP),
+           Size(512, GiB)
+        )
+        self.assertEqual(
+           s.roundTo(Size(1, KiB), rounding=ROUND_HALF_UP),
+           Size(513, GiB)
+        )
+        self.assertEqual(
+           s.roundTo(Size(1, TiB), rounding=ROUND_HALF_UP),
+           Size(1, TiB)
+        )
         self.assertEqual(s.roundTo(Size(1, TiB), rounding=ROUND_DOWN), Size(0))
         self.assertEqual(s.roundTo(Size(0), rounding=ROUND_HALF_UP), Size(0))
-        self.assertEqual(s.roundTo(Size(13, GiB), rounding=ROUND_HALF_UP), Size(507, GiB))
+        self.assertEqual(
+           s.roundTo(Size(13, GiB), rounding=ROUND_HALF_UP),
+           Size(507, GiB)
+        )
 
     def testExceptions(self):
         """ Test raising exceptions when rounding. """

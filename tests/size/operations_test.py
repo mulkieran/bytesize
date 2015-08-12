@@ -88,7 +88,10 @@ class UtilityMethodsTestCase(unittest.TestCase):
 
         # divmod
         self.assertEqual(divmod(Size(32, MiB), 2), (Size(16, MiB), Size(0)))
-        self.assertEqual(divmod(Size(24, MiB), Size(16, MiB)), (1, Size(8, MiB)))
+        self.assertEqual(
+            divmod(Size(24, MiB), Size(16, MiB)),
+            (1, Size(8, MiB))
+        )
         with self.assertRaises(SizeNonsensicalBinOpError):
             divmod(2048, Size(12, B))
         with self.assertRaises(SizeNonsensicalBinOpError):
@@ -175,7 +178,10 @@ class UtilityMethodsTestCase(unittest.TestCase):
             s.__rtruediv__("str") # pylint: disable=pointless-statement
 
         # rdivmod
-        self.assertEqual(Size(16, MiB).__rdivmod__(Size(24, MiB)), (1, Size(8, MiB)))
+        self.assertEqual(
+            Size(16, MiB).__rdivmod__(Size(24, MiB)),
+            (1, Size(8, MiB))
+        )
         with self.assertRaises(SizeNonsensicalOpError):
             divmod(s.__rdivmod__("str"))
 

@@ -76,7 +76,8 @@ class Size(object):
 
             Must pass None as units argument if value has type Size.
         """
-        if isinstance(value, (six.integer_types, six.string_types, Decimal, Fraction)):
+        if isinstance(value, six.string_types) or \
+           isinstance(value, self._NUMERIC_TYPES):
             factor = (units or B).factor
 
             if isinstance(value, six.integer_types):
@@ -351,6 +352,7 @@ class Size(object):
         return (newcheck, unit)
 
     def roundTo(self, unit, rounding):
+        # pylint: disable=line-too-long
         """ Rounds to unit specified as a named constant or a Size.
 
             :param unit: a unit specifier

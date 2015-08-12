@@ -128,7 +128,10 @@ class DisplayTestCase(unittest.TestCase):
 
         # when min value is 100 and two digits on left of decimal
         s = Size('14', MiB)
-        self.assertEqual(s.components(min_value=100), (Fraction(14 * 1024, 1), KiB))
+        self.assertEqual(
+           s.components(min_value=100),
+           (Fraction(14 * 1024, 1), KiB)
+        )
 
     def testExceptionValues(self):
         """ Test that exceptions are properly raised on bad params. """

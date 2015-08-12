@@ -34,11 +34,12 @@ class _RoundingMethod(object):
         """
         self._doc = doc
 
-    doc = property(lambda s: s._doc, doc="explanation of rounding method")
-
     def __str__(self):
         return self.doc
     __repr__ = __str__
+
+    # pylint: disable=protected-access
+    doc = property(lambda s: s._doc, doc="explanation of rounding method")
 
 class RoundingMethods(object):
     """ Static class for accessing rounding methods. """
@@ -58,16 +59,17 @@ class Unit(object):
         self._prefix = prefix
         self._abbr = abbr
 
+    def __str__(self):
+        return self.abbr + "B"
+    __repr__ = __str__
+
+    # pylint: disable=protected-access
     factor = property(lambda s: s._factor, doc="numeric multiple of bytes")
     abbr = property(
        lambda s: s._abbr,
        doc="abbreviation for unit, precedes 'B'"
     )
     prefix = property(lambda s: s._prefix, doc="prefix for 'bytes'")
-
-    def __str__(self):
-        return self.abbr + "B"
-    __repr__ = __str__
 
 B = Unit(1, "", "")
 """ The universal unit, bytes. """
