@@ -19,6 +19,8 @@
 """ Utilities for bytesize package. """
 
 from decimal import Decimal
+from decimal import DefaultContext
+from decimal import localcontext
 from fractions import Fraction
 
 import six
@@ -26,17 +28,26 @@ import six
 from ._constants import RoundingMethods
 from ._errors import SizeValueError
 
-def format_magnitude(value, max_places=2, strip=False):
-    """ Format a numeric value.
+def convert_magnitude(value, max_places=2, context=DefaultContext):
+    """ Convert magnitude to a decimal string.
 
         :param value: any value
         :type value: a numeric value, not a float
         :param max_places: number of decimal places to use, default is 2
         :type max_place: an integer type or NoneType
-        :param bool strip: True if trailing zeros are to be stripped
+        :param :class:`decimal.DefaultContext` context: a decimal context
 
-        :returns: the formatted value
+        :returns: a string representation of value
         :rtype: str
+
+        Since a rational number may be a non-terminating decimal
+        quantity, this representation is not guaranteed to be exact, regardless
+        of the value of max_places.
+
+        Even in the case of a terminating decimal representation, the
+        representation may be inexact if the number of significant digits
+        is too large for the precision of the Decimal operations as
+        specified by the context.
     """
     if max_places is not None and \
        (max_places < 0 or not isinstance(max_places, six.integer_types)):
@@ -53,20 +64,36 @@ def format_magnitude(value, max_places=2, strip=False):
            "must not be a float"
         )
 
-    if isinstance(value, Fraction):
-        value = Decimal(value.numerator)/Decimal(value.denominator)
+    with localcontext(context):
+        if isinstance(value, Fraction):
+            value = Decimal(value.numerator)/Decimal(value.denominator)
 
-    value = Decimal(value)
+        value = Decimal(value)
 
-    if max_places is not None:
-        value = value.quantize(Decimal(10) ** -max_places)
+        if max_places is not None:
+            value = value.quantize(Decimal(10) ** -max_places)
 
-    retval_str = str(value)
+        return str(value)
 
-    if '.' in retval_str and strip:
-        retval_str = retval_str.rstrip("0").rstrip(".")
+def format_magnitude(value, max_places=2, strip=False, context=DefaultContext):
+    """ Format a numeric value.
 
-    return retval_str
+        :param value: any value
+        :type value: a numeric value, not a float
+        :param max_places: number of decimal places to use, default is 2
+        :type max_place: an integer type or NoneType
+        :param bool strip: True if trailing zeros are to be stripped
+        :param :class:`decimal.DefaultContext` context: a decimal context
+
+        :returns: the formatted value
+        :rtype: str
+    """
+    ret = convert_magnitude(value, max_places, context=context)
+
+    if '.' in ret and strip:
+        ret = ret.rstrip("0").rstrip(".")
+
+    return ret
 
 def round_fraction(value, rounding):
     """ Round a fraction to an integer according to rounding method.

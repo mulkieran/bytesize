@@ -116,4 +116,5 @@ from ._errors import SizeError
 from ._size import Size
 
 # FORMATTING
+from ._util import convert_magnitude
 from ._util import format_magnitude
