@@ -110,9 +110,8 @@ class Size(object):
            min_value=self._STR_CONFIG.min_value,
            binary_units=self._STR_CONFIG.binary_units
         )
-        res = Decimal(magnitude.numerator) / Decimal(magnitude.denominator)
         res = format_magnitude(
-           res,
+           magnitude,
            max_places=self._STR_CONFIG.max_places,
            strip=self._STR_CONFIG.strip
         )

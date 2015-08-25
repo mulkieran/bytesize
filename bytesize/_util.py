@@ -30,7 +30,7 @@ def format_magnitude(value, max_places=2, strip=False):
     """ Format a numeric value.
 
         :param value: any value
-        :type value: a numeric value, convertible to Decimal, not a float
+        :type value: a numeric value, not a float
         :param max_places: number of decimal places to use, default is 2
         :type max_place: an integer type or NoneType
         :param bool strip: True if trailing zeros are to be stripped
@@ -52,6 +52,9 @@ def format_magnitude(value, max_places=2, strip=False):
            "value",
            "must not be a float"
         )
+
+    if isinstance(value, Fraction):
+        value = Decimal(value.numerator)/Decimal(value.denominator)
 
     value = Decimal(value)
 
