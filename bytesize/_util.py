@@ -20,6 +20,7 @@
 
 from decimal import Decimal
 from decimal import DefaultContext
+from decimal import InvalidOperation
 from decimal import localcontext
 from fractions import Fraction
 
@@ -64,14 +65,19 @@ def convert_magnitude(value, max_places=2, context=DefaultContext):
            "must not be a float"
         )
 
-    with localcontext(context):
+    with localcontext(context) as ctx:
         if isinstance(value, Fraction):
             value = Decimal(value.numerator)/Decimal(value.denominator)
 
         value = Decimal(value)
 
         if max_places is not None:
-            value = value.quantize(Decimal(10) ** -max_places)
+            while True:
+                try:
+                    value = value.quantize(Decimal(10) ** -max_places)
+                    break
+                except InvalidOperation:
+                    ctx.prec += 2
 
         return str(value)
 
