@@ -302,7 +302,7 @@ class Size(object):
             :raises SizeValueError: if unit specifier is non-positive
         """
         spec = B if spec is None else spec
-        factor = Fraction(int(getattr(spec, "factor", spec)))
+        factor = Fraction(int(spec))
 
         if factor <= 0:
             raise SizeValueError(
@@ -364,7 +364,7 @@ class Size(object):
 
             If unit is Size(0), returns Size(0).
         """
-        factor = int(getattr(unit, "factor", unit))
+        factor = int(unit)
 
         if factor < 0:
             raise SizeValueError(factor, "factor")

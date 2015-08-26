@@ -71,6 +71,9 @@ class Unit(object):
     )
     prefix = property(lambda s: s._prefix, doc="prefix for 'bytes'")
 
+    def __int__(self):
+        return self.factor
+
 B = Unit(1, "", "")
 """ The universal unit, bytes. """
 
