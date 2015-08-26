@@ -18,9 +18,12 @@
 
 """ Tests for operations on Size objects. """
 
-import copy
+from hypothesis import given
+from hypothesis import strategies
+from hypothesis import Settings
 import unittest
 
+import copy
 from fractions import Fraction
 
 from bytesize import Size
@@ -28,6 +31,7 @@ from bytesize import B
 from bytesize import MiB
 from bytesize import GiB
 from bytesize import TiB
+from bytesize import UNITS
 
 from bytesize._errors import SizeNonsensicalBinOpError
 from bytesize._errors import SizeNonsensicalOpError
@@ -158,8 +162,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(repr(Size(1024)), "Size('1024')")
         self.assertEqual(repr(Size("1024.1")), "Size('1024')")
 
-        self.assertEqual(hash(Size(1024)), hash(1024))
-
         s = Size(1024)
         z = copy.deepcopy(s)
         self.assertIsNot(s._magnitude, z._magnitude) # pylint: disable=protected-access
@@ -200,34 +202,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalOpError):
             s.__rsub__(2) # pylint: disable=pointless-statement
 
-class ConversionTestCase(unittest.TestCase):
-    """ Test conversions. """
-
-    def testBool(self):
-        """ Test conversion to bool.
-
-            Note that bool calls __bool__() in Python 3, __nonzero__ in Python2.
-        """
-        self.assertFalse(bool(Size(0)))
-        self.assertFalse(Size(0).__bool__())
-
-        self.assertTrue(bool(Size(1)))
-        self.assertTrue(Size(1).__bool__())
-
-    def testInt(self):
-        """ Test integer conversions. """
-        self.assertIsInstance(int(Size(32, MiB)), int)
-        self.assertEqual(int(Size(32, MiB)), 32 * MiB.factor)
-
-    def testFloat(self):
-        """ Test float conversion.
-
-            Converting a Size to a float should require some effort.
-        """
-        with self.assertRaises(TypeError):
-            float(Size(32))
-        self.assertEqual(float(int(Size(32))), float(32))
-
 class DivisionTestCase(unittest.TestCase):
     """ Test division operations. """
     # pylint: disable=too-few-public-methods
@@ -253,3 +227,20 @@ class DivisionTestCase(unittest.TestCase):
             s / "str" # pylint: disable=pointless-statement
         with self.assertRaises(SizeNonsensicalBinOpError):
             "str" / s # pylint: disable=pointless-statement
+
+class UnaryOperatorsTestCase(unittest.TestCase):
+    """ Test unary operators. """
+    # pylint: disable=too-few-public-methods
+
+    @given(
+       strategies.integers(),
+       strategies.sampled_from(UNITS()),
+       settings=Settings(max_examples=5)
+    )
+    def testHash(self, s, u):
+        """ Test that hash has the necessary property for hash table lookup. """
+        size = Size(s, u)
+        size3 = Size(s, u)
+        size2 = Size(s + 1, u)
+        self.assertTrue(size != size2)
+        self.assertTrue(size == size3 and hash(size) == hash(size3))
