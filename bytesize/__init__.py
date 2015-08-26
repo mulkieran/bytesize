@@ -106,6 +106,8 @@ ROUND_HALF_DOWN = _RoundingMethods.ROUND_HALF_DOWN
 ROUND_HALF_UP = _RoundingMethods.ROUND_HALF_UP
 ROUND_UP = _RoundingMethods.ROUND_UP
 
+from ._constants import ROUNDING_METHODS
+
 # CONFIGURATION
 from ._config import StrConfig
 

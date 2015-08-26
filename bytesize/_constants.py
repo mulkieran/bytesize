@@ -50,6 +50,13 @@ class RoundingMethods(object):
     ROUND_HALF_UP = _RoundingMethod("Round to nearest, up on a tie.")
     ROUND_UP = _RoundingMethod("Round up.")
 
+    _METHODS = [ROUND_DOWN, ROUND_HALF_DOWN, ROUND_HALF_UP, ROUND_UP]
+
+    @classmethod
+    def METHODS(cls):
+        """ Methods of this class. """
+        return cls._METHODS[:]
+
 class Unit(object):
     """ Class to encapsulate unit information. """
     # pylint: disable=too-few-public-methods
@@ -125,3 +132,5 @@ class BinaryUnits(object):
 def UNITS():
     """ All unit constants. """
     return ([B] + BinaryUnits.UNITS() + DecimalUnits.UNITS())[:]
+
+ROUNDING_METHODS = RoundingMethods.METHODS
