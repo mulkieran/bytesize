@@ -16,20 +16,23 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
-""" Test for configuration classes. """
+""" Test for utility functions. """
+from hypothesis import given
+from hypothesis import strategies
 import unittest
 
 from decimal import Decimal
+from decimal import DefaultContext
 from fractions import Fraction
 
 from bytesize._constants import RoundingMethods
 from bytesize._errors import SizeValueError
+from bytesize._util import convert_magnitude
 from bytesize._util import format_magnitude
 from bytesize._util import round_fraction
 
 class FormatTestCase(unittest.TestCase):
     """ Test formatting. """
-    # pylint: disable=too-few-public-methods
 
     def testException(self):
         """ Raises exception on bad input. """
@@ -37,6 +40,44 @@ class FormatTestCase(unittest.TestCase):
             format_magnitude(Decimal(200), max_places=-1)
         with self.assertRaises(SizeValueError):
             format_magnitude(0.1)
+
+    _max_exponent = DefaultContext.prec
+    @given(
+       strategies.integers(
+           min_value=-(10**_max_exponent - 1),
+           max_value=10**_max_exponent - 1
+       ),
+       strategies.integers(min_value=0),
+       strategies.integers(min_value=0)
+    )
+    def testExactness(self, n, m, e):
+        """ When max_places is not specified, the denominator of
+            the value is a power of 10, and the number of significant digits
+            in the numerator is no more than the default precision of the
+            decimal operations, the string result is exact.
+        """
+        x = Fraction(n * 10**m, 10**e)
+        if x.denominator == 1:
+            x = int(x)
+        converted = convert_magnitude(
+           x,
+           max_places=None,
+           context=DefaultContext
+        )
+        self.assertEqual(Fraction(converted), x)
+
+    def testInexactness(self):
+        """ If the number of digits in the numerator exceeds the
+            available precision, and the lowest order digit is non-zero,
+            the result is not exact.
+        """
+        x = Fraction(10**DefaultContext.prec + 1)
+        converted = convert_magnitude(
+           x,
+           max_places=None,
+           context=DefaultContext
+        )
+        self.assertNotEqual(Fraction(converted), x)
 
 class RoundingTestCase(unittest.TestCase):
     """ Test rounding of fraction. """
@@ -49,21 +90,23 @@ class RoundingTestCase(unittest.TestCase):
         with self.assertRaises(SizeValueError):
             round_fraction(Fraction(16, 32), "a string")
 
-    def testRounding(self):
+    @given(
+       strategies.integers(min_value=1, max_value=9)
+    )
+    def testRounding(self, i):
         """ Rounding various values according to various methods. """
-        for i in range(1, 10):
-            f = Fraction(i, 10)
-            self.assertEqual(round_fraction(f, RoundingMethods.ROUND_DOWN), 0)
-            self.assertEqual(round_fraction(f, RoundingMethods.ROUND_UP), 1)
+        f = Fraction(i, 10)
+        self.assertEqual(round_fraction(f, RoundingMethods.ROUND_DOWN), 0)
+        self.assertEqual(round_fraction(f, RoundingMethods.ROUND_UP), 1)
 
-            r = round_fraction(f, RoundingMethods.ROUND_HALF_UP)
-            if i < 5:
-                self.assertEqual(r, 0)
-            else:
-                self.assertEqual(r, 1)
+        r = round_fraction(f, RoundingMethods.ROUND_HALF_UP)
+        if i < 5:
+            self.assertEqual(r, 0)
+        else:
+            self.assertEqual(r, 1)
 
-            r = round_fraction(f, RoundingMethods.ROUND_HALF_DOWN)
-            if i > 5:
-                self.assertEqual(r, 1)
-            else:
-                self.assertEqual(r, 0)
+        r = round_fraction(f, RoundingMethods.ROUND_HALF_DOWN)
+        if i > 5:
+            self.assertEqual(r, 1)
+        else:
+            self.assertEqual(r, 0)
