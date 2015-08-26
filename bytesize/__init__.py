@@ -44,20 +44,29 @@
           * ZiB
           * YiB
 
+       - UNITS: :func:`._constants.UNITS`
+
     * Rounding constants, with meaning as for the Python decimal module:
        - ROUND_DOWN
        - ROUND_HALF_DOWN
        - ROUND_HALF_UP
        - ROUND_UP
 
+       - ROUNDING_METHODS
+
     * Configuration classes:
-       - :class:`._config.StrConfig`
+       - StrConfig: :class:`._config.StrConfig`
 
     * Exception classes:
-       - :class:`._errors.SizeError`
+       - SizeError: :class:`._errors.SizeError`
 
     * Size classes:
-       - :class:`._size.Size`
+       - Size: :class:`._size.Size`
+
+    * Formatting functions
+       - convert_magnitude: :func:`._util.convert_magnitude`
+       - format_magnitude: :func:`._util.format_magnitude`
+       - round_fraction: :func:`._util.round_fraction`
 
     All parts of the public interface of bytesize must be imported directly
     from the top-level bytesize module, as::
@@ -120,3 +129,4 @@ from ._size import Size
 # FORMATTING
 from ._util import convert_magnitude
 from ._util import format_magnitude
+from ._util import round_fraction
