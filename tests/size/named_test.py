@@ -18,123 +18,124 @@
 
 """ Tests for named methods of Size objects. """
 
+from hypothesis import given
+from hypothesis import strategies
 import unittest
 
 from fractions import Fraction
 
 from bytesize import Size
 from bytesize import B
-from bytesize import KiB
-from bytesize import MiB
-from bytesize import GiB
-from bytesize import TiB
 from bytesize import ROUND_DOWN
 from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP
+from bytesize import ROUNDING_METHODS
 
 from bytesize._constants import BinaryUnits
+from bytesize._constants import DecimalUnits
+from bytesize._constants import UNITS
 
 from bytesize._errors import SizeValueError
 
 class ConversionTestCase(unittest.TestCase):
     """ Test conversion methods. """
 
-    def testConvertToPrecision(self):
-        """ Test convertTo method. """
-        s = Size(1835008)
-        self.assertEqual(s.convertTo(None), Fraction(1835008))
-        self.assertEqual(s.convertTo(B), Fraction(1835008))
-        self.assertEqual(s.convertTo(KiB), Fraction(1792))
-        self.assertEqual(s.convertTo(MiB), Fraction(7, 4))
-
-    def testConvertToWithSize(self):
-        """ Test convertTo method when conversion target is a Size. """
-        s = Size(1835008)
-        self.assertEqual(s.convertTo(Size(1)), s.convertTo(B))
-        self.assertEqual(s.convertTo(Size(1024)), s.convertTo(KiB))
-        self.assertEqual(Size(512).convertTo(Size(1024)), Fraction(1, 2))
-        self.assertEqual(Size(1024).convertTo(Size(512)), Fraction(2, 1))
-
+    def testException(self):
+        """ Test exceptions. """
         with self.assertRaises(SizeValueError):
-            s.convertTo(Size(0))
+            Size(0).convertTo(-2)
+        with self.assertRaises(SizeValueError):
+            Size(0).convertTo(0)
 
-    def testConvertToLargeSize(self):
-        """ Test that conversion maintains precision for large sizes. """
-        s = Size(0xfffffffffffff)
-        value = int(s)
-        for u in BinaryUnits.UNITS():
-            self.assertEqual(s.convertTo(u) * u.factor, value)
+    @given(
+       strategies.builds(Size, strategies.integers()),
+       strategies.one_of(
+           strategies.none(),
+           strategies.sampled_from(UNITS()),
+           strategies.builds(Size, strategies.integers(min_value=1))
+       )
+    )
+    def testPrecision(self, s, u):
+        """ Test precision of conversion. """
+        factor = (u and int(u)) or int(B)
+        self.assertEqual(s.convertTo(u) * factor, int(s))
+
+class ComponentsTestCase(unittest.TestCase):
+    """ Test components method. """
+
+    def testException(self):
+        """ Test exceptions. """
+        with self.assertRaises(SizeValueError):
+            Size(0).components(min_value=-1)
+        with self.assertRaises(SizeValueError):
+            Size(0).components(min_value=3.2)
+
+    @given(
+       strategies.builds(Size, strategies.integers()),
+       strategies.integers(min_value=1),
+       strategies.booleans()
+    )
+    def testResults(self, s, min_value, binary_units):
+        """ Test component results. """
+        (m, u) = s.components(min_value, binary_units)
+        self.assertEqual(m * int(u), int(s))
+        if u == B:
+            return
+        if binary_units:
+            self.assertIn(u, BinaryUnits.UNITS())
+        else:
+            self.assertIn(u, DecimalUnits.UNITS())
+        self.assertTrue(abs(m) >= min_value)
 
 class RoundingTestCase(unittest.TestCase):
     """ Test rounding methods. """
 
-    def testRoundTo(self):
-        """ Test roundTo method. """
+    @given(
+       strategies.builds(Size, strategies.integers()),
+       strategies.one_of(
+          strategies.builds(Size, strategies.integers(min_value=0)),
+          strategies.sampled_from(UNITS())
+       ),
+       strategies.sampled_from(ROUNDING_METHODS())
+    )
+    def testResults(self, s, unit, rounding):
+        """ Test roundTo results. """
+        rounded = s.roundTo(unit, rounding)
 
-        s = Size("10.3", GiB)
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP), Size(10, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP),
-                         Size(10, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_DOWN),
-                         Size(10, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_UP),
-                         Size(11, GiB))
-        # >>> Size("10.3 GiB").convertTo(MiB)
-        # Decimal('10547.19999980926513671875')
-        self.assertEqual(
-           s.roundTo(MiB, rounding=ROUND_HALF_UP),
-           Size(10547, MiB)
-        )
-        self.assertEqual(s.roundTo(MiB, rounding=ROUND_UP),
-                         Size(10548, MiB))
-        self.assertIsInstance(s.roundTo(MiB, rounding=ROUND_HALF_UP), Size)
-        with self.assertRaises(SizeValueError):
-            s.roundTo(MiB, rounding='abc')
+        if int(unit) == 0:
+            self.assertEqual(rounded, Size(0))
+            return
 
-        # arbitrary decimal rounding constants are not allowed
-        from decimal import ROUND_HALF_DOWN
-        with self.assertRaises(SizeValueError):
-            s.roundTo(MiB, rounding=ROUND_HALF_DOWN)
+        converted = s.convertTo(unit)
+        if converted.denominator == 1:
+            self.assertEqual(rounded, s)
+            return
 
-        s = Size("10.51", GiB)
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP), Size(11, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP),
-                         Size(11, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_DOWN),
-                         Size(10, GiB))
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_UP),
-                         Size(11, GiB))
+        factor = int(unit)
+        (q, r) = divmod(converted.numerator, converted.denominator)
+        ceiling = Size((q + 1) * factor)
+        floor = Size(q * factor)
+        if rounding is ROUND_UP:
+            self.assertEqual(rounded, ceiling)
+            return
 
-        s = Size(513, GiB)
-        self.assertEqual(s.roundTo(GiB, rounding=ROUND_HALF_UP), s)
-        self.assertEqual(s.roundTo(TiB, rounding=ROUND_HALF_UP), Size(1, TiB))
-        self.assertEqual(s.roundTo(TiB, rounding=ROUND_DOWN),
-                         Size(0))
+        if rounding is ROUND_DOWN:
+            self.assertEqual(rounded, floor)
+            return
 
-    def testSizeParams(self):
-        """ Test rounding with Size parameters. """
-        s = Size(513, GiB)
-        self.assertEqual(
-           s.roundTo(Size(128, GiB), rounding=ROUND_HALF_UP),
-           Size(512, GiB)
-        )
-        self.assertEqual(
-           s.roundTo(Size(1, KiB), rounding=ROUND_HALF_UP),
-           Size(513, GiB)
-        )
-        self.assertEqual(
-           s.roundTo(Size(1, TiB), rounding=ROUND_HALF_UP),
-           Size(1, TiB)
-        )
-        self.assertEqual(s.roundTo(Size(1, TiB), rounding=ROUND_DOWN), Size(0))
-        self.assertEqual(s.roundTo(Size(0), rounding=ROUND_HALF_UP), Size(0))
-        self.assertEqual(
-           s.roundTo(Size(13, GiB), rounding=ROUND_HALF_UP),
-           Size(507, GiB)
-        )
+        remainder = abs(Fraction(r, converted.denominator))
+        half = Fraction(1, 2)
+        if remainder > half:
+            self.assertEqual(rounded, ceiling)
+        elif remainder < half:
+            self.assertEqual(rounded, floor)
+        else:
+            if rounding is ROUND_HALF_UP:
+                self.assertEqual(rounded, ceiling)
+            else:
+                self.assertEqual(rounded, floor)
 
     def testExceptions(self):
         """ Test raising exceptions when rounding. """
-        s = Size(513, GiB)
         with self.assertRaises(SizeValueError):
-            s.roundTo(Size(-1, B), rounding=ROUND_HALF_UP)
+            Size(0).roundTo(Size(-1, B), rounding=ROUND_HALF_UP)
