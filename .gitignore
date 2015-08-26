@@ -7,3 +7,4 @@ doc/tests
 htmlcov
 _pyreverse
 .coverage
+.hypothesis
