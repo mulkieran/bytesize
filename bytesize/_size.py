@@ -72,6 +72,7 @@ class Size(object):
             :type value: Size, or any finite numeric type (possibly as str)
             :param units: the units of the size, default is None
             :type units: any of the publicly defined units constants
+            :raises SizeValueError: on bad parameters
 
             Must pass None as units argument if value has type Size.
 
@@ -81,15 +82,10 @@ class Size(object):
         """
         if isinstance(value, six.string_types) or \
            isinstance(value, self._NUMERIC_TYPES):
-            factor = (units or B).factor
-
-            if isinstance(value, six.integer_types):
-                magnitude = value * factor
-            else:
-                try:
-                    magnitude = int(Fraction(value) * factor)
-                except (ValueError, TypeError):
-                    raise SizeValueError(value, "value")
+            try:
+                magnitude = int(Fraction(value) * int(units or B))
+            except (ValueError, TypeError):
+                raise SizeValueError(value, "value")
 
         elif isinstance(value, Size):
             if units is not None:
