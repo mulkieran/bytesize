@@ -70,3 +70,18 @@ class ConversionTestCase(unittest.TestCase):
         match = re.match(regex, str(Size(s, u)))
         self.assertIsNotNone(match)
         self.assertIn(match.group('units'), [u.abbr for u in UNITS()])
+
+    @given(
+       strategies.builds(
+          Size,
+          strategies.integers(),
+          strategies.sampled_from(UNITS())
+       ),
+       settings=Settings(max_examples=5)
+    )
+    def testRepr(self, s):
+        """ Test that repr looks right. """
+        regex = re.compile(r"Size\(\'(?P<val>-?[0-9]+)\'\)")
+        match = re.match(regex, "%r" % s)
+        self.assertIsNotNone(match)
+        self.assertEqual(int(match.group('val')), int(s))
