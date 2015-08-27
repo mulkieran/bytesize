@@ -40,7 +40,6 @@ from ._errors import SizeValueError
 from ._constants import B
 from ._constants import BinaryUnits
 from ._constants import DecimalUnits
-from ._constants import RoundingMethods
 
 from ._util import format_magnitude
 from ._util import round_fraction
@@ -75,6 +74,10 @@ class Size(object):
             :type units: any of the publicly defined units constants
 
             Must pass None as units argument if value has type Size.
+
+            Only constructs whole byte Sizes; fractional Size quantities
+            are rounded. Rounding is always toward 0. So,
+            Size('-0.5', B) == Size(0), not Size(-1).
         """
         if isinstance(value, six.string_types) or \
            isinstance(value, self._NUMERIC_TYPES):
@@ -84,13 +87,9 @@ class Size(object):
                 magnitude = value * factor
             else:
                 try:
-                    magnitude = Fraction(value)
+                    magnitude = int(Fraction(value) * factor)
                 except ValueError:
                     raise SizeValueError(value, "value")
-                magnitude = round_fraction(
-                   magnitude * factor,
-                   rounding=RoundingMethods.ROUND_DOWN
-                )
 
         elif isinstance(value, Size):
             if units is not None:
