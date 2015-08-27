@@ -69,7 +69,7 @@ class Size(object):
         """ Initialize a new Size object.
 
             :param value: a size value, default is 0
-            :type value: Size, or any numeric type (possibly as str)
+            :type value: Size, or any finite numeric type (possibly as str)
             :param units: the units of the size, default is None
             :type units: any of the publicly defined units constants
 
@@ -88,7 +88,7 @@ class Size(object):
             else:
                 try:
                     magnitude = int(Fraction(value) * factor)
-                except ValueError:
+                except (ValueError, TypeError):
                     raise SizeValueError(value, "value")
 
         elif isinstance(value, Size):
