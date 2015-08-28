@@ -37,6 +37,8 @@ from bytesize._errors import SizeNonsensicalBinOpError
 from bytesize._errors import SizeNonsensicalOpError
 from bytesize._errors import SizePowerResultError
 
+from .utils import SIZE_STRATEGY
+
 class UtilityMethodsTestCase(unittest.TestCase):
     """ Test operator methods and other methods with an '_'. """
 
@@ -223,6 +225,22 @@ class DivisionTestCase(unittest.TestCase):
             s / "str" # pylint: disable=pointless-statement
         with self.assertRaises(SizeNonsensicalBinOpError):
             "str" / s # pylint: disable=pointless-statement
+
+class AdditionTestCase(unittest.TestCase):
+    """ Test addition. """
+
+    def testExceptions(self):
+        """ Any non-size other raises an exception. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            2 + Size(0)
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(0) + 2
+
+    @given(SIZE_STRATEGY, SIZE_STRATEGY)
+    def testAddition(self, s1, s2):
+        """ Test addition. """
+        self.assertEqual(s1 + s2, Size(int(s1) + int(s2)))
 
 class UnaryOperatorsTestCase(unittest.TestCase):
     """ Test unary operators. """
