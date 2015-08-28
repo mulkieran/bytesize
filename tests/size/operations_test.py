@@ -240,6 +240,22 @@ class AdditionTestCase(unittest.TestCase):
         """ Test addition. """
         self.assertEqual(s1 + s2, Size(int(s1) + int(s2)))
 
+class SubtractionTestCase(unittest.TestCase):
+    """ Test subtraction. """
+
+    def testExceptions(self):
+        """ Any non-size other raises an exception. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            2 - Size(0)
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(0) - 2
+
+    @given(SIZE_STRATEGY, SIZE_STRATEGY)
+    def testAddition(self, s1, s2):
+        """ Test addition. """
+        self.assertEqual(s1 - s2, Size(int(s1) - int(s2)))
+
 class UnaryOperatorsTestCase(unittest.TestCase):
     """ Test unary operators. """
 
