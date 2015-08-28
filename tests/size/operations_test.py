@@ -23,6 +23,7 @@ from hypothesis import Settings
 import unittest
 
 import copy
+from decimal import Decimal
 from fractions import Fraction
 
 from bytesize import Size
@@ -35,6 +36,7 @@ from bytesize._errors import SizeNonsensicalBinOpError
 from bytesize._errors import SizeNonsensicalOpError
 from bytesize._errors import SizePowerResultError
 
+from tests.utils import NUMBERS_STRATEGY
 from tests.utils import SIZE_STRATEGY
 
 class UtilityMethodsTestCase(unittest.TestCase):
@@ -239,6 +241,22 @@ class AdditionTestCase(unittest.TestCase):
     def testAddition(self, s1, s2):
         """ Test addition. """
         self.assertEqual(s1 + s2, Size(int(s1) + int(s2)))
+
+class MultiplicationTestCase(unittest.TestCase):
+    """ Test multiplication. """
+
+    def testExceptions(self):
+        """ Size others are unrepresentable. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizePowerResultError):
+            Size(0) * Size(0)
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(0) * Decimal("NaN")
+
+    @given(SIZE_STRATEGY, NUMBERS_STRATEGY)
+    def testMultiplication(self, s, n):
+        """ Test multiplication. """
+        self.assertEqual(s * n, Size(int(s) * Fraction(n)))
 
 class SubtractionTestCase(unittest.TestCase):
     """ Test subtraction. """

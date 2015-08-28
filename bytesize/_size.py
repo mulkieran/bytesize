@@ -233,7 +233,10 @@ class Size(object):
         # self * other = mul
         # Therefore, T(mul) = Size and T(other) is a numeric type.
         if isinstance(other, self._NUMERIC_TYPES):
-            return Size(self._magnitude * other)
+            try:
+                return Size(self._magnitude * Fraction(other))
+            except TypeError:
+                raise SizeNonsensicalBinOpError("*", other)
         if isinstance(other, Size):
             raise SizePowerResultError()
         raise SizeNonsensicalBinOpError("*", other)
