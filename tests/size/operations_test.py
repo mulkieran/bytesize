@@ -35,7 +35,7 @@ from bytesize._errors import SizeNonsensicalBinOpError
 from bytesize._errors import SizeNonsensicalOpError
 from bytesize._errors import SizePowerResultError
 
-from .utils import SIZE_STRATEGY
+from tests.utils import SIZE_STRATEGY
 
 class UtilityMethodsTestCase(unittest.TestCase):
     """ Test operator methods and other methods with an '_'. """
