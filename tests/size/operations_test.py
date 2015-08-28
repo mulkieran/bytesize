@@ -19,7 +19,6 @@
 """ Tests for operations on Size objects. """
 
 from hypothesis import given
-from hypothesis import strategies
 from hypothesis import Settings
 import unittest
 
@@ -31,7 +30,6 @@ from bytesize import B
 from bytesize import MiB
 from bytesize import GiB
 from bytesize import TiB
-from bytesize import UNITS
 
 from bytesize._errors import SizeNonsensicalBinOpError
 from bytesize._errors import SizeNonsensicalOpError
@@ -246,15 +244,9 @@ class UnaryOperatorsTestCase(unittest.TestCase):
     """ Test unary operators. """
     # pylint: disable=too-few-public-methods
 
-    @given(
-       strategies.integers(),
-       strategies.sampled_from(UNITS()),
-       settings=Settings(max_examples=5)
-    )
-    def testHash(self, s, u):
+    @given(SIZE_STRATEGY, SIZE_STRATEGY, settings=Settings(max_examples=5))
+    def testHash(self, s1, s2):
         """ Test that hash has the necessary property for hash table lookup. """
-        size = Size(s, u)
-        size3 = Size(s, u)
-        size2 = Size(s + 1, u)
-        self.assertTrue(size != size2)
-        self.assertTrue(size == size3 and hash(size) == hash(size3))
+        s3 = copy.deepcopy(s1)
+        self.assertTrue(hash(s1) == hash(s3))
+        self.assertTrue(s1 != s2 or hash(s1) == hash(s2))
