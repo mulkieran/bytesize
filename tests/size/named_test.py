@@ -37,6 +37,8 @@ from bytesize._constants import UNITS
 
 from bytesize._errors import SizeValueError
 
+from tests.utils import SIZE_STRATEGY
+
 class ConversionTestCase(unittest.TestCase):
     """ Test conversion methods. """
 
@@ -91,9 +93,9 @@ class RoundingTestCase(unittest.TestCase):
     """ Test rounding methods. """
 
     @given(
-       strategies.builds(Size, strategies.integers()),
+       SIZE_STRATEGY,
        strategies.one_of(
-          strategies.builds(Size, strategies.integers(min_value=0)),
+          SIZE_STRATEGY.filter(lambda x: int(x) >= 0),
           strategies.sampled_from(UNITS())
        ),
        strategies.sampled_from(ROUNDING_METHODS())
