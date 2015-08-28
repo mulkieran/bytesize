@@ -242,7 +242,6 @@ class AdditionTestCase(unittest.TestCase):
 
 class UnaryOperatorsTestCase(unittest.TestCase):
     """ Test unary operators. """
-    # pylint: disable=too-few-public-methods
 
     @given(SIZE_STRATEGY, SIZE_STRATEGY, settings=Settings(max_examples=5))
     def testHash(self, s1, s2):
@@ -250,3 +249,18 @@ class UnaryOperatorsTestCase(unittest.TestCase):
         s3 = copy.deepcopy(s1)
         self.assertTrue(hash(s1) == hash(s3))
         self.assertTrue(s1 != s2 or hash(s1) == hash(s2))
+
+    @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
+    def testAbs(self, s):
+        """ Test absolute value. """
+        self.assertEqual(abs(s), Size(abs(int(s))))
+
+    @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
+    def testNeg(self, s):
+        """ Test negation. """
+        self.assertEqual(-s, Size(-int(s)))
+
+    @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
+    def testPos(self, s):
+        """ Test positive. """
+        self.assertEqual(+s, s)
