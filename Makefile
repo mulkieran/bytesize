@@ -44,6 +44,9 @@ clean:
 test:
 	PYTHONPATH=.:tests/ $(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
+pytest:
+	py.test -p no:doctest --durations=10
+
 OMIT_PATHS = 
 OMIT = $(subst $(space),$(comma),$(strip $(OMIT_PATHS)))
 coverage:
