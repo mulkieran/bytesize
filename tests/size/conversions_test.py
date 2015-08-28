@@ -23,6 +23,7 @@ from hypothesis import strategies
 from hypothesis import Settings
 import unittest
 
+import copy
 import re
 
 from bytesize import Size
@@ -85,3 +86,11 @@ class ConversionTestCase(unittest.TestCase):
         match = re.match(regex, "%r" % s)
         self.assertIsNotNone(match)
         self.assertEqual(int(match.group('val')), int(s))
+
+    def testDeepCopy(self):
+        """ Test that deepcopy is different but equal. """
+        s1 = Size(0)
+        s2 = copy.deepcopy(s1)
+        self.assertEqual(s1, s2)
+        s1._magnitude += 1
+        self.assertNotEqual(s1, s2)

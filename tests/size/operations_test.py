@@ -162,10 +162,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(repr(Size(1024)), "Size('1024')")
         self.assertEqual(repr(Size("1024.1")), "Size('1024')")
 
-        s = Size(1024)
-        z = copy.deepcopy(s)
-        self.assertIsNot(s._magnitude, z._magnitude) # pylint: disable=protected-access
-
     def testRMethods(self):
         """ Test certain r* methods. These methods must be invoked
             explicitly, rather than by means of an operator, in order
