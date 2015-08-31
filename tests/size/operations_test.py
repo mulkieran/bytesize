@@ -162,7 +162,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
 
         self.assertEqual(repr(Size(0)), "Size('0')")
         self.assertEqual(repr(Size(1024)), "Size('1024')")
-        self.assertEqual(repr(Size("1024.1")), "Size('1024')")
+        self.assertEqual(repr(Size("1024.1")), "Size(i'1024')")
 
     def testRMethods(self):
         """ Test certain r* methods. These methods must be invoked
@@ -287,12 +287,15 @@ class UnaryOperatorsTestCase(unittest.TestCase):
     @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
     def testAbs(self, s):
         """ Test absolute value. """
-        self.assertEqual(abs(s), Size(abs(int(s))))
+        if s.inexact:
+            self.assertNotEqual(abs(s), Size(abs(int(s))))
+        else:
+            self.assertEqual(abs(s), Size(abs(int(s))))
 
     @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
     def testNeg(self, s):
         """ Test negation. """
-        self.assertEqual(-s, Size(-int(s)))
+        self.assertEqual(-s, Size(-int(s), inexact=s.inexact))
 
     @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
     def testPos(self, s):

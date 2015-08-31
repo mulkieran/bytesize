@@ -65,13 +65,15 @@ class Size(object):
             binary_units=config.binary_units
         )
 
-    def __init__(self, value=0, units=None):
+    def __init__(self, value=0, units=None, inexact=None):
         """ Initialize a new Size object.
 
             :param value: a size value, default is 0
             :type value: Size, or any finite numeric type (possibly as str)
             :param units: the units of the size, default is None
             :type units: any of the publicly defined units constants
+            :param inexact: True if the value is inexact, default is None
+            :type inexact: bool or NoneType
             :raises SizeValueError: on bad parameters
 
             Must pass None as units argument if value has type Size.
@@ -82,8 +84,11 @@ class Size(object):
         """
         if isinstance(value, six.string_types) or \
            isinstance(value, self._NUMERIC_TYPES):
+            self._inexact = inexact
             try:
-                magnitude = int(Fraction(value) * int(units or B))
+                magnitude = Fraction(value) * int(units or B)
+                if magnitude.denominator != 1:
+                    self._inexact = True
             except (ValueError, TypeError):
                 raise SizeValueError(value, "value")
 
@@ -94,11 +99,23 @@ class Size(object):
                    "units",
                    "meaningless when Size value is passed"
                 )
+            if inexact is not None:
+                raise SizeValueError(
+                   inexact,
+                   "inexact",
+                   "meaningless when Size value is passed"
+                )
             magnitude = value
+            self._inexact = value.inexact
         else:
             raise SizeValueError(value, "value")
 
         self._magnitude = int(magnitude)
+
+    @property
+    def inexact(self):
+        """ True if this value is inexact, else False. """
+        return self._inexact
 
     def __str__(self):
         (magnitude, units) = self.components(
@@ -113,11 +130,12 @@ class Size(object):
         return res + " " + units.abbr + _BYTES_SYMBOL
 
     def __repr__(self):
-        return "Size('%s')" % self._magnitude
+        fmt = "Size(i'%s')" if self.inexact else "Size('%s')"
+        return fmt % self._magnitude
 
     def __deepcopy__(self, memo):
         # pylint: disable=unused-argument
-        return Size(self._magnitude)
+        return Size(self)
 
     def __nonzero__(self):
         return self._magnitude != 0
@@ -130,18 +148,18 @@ class Size(object):
         return hash(self._magnitude)
 
     def __bool__(self):
-        return self.__nonzero__()
+        return self.__nonzero__() or self.inexact
 
     # UNARY OPERATIONS
 
     def __abs__(self):
-        return Size(abs(self._magnitude))
+        return Size(abs(self._magnitude), inexact=self.inexact)
 
     def __neg__(self):
-        return Size(-(self._magnitude))
+        return Size(-(self._magnitude), inexact=self.inexact)
 
     def __pos__(self):
-        return Size(self._magnitude)
+        return Size(self._magnitude, inexact=self.inexact)
 
     # BINARY OPERATIONS
     def __add__(self, other):
@@ -174,7 +192,8 @@ class Size(object):
         return (div, Size(rem))
 
     def __eq__(self, other):
-        return isinstance(other, Size) and self._magnitude == int(other)
+        return isinstance(other, Size) and self._magnitude == int(other) \
+           and not self.inexact and not other.inexact
 
     def __floordiv__(self, other):
         # other * floor + rem = self
@@ -253,7 +272,8 @@ class Size(object):
         raise SizeNonsensicalBinOpError("rpow", other)
 
     def __ne__(self, other):
-        return not isinstance(other, Size) or self._magnitude != int(other)
+        return not isinstance(other, Size) or \
+           self._magnitude != int(other) or self.inexact or other.inexact
 
     def __sub__(self, other):
         # self - other = sub
@@ -372,4 +392,4 @@ class Size(object):
 
         magnitude = self._magnitude / Fraction(factor)
         rounded = round_fraction(magnitude, rounding)
-        return Size(rounded * factor)
+        return Size(rounded * factor, inexact=self.inexact)

@@ -52,7 +52,7 @@ class ConstructionTestCase(unittest.TestCase):
 
     def testPartialBytes(self):
         """ Test rounding of partial bytes in constructor. """
-        self.assertEqual(Size("1024.6"), Size(1024))
+        self.assertEqual(Size("1024.6"), Size(1024, inexact=True))
         self.assertEqual(Size(1/Decimal(1025), KiB), Size(0))
         self.assertEqual(Size(1/Decimal(1023), KiB), Size(1))
 
