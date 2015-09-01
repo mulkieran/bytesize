@@ -59,10 +59,11 @@ class Size(object):
             :param :class:`._config.StrConfig` config: a configuration object
         """
         cls._STR_CONFIG = StrConfig(
+            binary_units=config.binary_units,
             max_places=config.max_places,
-            strip=config.strip,
             min_value=config.min_value,
-            binary_units=config.binary_units
+            show_approx_str=config.show_approx_str,
+            strip=config.strip
         )
 
     def __init__(self, value=0, units=None):
@@ -110,7 +111,12 @@ class Size(object):
            max_places=self._STR_CONFIG.max_places,
            strip=self._STR_CONFIG.strip
         )
-        return res + " " + units.abbr + _BYTES_SYMBOL
+
+        if Fraction(res) != magnitude and self._STR_CONFIG.show_approx_str:
+            modifier = "@"
+        else:
+            modifier = ""
+        return modifier + res + " " + units.abbr + _BYTES_SYMBOL
 
     def __repr__(self):
         return "Size('%s')" % self._magnitude

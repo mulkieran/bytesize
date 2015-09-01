@@ -83,19 +83,19 @@ class DisplayTestCase(unittest.TestCase):
     def testStr(self):
         """ Test construction of display components. """
         s = Size(58929971)
-        self.assertEqual(str(s), "56.20 MiB")
+        self.assertEqual(str(s), "@56.20 MiB")
 
         s = Size(478360371)
-        self.assertEqual(str(s), "456.20 MiB")
+        self.assertEqual(str(s), "@456.20 MiB")
 
         s = Size("12.68", TiB)
-        self.assertEqual(str(s), "12.68 TiB")
+        self.assertEqual(str(s), "@12.68 TiB")
 
         s = Size("26.55", MiB)
-        self.assertEqual(str(s), "26.55 MiB")
+        self.assertEqual(str(s), "@26.55 MiB")
 
         s = Size('12.687', TiB)
-        self.assertEqual(str(s), "12.69 TiB")
+        self.assertEqual(str(s), "@12.69 TiB")
 
     def testHumanReadableFractionalQuantities(self):
         """ Test behavior when the displayed value is a fraction of units. """
@@ -177,7 +177,7 @@ class ConfigurationTestCase(unittest.TestCase):
         self.assertEqual(str(s), "300 MiB")
 
         s = Size('12.6998', TiB)
-        self.assertEqual(str(s), "12.7 TiB")
+        self.assertEqual(str(s), "@12.7 TiB")
 
         # byte values close to multiples of 2 are shown without trailing zeros
         s = Size(0xff)
@@ -186,27 +186,27 @@ class ConfigurationTestCase(unittest.TestCase):
         # a fractional quantity is shown if the value deviates
         # from the whole number of units by more than 1%
         s = Size(16384 - (Decimal(1024)/100 + 1))
-        self.assertEqual(str(s), "15.99 KiB")
+        self.assertEqual(str(s), "@15.99 KiB")
 
         # test a very large quantity with no associated abbreviation or prefix
         s = Size(1024**9)
         self.assertEqual(str(s), "1024 YiB")
         s = Size(1024**9 - 1)
-        self.assertEqual(str(s), "1024 YiB")
+        self.assertEqual(str(s), "@1024 YiB")
         s = Size(1024**10)
         self.assertEqual(str(s), "1048576 YiB")
 
         s = Size(0xfffffffffffff)
-        self.assertEqual(str(s), "4 PiB")
+        self.assertEqual(str(s), "@4 PiB")
 
         s = Size(0xffff)
         # value is not exactly 64 KiB, but w/ 2 places, value is 64.00 KiB
         # so the trailing 0s are stripped.
-        self.assertEqual(str(s), "64 KiB")
+        self.assertEqual(str(s), "@64 KiB")
 
         Size.set_str_config(StrConfig(max_places=3, strip=True))
         s = Size('23.7874', TiB)
-        self.assertEqual(str(s), "23.787 TiB")
+        self.assertEqual(str(s), "@23.787 TiB")
 
         Size.set_str_config(StrConfig(min_value=10, strip=True))
         s = Size(8193)
@@ -215,7 +215,7 @@ class ConfigurationTestCase(unittest.TestCase):
         # if max_places is set to None, all digits are displayed
         Size.set_str_config(StrConfig(max_places=None, strip=True))
         s = Size(0xfffffffffffff)
-        self.assertEqual(str(s), "3.9999999999999991118215803 PiB")
+        self.assertEqual(str(s), "@3.9999999999999991118215803 PiB")
         s = Size(0x10000)
         self.assertEqual(str(s), ("64 KiB"))
         s = Size(0x10001)
@@ -223,10 +223,10 @@ class ConfigurationTestCase(unittest.TestCase):
 
         Size.set_str_config(StrConfig(strip=False))
         s = Size(1024**9 + 1)
-        self.assertEqual(str(s), "1024.00 YiB")
+        self.assertEqual(str(s), "@1024.00 YiB")
 
         s = Size(0xfffff)
-        self.assertEqual(str(s), "1024.00 KiB")
+        self.assertEqual(str(s), "@1024.00 KiB")
 
     def testStrWithSmallDeviations(self):
         """ Behavior when deviation from whole value is small. """
@@ -236,15 +236,15 @@ class ConfigurationTestCase(unittest.TestCase):
 
         # deviation is less than 1/2 of 1% of 1024
         s = Size(16384 - (eps - 1))
-        self.assertEqual(str(s), "16 KiB")
+        self.assertEqual(str(s), "@16 KiB")
 
         # deviation is greater than 1/2 of 1% of 1024
         s = Size(16384 - (eps + 1))
-        self.assertEqual(str(s), "15.99 KiB")
+        self.assertEqual(str(s), "@15.99 KiB")
         # deviation is greater than 1/2 of 1% of 1024
         s = Size(16384 + (eps + 1))
-        self.assertEqual(str(s), "16.01 KiB")
+        self.assertEqual(str(s), "@16.01 KiB")
 
         # deviation is less than 1/2 of 1% of 1024
         s = Size(16384 + (eps - 1))
-        self.assertEqual(str(s), "16 KiB")
+        self.assertEqual(str(s), "@16 KiB")

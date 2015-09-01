@@ -45,6 +45,7 @@ class StrConfig(object):
        "binary_units=%(binary_units)s",
        "max_places=%(max_places)s",
        "min_value=%(strip)s",
+       "show_approx_str=%(show_approx_str)s",
        "strip=%(strip)s"
     ])
 
@@ -53,7 +54,8 @@ class StrConfig(object):
        max_places=2,
        strip=False,
        min_value=1,
-       binary_units=True
+       binary_units=True,
+       show_approx_str=True
     ):
         """ Initializer.
 
@@ -63,17 +65,20 @@ class StrConfig(object):
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int or Decimal
             :param bool binary_units: binary units if True, else SI
+            :param bool show_approx_str: distinguish approximate str values
         """
         self._max_places = max_places
         self._strip = strip
         self._min_value = min_value
         self._binary_units = binary_units
+        self._show_approx_str = show_approx_str
 
     def __str__(self):
         values = {
            'binary_units' : self.binary_units,
            'max_places' : self.max_places,
            'min_value' : self.min_value,
+           'show_approx_str' : self.show_approx_str,
            'strip' : self.strip
         }
         return "StrConfig(%s)" % (self._FMT_STR % values)
@@ -84,10 +89,11 @@ class StrConfig(object):
     min_value = property(lambda s: s._min_value)
     strip = property(lambda s: s._strip)
     binary_units = property(lambda s: s._binary_units)
+    show_approx_str = property(lambda s: s._show_approx_str)
 
 class Defaults(object):
     """ Configuration defaults. """
     # pylint: disable=too-few-public-methods
 
-    STR_CONFIG = StrConfig(2, False, 1, True)
+    STR_CONFIG = StrConfig(2, False, 1, True, True)
     """ Default configuration for string display. """
