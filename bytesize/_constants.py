@@ -23,6 +23,11 @@
      * Size units, e.g., Ki, Mi
 """
 
+from decimal import Decimal
+from fractions import Fraction
+
+import six
+
 class _RoundingMethod(object):
     """ Class to generate rounding method enumeration. """
     # pylint: disable=too-few-public-methods
@@ -134,3 +139,5 @@ def UNITS():
     return ([B] + BinaryUnits.UNITS() + DecimalUnits.UNITS())[:]
 
 ROUNDING_METHODS = RoundingMethods.METHODS
+
+PRECISE_NUMERIC_TYPES = (six.integer_types, Decimal, Fraction)

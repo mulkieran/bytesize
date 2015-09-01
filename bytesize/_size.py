@@ -40,6 +40,7 @@ from ._errors import SizeValueError
 from ._constants import B
 from ._constants import BinaryUnits
 from ._constants import DecimalUnits
+from ._constants import PRECISE_NUMERIC_TYPES
 
 from ._util import format_magnitude
 from ._util import round_fraction
@@ -49,7 +50,6 @@ _BYTES_SYMBOL = "B"
 class Size(object):
     """ Class for instantiating Size objects. """
 
-    _NUMERIC_TYPES = (six.integer_types, Decimal, Fraction)
     _STR_CONFIG = Defaults.STR_CONFIG
 
     @classmethod
@@ -82,7 +82,7 @@ class Size(object):
             Size('-0.5', B) == Size(0), not Size(-1).
         """
         if isinstance(value, six.string_types) or \
-           isinstance(value, self._NUMERIC_TYPES):
+           isinstance(value, PRECISE_NUMERIC_TYPES):
             try:
                 magnitude = int(Fraction(value) * int(units or B))
             except (ValueError, TypeError):
@@ -164,7 +164,7 @@ class Size(object):
         if isinstance(other, Size):
             (div, rem) = divmod(self._magnitude, int(other))
             return (div, Size(rem))
-        if isinstance(other, self._NUMERIC_TYPES):
+        if isinstance(other, PRECISE_NUMERIC_TYPES):
             (div, rem) = divmod(self._magnitude, other)
             return (Size(div), Size(rem))
         raise SizeNonsensicalBinOpError("divmod", other)
@@ -188,7 +188,7 @@ class Size(object):
         #                     = int, if T(other) is Size
         if isinstance(other, Size):
             return self._magnitude.__floordiv__(int(other))
-        if isinstance(other, self._NUMERIC_TYPES):
+        if isinstance(other, PRECISE_NUMERIC_TYPES):
             return Size(Decimal(self._magnitude).__floordiv__(other))
         raise SizeNonsensicalBinOpError("floordiv", other)
 
@@ -224,7 +224,7 @@ class Size(object):
         # Therefore, T(mod) = Size
         if isinstance(other, Size):
             return Size(self._magnitude % int(other))
-        if isinstance(other, self._NUMERIC_TYPES):
+        if isinstance(other, PRECISE_NUMERIC_TYPES):
             return Size(self._magnitude % other)
         raise SizeNonsensicalBinOpError("%", other)
 
@@ -238,7 +238,7 @@ class Size(object):
     def __mul__(self, other):
         # self * other = mul
         # Therefore, T(mul) = Size and T(other) is a numeric type.
-        if isinstance(other, self._NUMERIC_TYPES):
+        if isinstance(other, PRECISE_NUMERIC_TYPES):
             try:
                 return Size(self._magnitude * Fraction(other))
             except TypeError:
@@ -250,7 +250,7 @@ class Size(object):
 
     def __pow__(self, other):
         # Cannot represent multiples of Sizes.
-        if not isinstance(other, self._NUMERIC_TYPES):
+        if not isinstance(other, PRECISE_NUMERIC_TYPES):
             raise SizeNonsensicalBinOpError("**", other)
         raise SizePowerResultError()
 
@@ -331,7 +331,8 @@ class Size(object):
             The meaning of the parameters is the same as for
             :class:`._config.StrConfig`.
         """
-        if min_value < 0 or not isinstance(min_value, self._NUMERIC_TYPES):
+        if min_value < 0 or \
+           not isinstance(min_value, PRECISE_NUMERIC_TYPES):
             raise SizeValueError(
                min_value,
                "min_value",
