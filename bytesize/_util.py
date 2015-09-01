@@ -26,7 +26,9 @@ from fractions import Fraction
 
 import six
 
+from ._constants import B
 from ._constants import RoundingMethods
+from ._constants import PRECISE_NUMERIC_TYPES
 from ._errors import SizeValueError
 
 def convert_magnitude(value, max_places=2, context=DefaultContext):
@@ -140,3 +142,23 @@ def round_fraction(value, rounding):
                 return base
 
     raise SizeValueError(rounding, "rounding")
+
+def get_bytes(value=0, units=None):
+    """ Get number of bytes corresponding to value and units.
+
+        :param value: a size value, default is 0
+        :type value: any finite numeric type (possibly as str)
+        :param units: the units of the size, default is None
+        :type units: any elements in UNITS() or NoneType
+        :raises SizeValueError: on bad parameters
+        :returns: number of bytes
+        :rtype: Fraction
+    """
+    if isinstance(value, six.string_types) or \
+       isinstance(value, PRECISE_NUMERIC_TYPES):
+        try:
+            return Fraction(value) * int(units or B)
+        except (ValueError, TypeError):
+            raise SizeValueError(value, "value")
+    else:
+        raise SizeValueError(value, "value")

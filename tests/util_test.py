@@ -26,10 +26,14 @@ from decimal import DefaultContext
 from fractions import Fraction
 
 from bytesize._constants import RoundingMethods
+from bytesize._constants import UNITS
 from bytesize._errors import SizeValueError
 from bytesize._util import convert_magnitude
 from bytesize._util import format_magnitude
+from bytesize._util import get_bytes
 from bytesize._util import round_fraction
+
+from tests.utils import NUMBERS_STRATEGY
 
 class FormatTestCase(unittest.TestCase):
     """ Test formatting. """
@@ -110,3 +114,18 @@ class RoundingTestCase(unittest.TestCase):
             self.assertEqual(r, 1)
         else:
             self.assertEqual(r, 0)
+
+class GetBytesTestCase(unittest.TestCase):
+    """ Test get_bytes method. """
+
+    def testExceptions(self):
+        """ Test exceptions. """
+        with self.assertRaises(SizeValueError):
+            get_bytes(Decimal('Nan'), None)
+        with self.assertRaises(SizeValueError):
+            get_bytes(1.2, None)
+
+    @given(NUMBERS_STRATEGY, strategies.sampled_from(UNITS()))
+    def testGetBytes(self, n, u):
+        """ Test correctness. """
+        self.assertEqual(get_bytes(n, u), Fraction(n) * int(u))
