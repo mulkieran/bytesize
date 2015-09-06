@@ -67,6 +67,7 @@ class StrConfig(object):
             :param bool binary_units: binary units if True, else SI
             :param bool show_approx_str: distinguish approximate str values
         """
+        # pylint: disable=too-many-arguments
         self._max_places = max_places
         self._strip = strip
         self._min_value = min_value
@@ -91,9 +92,23 @@ class StrConfig(object):
     binary_units = property(lambda s: s._binary_units)
     show_approx_str = property(lambda s: s._show_approx_str)
 
-class Defaults(object):
-    """ Configuration defaults. """
+class SizeConfig(object):
+    """ Configuration for :class:`Size` class. """
     # pylint: disable=too-few-public-methods
 
     STR_CONFIG = StrConfig(2, False, 1, True, True)
     """ Default configuration for string display. """
+
+    @classmethod
+    def set_str_config(cls, config):
+        """ Set the configuration for __str__ method for all Size objects.
+
+            :param :class:`._config.StrConfig` config: a configuration object
+        """
+        cls.STR_CONFIG = StrConfig(
+            binary_units=config.binary_units,
+            max_places=config.max_places,
+            min_value=config.min_value,
+            show_approx_str=config.show_approx_str,
+            strip=config.strip
+        )

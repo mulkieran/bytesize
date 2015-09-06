@@ -118,6 +118,7 @@ ROUND_UP = _RoundingMethods.ROUND_UP
 from ._constants import ROUNDING_METHODS
 
 # CONFIGURATION
+from ._config import SizeConfig
 from ._config import StrConfig
 
 # EXCEPTIONS

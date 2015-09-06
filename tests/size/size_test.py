@@ -32,7 +32,7 @@ from bytesize import TiB
 from bytesize import KB
 from bytesize import StrConfig
 
-from bytesize._config import Defaults
+from bytesize._config import SizeConfig
 
 from bytesize._errors import SizeValueError
 
@@ -152,22 +152,26 @@ class DisplayTestCase(unittest.TestCase):
 class ConfigurationTestCase(unittest.TestCase):
     """ Test setting configuration for display. """
 
+    def setUp(self):
+        """ Get current config. """
+        self.str_config = SizeConfig.STR_CONFIG
+
     def tearDown(self):
         """ Reset configuration to default. """
-        Size.set_str_config(Defaults.STR_CONFIG)
+        SizeConfig.set_str_config(self.str_config)
 
     def testSettingConfiguration(self):
         """ Test that setting configuration to different values has effect. """
         s = Size(64, GiB)
-        s.set_str_config(StrConfig(strip=False))
+        SizeConfig.set_str_config(StrConfig(strip=False))
         prev = str(s)
-        s.set_str_config(StrConfig(strip=True))
+        SizeConfig.set_str_config(StrConfig(strip=True))
         subs = str(s)
         self.assertTrue(subs != prev)
 
     def testStrConfigs(self):
         """ Test str with various configuration options. """
-        Size.set_str_config(StrConfig(strip=True))
+        SizeConfig.set_str_config(StrConfig(strip=True))
 
         # exactly 4 Pi
         s = Size(0x10000000000000)
@@ -204,16 +208,16 @@ class ConfigurationTestCase(unittest.TestCase):
         # so the trailing 0s are stripped.
         self.assertEqual(str(s), "@64 KiB")
 
-        Size.set_str_config(StrConfig(max_places=3, strip=True))
+        SizeConfig.set_str_config(StrConfig(max_places=3, strip=True))
         s = Size('23.7874', TiB)
         self.assertEqual(str(s), "@23.787 TiB")
 
-        Size.set_str_config(StrConfig(min_value=10, strip=True))
+        SizeConfig.set_str_config(StrConfig(min_value=10, strip=True))
         s = Size(8193)
         self.assertEqual(str(s), ("8193 B"))
 
         # if max_places is set to None, all digits are displayed
-        Size.set_str_config(StrConfig(max_places=None, strip=True))
+        SizeConfig.set_str_config(StrConfig(max_places=None, strip=True))
         s = Size(0xfffffffffffff)
         self.assertEqual(str(s), "@3.9999999999999991118215803 PiB")
         s = Size(0x10000)
@@ -221,7 +225,7 @@ class ConfigurationTestCase(unittest.TestCase):
         s = Size(0x10001)
         self.assertEqual(str(s), "64.0009765625 KiB")
 
-        Size.set_str_config(StrConfig(strip=False))
+        SizeConfig.set_str_config(StrConfig(strip=False))
         s = Size(1024**9 + 1)
         self.assertEqual(str(s), "@1024.00 YiB")
 
@@ -230,7 +234,7 @@ class ConfigurationTestCase(unittest.TestCase):
 
     def testStrWithSmallDeviations(self):
         """ Behavior when deviation from whole value is small. """
-        Size.set_str_config(StrConfig(strip=True))
+        SizeConfig.set_str_config(StrConfig(strip=True))
 
         eps = Decimal(1024)/100/2 # 1/2 of 1% of 1024
 

@@ -30,8 +30,7 @@ from fractions import Fraction
 
 import six
 
-from ._config import Defaults
-from ._config import StrConfig
+from ._config import SizeConfig
 
 from ._errors import SizeNonsensicalBinOpError
 from ._errors import SizePowerResultError
@@ -49,22 +48,6 @@ _BYTES_SYMBOL = "B"
 
 class Size(object):
     """ Class for instantiating Size objects. """
-
-    _STR_CONFIG = Defaults.STR_CONFIG
-
-    @classmethod
-    def set_str_config(cls, config):
-        """ Set the configuration for __str__ method for all Size objects.
-
-            :param :class:`._config.StrConfig` config: a configuration object
-        """
-        cls._STR_CONFIG = StrConfig(
-            binary_units=config.binary_units,
-            max_places=config.max_places,
-            min_value=config.min_value,
-            show_approx_str=config.show_approx_str,
-            strip=config.strip
-        )
 
     def __init__(self, value=0, units=None):
         """ Initialize a new Size object.
@@ -103,16 +86,17 @@ class Size(object):
 
     def __str__(self):
         (magnitude, units) = self.components(
-           min_value=self._STR_CONFIG.min_value,
-           binary_units=self._STR_CONFIG.binary_units
+           min_value=SizeConfig.STR_CONFIG.min_value,
+           binary_units=SizeConfig.STR_CONFIG.binary_units
         )
         res = format_magnitude(
            magnitude,
-           max_places=self._STR_CONFIG.max_places,
-           strip=self._STR_CONFIG.strip
+           max_places=SizeConfig.STR_CONFIG.max_places,
+           strip=SizeConfig.STR_CONFIG.strip
         )
 
-        if Fraction(res) != magnitude and self._STR_CONFIG.show_approx_str:
+        if Fraction(res) != magnitude and \
+           SizeConfig.STR_CONFIG.show_approx_str:
             modifier = "@"
         else:
             modifier = ""

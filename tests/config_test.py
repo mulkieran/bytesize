@@ -19,7 +19,7 @@
 """ Test for configuration classes. """
 import unittest
 
-from bytesize._config import Defaults
+from bytesize._config import SizeConfig
 
 class ConfigTestCase(unittest.TestCase):
     """ Exercise methods of configuration classes. """
@@ -27,4 +27,4 @@ class ConfigTestCase(unittest.TestCase):
 
     def testStrConfigObject(self):
         """ Miscellaneous tests for string configuration. """
-        self.assertIsNotNone(str(Defaults.STR_CONFIG))
+        self.assertIsNotNone(str(SizeConfig.STR_CONFIG))
