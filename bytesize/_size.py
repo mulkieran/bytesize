@@ -84,23 +84,31 @@ class Size(object):
 
         self._magnitude = int(magnitude)
 
-    def __str__(self):
+    def getString(self, config):
+        """ Return a string representation of the size.
+
+            :param :class:`SizeConfig` config: representation configuration
+            :returns: a string representation
+            :rtype: str
+        """
         (magnitude, units) = self.components(
-           min_value=SizeConfig.STR_CONFIG.min_value,
-           binary_units=SizeConfig.STR_CONFIG.binary_units
+           min_value=config.min_value,
+           binary_units=config.binary_units
         )
         res = format_magnitude(
            magnitude,
-           max_places=SizeConfig.STR_CONFIG.max_places,
-           strip=SizeConfig.STR_CONFIG.strip
+           max_places=config.max_places,
+           strip=config.strip
         )
 
-        if Fraction(res) != magnitude and \
-           SizeConfig.STR_CONFIG.show_approx_str:
+        if Fraction(res) != magnitude and config.show_approx_str:
             modifier = "@"
         else:
             modifier = ""
         return modifier + res + " " + units.abbr + _BYTES_SYMBOL
+
+    def __str__(self):
+        return self.getString(SizeConfig.STR_CONFIG)
 
     def __repr__(self):
         return "Size('%s')" % self._magnitude
