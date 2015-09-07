@@ -19,12 +19,68 @@
 """ Test for configuration classes. """
 import unittest
 
+from hypothesis import given
+from hypothesis import strategies
+from hypothesis import Settings
+
+from bytesize._config import InputConfig
 from bytesize._config import SizeConfig
+from bytesize._config import StrConfig
+
+from bytesize._constants import RoundingMethods
+from bytesize._constants import UNITS
 
 class ConfigTestCase(unittest.TestCase):
-    """ Exercise methods of configuration classes. """
+    """ Exercise methods of output configuration classes. """
     # pylint: disable=too-few-public-methods
 
     def testStrConfigObject(self):
         """ Miscellaneous tests for string configuration. """
         self.assertIsNotNone(str(SizeConfig.STR_CONFIG))
+
+class InputTestCase(unittest.TestCase):
+    """ Exercise methods of input configuration classes. """
+    # pylint: disable=too-few-public-methods
+
+    def testInputConfigObject(self):
+        """ Miscellaneous tests for input configuration. """
+        self.assertIsNotNone(str(SizeConfig.INPUT_CONFIG))
+
+class SizeTestCase(unittest.TestCase):
+    """ Test Size configuration. """
+    # pylint: disable=too-few-public-methods
+
+    def setUp(self):
+        self.str_config = SizeConfig.STR_CONFIG
+
+    @given(
+       strategies.builds(
+          StrConfig,
+          binary_units=strategies.booleans(),
+          max_places=strategies.integers().filter(lambda x: x >= 0),
+          min_value=strategies.fractions(),
+          show_approx_str=strategies.booleans(),
+          strip=strategies.booleans()
+       ),
+       settings=Settings(max_examples=30)
+    )
+    def testSettingStrConfig(self, config):
+        """ Test that new str config is the correct one. """
+        SizeConfig.set_str_config(config)
+        self.assertEqual(str(config), str(SizeConfig.STR_CONFIG))
+
+    @given(
+       strategies.builds(
+          InputConfig,
+          method=strategies.sampled_from(RoundingMethods.METHODS()),
+          unit=strategies.sampled_from(UNITS())
+       ),
+       settings=Settings(max_examples=10)
+    )
+    def testSettingInputConfig(self, config):
+        """ That that new input config is the correct one. """
+        SizeConfig.set_input_config(config)
+        self.assertEqual(str(config), str(SizeConfig.INPUT_CONFIG))
+
+    def tearDown(self):
+        SizeConfig.STR_CONFIG = self.str_config

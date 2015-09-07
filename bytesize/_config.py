@@ -18,6 +18,9 @@
 
 """ Configuration of the bytesize package. """
 
+from ._constants import B
+from ._constants import RoundingMethods
+
 class StrConfig(object):
     """ Configuration for __str__ method.
 
@@ -92,6 +95,37 @@ class StrConfig(object):
     binary_units = property(lambda s: s._binary_units)
     show_approx_str = property(lambda s: s._show_approx_str)
 
+class InputConfig(object):
+    """ Configuration for input of Sizes.
+
+        Specifies rounding unit and method for Sizes constructed from
+        user input.
+    """
+    # pylint: disable=too-few-public-methods
+
+    _FMT_STR = ", ".join(["method=%(method)s", "unit=%(unit)s"])
+
+    def __init__(self, unit=B, method=RoundingMethods.ROUND_DOWN):
+        """ Initializer.
+
+            :param unit: unit to round to, default is B
+            :type unit: an instance of :func:`._constants.UNITS`
+            :param method: rounding method, default is ROUND_DOWN
+            :type method: instance of :func:`._constants.ROUNDING_METHODS`
+        """
+        self._unit = unit
+        self._method = method
+
+    def __str__(self):
+        values = {'method' : self.method, 'unit' : self.unit}
+        return "InputConfig(%s)" % (self._FMT_STR % values)
+    __repr__ = __str__
+
+    # pylint: disable=protected-access
+    method = property(lambda s: s._method)
+    unit = property(lambda s: s._unit)
+
+
 class SizeConfig(object):
     """ Configuration for :class:`Size` class. """
     # pylint: disable=too-few-public-methods
@@ -99,11 +133,14 @@ class SizeConfig(object):
     STR_CONFIG = StrConfig(2, False, 1, True, True)
     """ Default configuration for string display. """
 
+    INPUT_CONFIG = InputConfig(B, RoundingMethods.ROUND_DOWN)
+    """ Default configuration for interpreting input values. """
+
     @classmethod
     def set_str_config(cls, config):
         """ Set the configuration for __str__ method for all Size objects.
 
-            :param :class:`._config.StrConfig` config: a configuration object
+            :param :class:`StrConfig` config: a configuration object
         """
         cls.STR_CONFIG = StrConfig(
             binary_units=config.binary_units,
@@ -111,4 +148,15 @@ class SizeConfig(object):
             min_value=config.min_value,
             show_approx_str=config.show_approx_str,
             strip=config.strip
+        )
+
+    @classmethod
+    def set_input_config(cls, config):
+        """ Set the configuration for input method for all Size objects.
+
+            :param :class:`.InputConfig` config: a configuration object
+        """
+        cls.INPUT_CONFIG = InputConfig(
+            method=config.method,
+            unit=config.unit
         )
