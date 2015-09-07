@@ -309,6 +309,18 @@ class Size(object):
 
         return self._magnitude / factor
 
+    def componentsList(self, binary_units=True):
+        """ Yield a representation of this size for every unit,
+            decomposed into a Fraction value and a unit specifier
+            tuple.
+
+            :param bool binary_units: binary units if True, else SI
+        """
+        units = BinaryUnits if binary_units else DecimalUnits
+
+        for unit in [B] + units.UNITS():
+            yield (self.convertTo(unit), unit)
+
     def components(self, min_value=1, binary_units=True):
         """ Return a representation of this size, decomposed into a
             Fraction value and a unit specifier tuple.
@@ -338,14 +350,12 @@ class Size(object):
         # If the number is so large that no prefix will satisfy this
         # requirement use the largest prefix.
         limit = units.FACTOR * Fraction(min_value)
-        for unit in [B] + units.UNITS():
-            newcheck = self.convertTo(unit)
-
-            if abs(newcheck) < limit:
+        for (value, unit) in self.componentsList(binary_units=binary_units):
+            if abs(value) < limit:
                 break
 
         # pylint: disable=undefined-loop-variable
-        return (newcheck, unit)
+        return (value, unit)
 
     def roundTo(self, unit, rounding):
         # pylint: disable=line-too-long
