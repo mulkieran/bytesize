@@ -28,10 +28,10 @@ from fractions import Fraction
 from bytesize._constants import RoundingMethods
 from bytesize._constants import UNITS
 from bytesize._errors import SizeValueError
-from bytesize._util import convert_magnitude
-from bytesize._util import format_magnitude
-from bytesize._util import get_bytes
-from bytesize._util import round_fraction
+from bytesize._util.misc import convert_magnitude
+from bytesize._util.misc import format_magnitude
+from bytesize._util.misc import get_bytes
+from bytesize._util.misc import round_fraction
 
 from tests.utils import NUMBERS_STRATEGY
 

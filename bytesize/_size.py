@@ -40,8 +40,8 @@ from ._constants import BinaryUnits
 from ._constants import DecimalUnits
 from ._constants import PRECISE_NUMERIC_TYPES
 
-from ._util import format_magnitude
-from ._util import round_fraction
+from ._util.misc import format_magnitude
+from ._util.misc import round_fraction
 
 _BYTES_SYMBOL = "B"
 

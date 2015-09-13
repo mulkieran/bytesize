@@ -16,7 +16,7 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
-""" Utilities for bytesize package. """
+""" Miscellaneous utilities. """
 
 from decimal import Decimal
 from decimal import DefaultContext
@@ -26,10 +26,10 @@ from fractions import Fraction
 
 import six
 
-from ._constants import B
-from ._constants import RoundingMethods
-from ._constants import PRECISE_NUMERIC_TYPES
-from ._errors import SizeValueError
+from .._constants import B
+from .._constants import RoundingMethods
+from .._constants import PRECISE_NUMERIC_TYPES
+from .._errors import SizeValueError
 
 def convert_magnitude(value, max_places=2, context=DefaultContext):
     """ Convert magnitude to a decimal string.

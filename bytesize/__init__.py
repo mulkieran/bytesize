@@ -63,11 +63,6 @@
     * Size classes:
        - Size: :class:`._size.Size`
 
-    * Formatting functions
-       - convert_magnitude: :func:`._util.convert_magnitude`
-       - format_magnitude: :func:`._util.format_magnitude`
-       - round_fraction: :func:`._util.round_fraction`
-
     All parts of the public interface of bytesize must be imported directly
     from the top-level bytesize module, as::
 
@@ -126,8 +121,3 @@ from ._errors import SizeError
 
 # SIZE
 from ._size import Size
-
-# FORMATTING
-from ._util import convert_magnitude
-from ._util import format_magnitude
-from ._util import round_fraction
