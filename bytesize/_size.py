@@ -25,7 +25,6 @@
     will cause an exception to be raised.
 """
 
-from decimal import Decimal
 from fractions import Fraction
 
 import six
@@ -181,7 +180,7 @@ class Size(object):
         if isinstance(other, Size):
             return self._magnitude.__floordiv__(int(other))
         if isinstance(other, PRECISE_NUMERIC_TYPES):
-            return Size(Decimal(self._magnitude).__floordiv__(other))
+            return Size(Fraction(self._magnitude).__floordiv__(other))
         raise SizeNonsensicalBinOpError("floordiv", other)
 
     def __rfloordiv__(self, other):
