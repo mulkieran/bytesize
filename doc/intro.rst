@@ -1,11 +1,10 @@
 Bytesize
 ========
 
-Bytesize is a module for handling parsing, display, and computation with
+Bytesize is a module for handling display, and computation with
 sizes expressed in bytes. Its principle feature is a Size class from
-which can be constructed Size objects which represent a precise, whole
-quantity of bytes. Size object can be displayed in a locale-specific manner.
-Various arithmetic operations are defined for Size objects.
+which can be constructed Size objects which represent a precise
+quantity of bytes. Various arithmetic operations are defined for Size objects.
 
 Practical Computing with Bytes
 ------------------------------
@@ -43,16 +42,15 @@ acceptable.
 
 Displaying Sizes
 ----------------
-Sizes are displayed using binary rather than SI prefixes or names, regardless
-of the value. For example, 1000 bytes is not displayed as 1KB
-(1 kilobyte), but as some number of bytes or KiB (kibibytes). The precise
-form in which a Size is displayed is configurable.
+Sizes are displayed according to a specified configuration. In the default
+configuration, Sizes are displayed using binary rather than SI prefixes
+or names, regardless of the value. For example, 1000 bytes is not displayed
+as 1KB (1 kilobyte), but as some number of bytes or KiB (kibibytes).
 
 Representing Units
 ------------------
 The size module supplies a set of named prefixes for both SI and binary units,
-for all non-fractional prefixes. Fractional prefixes are not defined, since
-fractional bytes are not of interest.
+for all non-fractional prefixes. Fractional prefixes are not defined.
 
 Constructing Sizes Programatically
 ----------------------------------
@@ -63,8 +61,7 @@ floats are disallowed.
 
 The constructor takes an optional units specifier, which defaults to bytes
 for all numeric values, and to None for Size objects. The type of the
-unit specifier is a named prefix supplied by the size module. Fractional
-quantities are rounded down to whole numbers of bytes.
+unit specifier is a named prefix supplied by the size module.
 
 Errors
 ------
