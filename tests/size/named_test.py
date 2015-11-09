@@ -95,7 +95,7 @@ class RoundingTestCase(unittest.TestCase):
     @given(
        SIZE_STRATEGY,
        strategies.one_of(
-          SIZE_STRATEGY.filter(lambda x: int(x) >= 0),
+          SIZE_STRATEGY.filter(lambda x: x.magnitude >= 0),
           strategies.sampled_from(UNITS())
        ),
        strategies.sampled_from(ROUNDING_METHODS())
@@ -104,7 +104,8 @@ class RoundingTestCase(unittest.TestCase):
         """ Test roundTo results. """
         rounded = s.roundTo(unit, rounding)
 
-        if int(unit) == 0:
+        if (isinstance(unit, Size) and unit.magnitude == 0) or \
+           (not isinstance(unit, Size) and int(unit) == 0):
             self.assertEqual(rounded, Size(0))
             return
 
@@ -113,7 +114,7 @@ class RoundingTestCase(unittest.TestCase):
             self.assertEqual(rounded, s)
             return
 
-        factor = int(unit)
+        factor = getattr(unit, 'magnitude', None) or int(unit)
         (q, r) = divmod(converted.numerator, converted.denominator)
         ceiling = Size((q + 1) * factor)
         floor = Size(q * factor)

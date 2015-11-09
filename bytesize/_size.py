@@ -58,15 +58,11 @@ class Size(object):
             :raises SizeValueError: on bad parameters
 
             Must pass None as units argument if value has type Size.
-
-            Only constructs whole byte Sizes; fractional Size quantities
-            are rounded. Rounding is always toward 0. So,
-            Size('-0.5', B) == Size(0), not Size(-1).
         """
         if isinstance(value, six.string_types) or \
            isinstance(value, PRECISE_NUMERIC_TYPES):
             try:
-                magnitude = int(Fraction(value) * int(units or B))
+                magnitude = Fraction(value) * int(units or B)
             except (ValueError, TypeError):
                 raise SizeValueError(value, "value")
 
@@ -77,11 +73,19 @@ class Size(object):
                    "units",
                    "meaningless when Size value is passed"
                 )
-            magnitude = value
+            magnitude = value.magnitude # pylint: disable=no-member
         else:
             raise SizeValueError(value, "value")
 
-        self._magnitude = int(magnitude)
+        self._magnitude = magnitude
+
+    @property
+    def magnitude(self):
+        """
+        :returns: the number of bytes
+        :rtype: Fraction
+        """
+        return self._magnitude
 
     def getString(self, config):
         """ Return a string representation of the size.
@@ -120,7 +124,7 @@ class Size(object):
         return self._magnitude != 0
 
     def __int__(self):
-        return self._magnitude
+        return int(self._magnitude)
     __trunc__ = __int__
 
     def __hash__(self):
@@ -144,7 +148,7 @@ class Size(object):
     def __add__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("+", other)
-        return Size(self._magnitude + int(other))
+        return Size(self._magnitude + other.magnitude)
     __radd__ = __add__
 
     def __divmod__(self, other):
@@ -153,7 +157,7 @@ class Size(object):
         #            T(div) = Size, if T(other) is numeric
         #                   = int, if T(other) is Size
         if isinstance(other, Size):
-            (div, rem) = divmod(self._magnitude, int(other))
+            (div, rem) = divmod(self._magnitude, other.magnitude)
             return (div, Size(rem))
         if isinstance(other, PRECISE_NUMERIC_TYPES):
             (div, rem) = divmod(self._magnitude, other)
@@ -167,20 +171,21 @@ class Size(object):
         # and T(other) is Size
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rdivmod", other)
-        (div, rem) = divmod(int(other), self._magnitude)
+        (div, rem) = divmod(other.magnitude, self._magnitude)
         return (div, Size(rem))
 
     def __eq__(self, other):
-        return isinstance(other, Size) and self._magnitude == int(other)
+        return isinstance(other, Size) and \
+           self._magnitude == other.magnitude
 
     def __floordiv__(self, other):
         # other * floor + rem = self
         # Therefore, T(floor) = Size, if T(other) is numeric
         #                     = int, if T(other) is Size
         if isinstance(other, Size):
-            return self._magnitude.__floordiv__(int(other))
+            return self._magnitude.__floordiv__(other.magnitude)
         if isinstance(other, PRECISE_NUMERIC_TYPES):
-            return Size(Fraction(self._magnitude).__floordiv__(other))
+            return Size(self._magnitude.__floordiv__(other))
         raise SizeNonsensicalBinOpError("floordiv", other)
 
     def __rfloordiv__(self, other):
@@ -188,33 +193,33 @@ class Size(object):
         # Therefore, T(floor) = int and T(other) is Size
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rfloordiv", other)
-        return int(other).__floordiv__(self._magnitude)
+        return other.magnitude.__floordiv__(self._magnitude)
 
     def __ge__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError(">=", other)
-        return self._magnitude >= int(other)
+        return self._magnitude >= other.magnitude
 
     def __gt__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError(">", other)
-        return self._magnitude > int(other)
+        return self._magnitude > other.magnitude
 
     def __le__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("<=", other)
-        return self._magnitude <= int(other)
+        return self._magnitude <= other.magnitude
 
     def __lt__(self, other):
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("<", other)
-        return self._magnitude < int(other)
+        return self._magnitude < other.magnitude
 
     def __mod__(self, other):
         # other * div + mod = self
         # Therefore, T(mod) = Size
         if isinstance(other, Size):
-            return Size(self._magnitude % int(other))
+            return Size(self._magnitude % other.magnitude)
         if isinstance(other, PRECISE_NUMERIC_TYPES):
             return Size(self._magnitude % other)
         raise SizeNonsensicalBinOpError("%", other)
@@ -224,7 +229,7 @@ class Size(object):
         # Therefore, T(mod) = T(other) and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rmod", other)
-        return Size(int(other) % self._magnitude)
+        return Size(other.magnitude % self._magnitude)
 
     def __mul__(self, other):
         # self * other = mul
@@ -250,21 +255,22 @@ class Size(object):
         raise SizeNonsensicalBinOpError("rpow", other)
 
     def __ne__(self, other):
-        return not isinstance(other, Size) or self._magnitude != int(other)
+        return not isinstance(other, Size) or \
+           self._magnitude != other.magnitude
 
     def __sub__(self, other):
         # self - other = sub
         # Therefore, T(sub) = T(self) = Size and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("-", other)
-        return Size(self._magnitude - int(other))
+        return Size(self._magnitude - other.magnitude)
 
     def __rsub__(self, other):
         # other - self = sub
         # Therefore, T(sub) = T(self) = Size and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rsub", other)
-        return Size(int(other) - self._magnitude)
+        return Size(other.magnitude - self._magnitude)
 
     def __truediv__(self, other):
         # other * truediv = self
@@ -273,7 +279,7 @@ class Size(object):
         # Numeric type other is not allowed, because it results
         # in a fractional size, in the general case.
         if isinstance(other, Size):
-            return Fraction(self._magnitude).__truediv__(int(other))
+            return self._magnitude.__truediv__(other.magnitude)
         raise SizeNonsensicalBinOpError("truediv", other)
 
     __div__ = __truediv__
@@ -283,7 +289,7 @@ class Size(object):
         # Therefore, T(truediv) = Fraction and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rtruediv", other)
-        return Fraction(int(other)).__truediv__(self._magnitude)
+        return other.magnitude.__truediv__(self._magnitude)
 
     __rdiv__ = __rtruediv__
 
@@ -297,7 +303,7 @@ class Size(object):
             :raises SizeValueError: if unit specifier is non-positive
         """
         spec = B if spec is None else spec
-        factor = Fraction(int(spec))
+        factor = getattr(spec, 'magnitude', None) or int(spec)
 
         if factor <= 0:
             raise SizeValueError(
@@ -370,7 +376,7 @@ class Size(object):
 
             If unit is Size(0), returns Size(0).
         """
-        factor = int(unit)
+        factor = getattr(unit, 'magnitude', None) or int(unit)
 
         if factor < 0:
             raise SizeValueError(factor, "factor")
@@ -378,6 +384,6 @@ class Size(object):
         if factor == 0:
             return Size(0)
 
-        magnitude = self._magnitude / Fraction(factor)
+        magnitude = self._magnitude / factor
         rounded = round_fraction(magnitude, rounding)
         return Size(rounded * factor)

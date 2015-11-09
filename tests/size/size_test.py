@@ -50,12 +50,6 @@ class ConstructionTestCase(unittest.TestCase):
         self.assertEqual(s.components(), (Fraction(-500, 1), MiB))
         self.assertEqual(s.convertTo(B), -524288000)
 
-    def testPartialBytes(self):
-        """ Test rounding of partial bytes in constructor. """
-        self.assertEqual(Size("1024.6"), Size(1024))
-        self.assertEqual(Size(1/Decimal(1025), KiB), Size(0))
-        self.assertEqual(Size(1/Decimal(1023), KiB), Size(1))
-
     def testConstructor(self):
         """ Test error checking in constructo. """
         with self.assertRaises(SizeValueError):
@@ -89,10 +83,10 @@ class DisplayTestCase(unittest.TestCase):
         self.assertEqual(str(s), "@456.20 MiB")
 
         s = Size("12.68", TiB)
-        self.assertEqual(str(s), "@12.68 TiB")
+        self.assertEqual(str(s), "12.68 TiB")
 
         s = Size("26.55", MiB)
-        self.assertEqual(str(s), "@26.55 MiB")
+        self.assertEqual(str(s), "26.55 MiB")
 
         s = Size('12.687', TiB)
         self.assertEqual(str(s), "@12.69 TiB")

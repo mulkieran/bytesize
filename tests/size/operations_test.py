@@ -162,7 +162,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
 
         self.assertEqual(repr(Size(0)), "Size('0')")
         self.assertEqual(repr(Size(1024)), "Size('1024')")
-        self.assertEqual(repr(Size("1024.1")), "Size('1024')")
+        self.assertEqual(repr(Size("1024.1")), "Size('10241/10')")
 
     def testRMethods(self):
         """ Test certain r* methods. These methods must be invoked
@@ -240,7 +240,7 @@ class AdditionTestCase(unittest.TestCase):
     @given(SIZE_STRATEGY, SIZE_STRATEGY)
     def testAddition(self, s1, s2):
         """ Test addition. """
-        self.assertEqual(s1 + s2, Size(int(s1) + int(s2)))
+        self.assertEqual(s1 + s2, Size(s1.magnitude + s2.magnitude))
 
 class MultiplicationTestCase(unittest.TestCase):
     """ Test multiplication. """
@@ -256,7 +256,7 @@ class MultiplicationTestCase(unittest.TestCase):
     @given(SIZE_STRATEGY, NUMBERS_STRATEGY)
     def testMultiplication(self, s, n):
         """ Test multiplication. """
-        self.assertEqual(s * n, Size(int(s) * Fraction(n)))
+        self.assertEqual(s * n, Size(Fraction(n) * s.magnitude))
 
 class SubtractionTestCase(unittest.TestCase):
     """ Test subtraction. """
@@ -270,9 +270,9 @@ class SubtractionTestCase(unittest.TestCase):
             Size(0) - 2
 
     @given(SIZE_STRATEGY, SIZE_STRATEGY)
-    def testAddition(self, s1, s2):
-        """ Test addition. """
-        self.assertEqual(s1 - s2, Size(int(s1) - int(s2)))
+    def testSubtraction(self, s1, s2):
+        """ Test subtraction. """
+        self.assertEqual(s1 - s2, Size(s1.magnitude - s2.magnitude))
 
 class UnaryOperatorsTestCase(unittest.TestCase):
     """ Test unary operators. """
@@ -287,12 +287,12 @@ class UnaryOperatorsTestCase(unittest.TestCase):
     @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
     def testAbs(self, s):
         """ Test absolute value. """
-        self.assertEqual(abs(s), Size(abs(int(s))))
+        self.assertEqual(abs(s), Size(abs(s.magnitude)))
 
     @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
     def testNeg(self, s):
         """ Test negation. """
-        self.assertEqual(-s, Size(-int(s)))
+        self.assertEqual(-s, Size(-s.magnitude))
 
     @given(SIZE_STRATEGY, settings=Settings(max_examples=5))
     def testPos(self, s):
