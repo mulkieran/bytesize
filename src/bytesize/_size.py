@@ -237,7 +237,7 @@ class Size(object):
         if isinstance(other, PRECISE_NUMERIC_TYPES):
             try:
                 return Size(self._magnitude * Fraction(other))
-            except TypeError:
+            except (TypeError, ValueError):
                 raise SizeNonsensicalBinOpError("*", other)
         if isinstance(other, Size):
             raise SizePowerResultError()
