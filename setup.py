@@ -34,6 +34,7 @@ with open(local_file("src/bytesize/version.py")) as o:
 setuptools.setup(
     name='bytesize',
     version=__version__,
+    url='http://python-bytesize.readthedocs.org/',
     author='Anne Mulhern',
     author_email='amulhern@redhat.com',
     description='computing with and displaying bytes',
