@@ -24,3 +24,7 @@ view:
 .PHONY: archive
 archive:
 	git archive --output=./bytesize.tar.gz HEAD
+
+.PHONY: upload-release
+upload-release:
+	python setup.py register sdist upload
