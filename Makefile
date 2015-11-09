@@ -1,58 +1,26 @@
-null    :=
-space   := $(null) #
-comma   := ,
+TOX=tox
 
-PYTHON := python2
+.PHONY: lint
+lint:
+	$(TOX) -c tox.ini -e lint
 
-COVERAGE := coverage
-PYLINT := pylint
-PYREVERSE := pyreverse
-ifeq ($(PYTHON),python3)
-   COVERAGE := coverage3
-   PYLINT := python3-pylint
-   PYREVERSE := python3-pyreverse
-endif
+.PHONY: coverage
+coverage:
+	$(TOX) -c tox.ini -e coverage
 
-check:
-	$(PYLINT) bytesize \
-		--reports=no \
-		--disable=I \
-		--disable=bad-continuation \
-		--disable=invalid-name
-	$(PYLINT) tests \
-		--reports=no \
-		--disable=I \
-		--disable=bad-continuation \
-		--disable=duplicate-code \
-		--disable=invalid-name \
-		--disable=too-many-public-methods
+.PHONY: test
+test:
+	$(TOX) -c tox.ini -e test
 
 PYREVERSE_OPTS = --output=pdf
+.PHONY: view
 view:
 	-rm -Rf _pyreverse
 	mkdir _pyreverse
-	PYTHONPATH=. $(PYREVERSE) ${PYREVERSE_OPTS} --project="bytesize" bytesize
+	PYTHONPATH=src pyreverse ${PYREVERSE_OPTS} --project="bytesize" src/bytesize
 	mv classes_bytesize.pdf _pyreverse
 	mv packages_bytesize.pdf _pyreverse
 
-doc-html:
-	cd doc; $(MAKE) clean html
-
-clean:
-	-rm -Rf _pyreverse
-
-test:
-	PYTHONPATH=.:tests/ $(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
-
-pytest:
-	py.test -p no:doctest --durations=10
-
-OMIT_PATHS = 
-OMIT = $(subst $(space),$(comma),$(strip $(OMIT_PATHS)))
-coverage:
-	PYTHONPATH=.:tests/ $(COVERAGE) run --timid --branch --omit="$(OMIT)" -m unittest discover -v -s tests/ -p '*_test.py'
-	$(COVERAGE) report --include="bytesize/*"
-	$(COVERAGE) html --include="bytesize/*"
-
+.PHONY: archive
 archive:
-	git archive --format tar.gz HEAD > bytesize.tar.gz
+	git archive --output=./bytesize.tar.gz HEAD
