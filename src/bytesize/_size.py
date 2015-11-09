@@ -55,15 +55,19 @@ class Size(object):
             :param value: a size value, default is 0
             :type value: Size, or any finite numeric type (possibly as str)
             :param units: the units of the size, default is None
-            :type units: any of the publicly defined units constants
+            :type units: any of the publicly defined units constants or a Size
             :raises SizeValueError: on bad parameters
 
             Must pass None as units argument if value has type Size.
+
+            The units number must be a precise numeric type.
         """
         if isinstance(value, six.string_types) or \
            isinstance(value, PRECISE_NUMERIC_TYPES):
             try:
-                magnitude = Fraction(value) * int(units or B)
+                units = B if units is None else units
+                factor = getattr(units, 'magnitude', None) or int(units)
+                magnitude = Fraction(value) * factor
             except (ValueError, TypeError):
                 raise SizeValueError(value, "value")
 
