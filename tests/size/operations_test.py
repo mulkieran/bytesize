@@ -33,7 +33,7 @@ from bytesize import GiB
 from bytesize import TiB
 
 from bytesize._errors import SizeNonsensicalBinOpError
-from bytesize._errors import SizeNonsensicalOpError
+from bytesize._errors import SizeNonsensicalBinOpValueError
 from bytesize._errors import SizePowerResultError
 
 from tests.utils import NUMBERS_STRATEGY
@@ -46,44 +46,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
         """ Test binary operators with a possible Size result. """
         s = Size(2, GiB)
 
-        # +
-        self.assertEqual(s + s, Size(4, GiB))
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            s + 2 # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            2 + s # pylint: disable=pointless-statement
-
-        # -
-        self.assertEqual(s - s, Size(0))
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            s - 2 # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            2 - s # pylint: disable=pointless-statement
-
-        # *
-        self.assertEqual(s * 2, Size(4, GiB))
-        self.assertEqual(2 * s, Size(4, GiB))
-        with self.assertRaises(SizePowerResultError):
-            s * s # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            s * "str" # pylint: disable=pointless-statement
-
-        # // floordiv
-        self.assertEqual(s // s, 1)
-        self.assertEqual(s // 2, Size(1, GiB))
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            2 // s # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            s // "str" # pylint: disable=pointless-statement
-
-        # %
-        self.assertEqual(s % s, Size(0))
-        self.assertEqual(s % 2, Size(0))
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            1024 % Size(127) # pylint: disable=expression-not-assigned, pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            s % "str" # pylint: disable=expression-not-assigned, pointless-statement
-
         # **
         with self.assertRaises(SizeNonsensicalBinOpError):
             s ** Size(2) # pylint: disable=expression-not-assigned, pointless-statement
@@ -91,17 +53,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
             s ** 2 # pylint: disable=pointless-statement
         with self.assertRaises(SizeNonsensicalBinOpError):
             2 ** Size(0) # pylint: disable=expression-not-assigned, pointless-statement
-
-        # divmod
-        self.assertEqual(divmod(Size(32, MiB), 2), (Size(16, MiB), Size(0)))
-        self.assertEqual(
-            divmod(Size(24, MiB), Size(16, MiB)),
-            (1, Size(8, MiB))
-        )
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            divmod(2048, Size(12, B))
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            divmod(s, "str")
 
     def testBinaryOperatorsBoolean(self):
         """ Test binary operators with a boolean result. """
@@ -164,67 +115,6 @@ class UtilityMethodsTestCase(unittest.TestCase):
         self.assertEqual(repr(Size(1024)), "Size('1024')")
         self.assertEqual(repr(Size("1024.1")), "Size('10241/10')")
 
-    def testRMethods(self):
-        """ Test certain r* methods. These methods must be invoked
-            explicitly, rather than by means of an operator, in order
-            to be executed. Otherwise, their companion non-R method
-            will be invoked instead.
-        """
-        s = Size(2, GiB)
-
-        # rtruediv, retains fractional quantities
-        self.assertEqual(s.__rtruediv__(s), Fraction(1))
-        with self.assertRaises(SizeNonsensicalOpError):
-            s.__rtruediv__("str") # pylint: disable=pointless-statement
-
-        # rdivmod
-        self.assertEqual(
-            Size(16, MiB).__rdivmod__(Size(24, MiB)),
-            (1, Size(8, MiB))
-        )
-        with self.assertRaises(SizeNonsensicalOpError):
-            divmod(s.__rdivmod__("str"))
-
-        # // rfloordiv
-        self.assertEqual(s.__rfloordiv__(s), 1)
-        with self.assertRaises(SizeNonsensicalOpError):
-            s.__rfloordiv__("str") # pylint: disable=pointless-statement
-
-        # rmod
-        self.assertEqual(s.__rmod__(s), Size(0))
-        with self.assertRaises(SizeNonsensicalOpError):
-            s.__rmod__("str") # pylint: disable=expression-not-assigned, pointless-statement
-
-        # rsub
-        self.assertEqual(s.__rsub__(s), Size(0))
-        with self.assertRaises(SizeNonsensicalOpError):
-            s.__rsub__(2) # pylint: disable=pointless-statement
-
-class DivisionTestCase(unittest.TestCase):
-    """ Test division operations. """
-    # pylint: disable=too-few-public-methods
-
-    def testTrueDiv(self):
-        """ __truediv__ retains fractional quantities """
-        s = Size(2, TiB)
-
-        # unity
-        self.assertEqual(s / s, Fraction(1))
-
-        # fractional quantities
-        div = Size(37)
-        res = s / div
-        self.assertEqual(res * div, s)
-
-        # exceptions
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            s / 2 # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            2 / s # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            s / "str" # pylint: disable=pointless-statement
-        with self.assertRaises(SizeNonsensicalBinOpError):
-            "str" / s # pylint: disable=pointless-statement
 
 class AdditionTestCase(unittest.TestCase):
     """ Test addition. """
@@ -242,6 +132,93 @@ class AdditionTestCase(unittest.TestCase):
         """ Test addition. """
         self.assertEqual(s1 + s2, Size(s1.magnitude + s2.magnitude))
 
+
+class DivmodTestCase(unittest.TestCase):
+    """ Test divmod. """
+
+    def testExceptions(self):
+        """ Test that exceptions are thrown. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            divmod(2048, Size(12, B))
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            divmod(Size(12), "str")
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            divmod(Size(12), Size(0))
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            divmod(Size(12), 0)
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            divmod(Size(12), Decimal('NaN'))
+
+    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Size(0)))
+    def testDivmodWithSize(self, s1, s2):
+        """ Test divmod with a size. """
+        (div, rem) = divmod(s1.magnitude, s2.magnitude)
+        self.assertEqual(divmod(s1, s2), (div, Size(rem)))
+
+    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
+    def testDivmodWithNumber(self, s1, s2):
+        """ Test divmod with a number. """
+        (div, rem) = divmod(s1.magnitude, Fraction(s2))
+        self.assertEqual(divmod(s1, s2), (Size(div), Size(rem)))
+
+
+class FloordivTestCase(unittest.TestCase):
+    """ Test floordiv. """
+
+    def testExceptions(self):
+        """ Test that exceptions are thrown. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            2048 // Size(12, B)
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12) // "str"
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) // Size(0)
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) // 0
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) // Decimal('NaN')
+
+    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Size(0)))
+    def testFloordivWithSize(self, s1, s2):
+        """ Test floordiv with a size. """
+        self.assertEqual(s1 // s2, s1.magnitude // s2.magnitude)
+
+    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
+    def testFloordivWithNumber(self, s1, s2):
+        """ Test floordiv with a number. """
+        self.assertEqual(s1 // s2, Size(s1.magnitude // Fraction(s2)))
+
+
+class ModTestCase(unittest.TestCase):
+    """ Test mod. """
+
+    def testExceptions(self):
+        """ Test that exceptions are thrown. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            2048 % Size(12, B)
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12) % "str"
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) % Size(0)
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) % 0
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) % Decimal('NaN')
+
+    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Size(0)))
+    def testModWithSize(self, s1, s2):
+        """ Test mod with a size. """
+        self.assertEqual(s1 % s2, Size(s1.magnitude % s2.magnitude))
+
+    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
+    def testModWithNumber(self, s1, s2):
+        """ Test mod with a number. """
+        self.assertEqual(s1 % s2, Size(s1.magnitude % Fraction(s2)))
+
+
 class MultiplicationTestCase(unittest.TestCase):
     """ Test multiplication. """
 
@@ -252,11 +229,110 @@ class MultiplicationTestCase(unittest.TestCase):
             Size(0) * Size(0)
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) * Decimal("NaN")
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(0) * 'str'
 
     @given(SIZE_STRATEGY, NUMBERS_STRATEGY)
     def testMultiplication(self, s, n):
         """ Test multiplication. """
         self.assertEqual(s * n, Size(Fraction(n) * s.magnitude))
+
+
+class RdivmodTestCase(unittest.TestCase):
+    """ Test rdivmod. """
+
+    def testExceptions(self):
+        """ Test that exceptions are thrown. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12).__rdivmod__(str)
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(0).__rdivmod__(Size(12))
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12).__rdivmod__(32)
+
+    @given(SIZE_STRATEGY.filter(lambda x: x != Size(0)), SIZE_STRATEGY)
+    def testRdivmodWithSize(self, s1, s2):
+        """ Test divmod with a size. """
+        (div, rem) = divmod(s2.magnitude, s1.magnitude)
+        self.assertEqual(s1.__rdivmod__(s2), (div, Size(rem)))
+
+
+class RfloordivTestCase(unittest.TestCase):
+    """ Test rfloordiv. """
+
+    def testExceptions(self):
+        """ Test that exceptions are thrown. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12, B).__rfloordiv__(1024)
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(0).__rfloordiv__(Size(12))
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12).__rfloordiv__(Decimal('NaN'))
+
+    @given(SIZE_STRATEGY.filter(lambda x: x != Size(0)), SIZE_STRATEGY)
+    def testRfloordivWithSize(self, s1, s2):
+        """ Test floordiv with a size. """
+        self.assertEqual(s1.__rfloordiv__(s2), s2.magnitude // s1.magnitude)
+
+
+class RmodTestCase(unittest.TestCase):
+    """ Test rmod. """
+
+    def testExceptions(self):
+        """ Test that exceptions are thrown. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12, B).__rmod__(1024)
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12).__rmod__("str")
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(0).__rmod__(Size(12))
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12).__rmod__(Decimal('NaN'))
+
+    @given(SIZE_STRATEGY.filter(lambda x: x != Size(0)), SIZE_STRATEGY)
+    def testRmodWithSize(self, s1, s2):
+        """ Test rmod with a size. """
+        self.assertEqual(s1.__rmod__(s2), Size(s2.magnitude % s1.magnitude))
+
+
+class RsubTestCase(unittest.TestCase):
+    """ Test rsub. """
+
+    def testExceptions(self):
+        """ Any non-size other raises an exception. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(0).__rsub__(2)
+
+    @given(SIZE_STRATEGY, SIZE_STRATEGY)
+    def testRsub(self, s1, s2):
+        """ Test __rsub__. """
+        self.assertEqual(s1.__rsub__(s2), Size(s2.magnitude - s1.magnitude))
+
+
+class RtruedivTestCase(unittest.TestCase):
+    """ Test rtruediv. """
+
+    def testExceptions(self):
+        """ Test that exceptions are thrown. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12, B).__rtruediv__(1024)
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12).__rtruediv__("str")
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(0).__rtruediv__(Size(12))
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12).__rtruediv__(Decimal('NaN'))
+
+    @given(SIZE_STRATEGY.filter(lambda x: x != Size(0)), SIZE_STRATEGY)
+    def testTruedivWithSize(self, s1, s2):
+        """ Test truediv with a size. """
+        self.assertEqual(s1.__rtruediv__(s2), s2.magnitude / s1.magnitude)
+
 
 class SubtractionTestCase(unittest.TestCase):
     """ Test subtraction. """
@@ -273,6 +349,35 @@ class SubtractionTestCase(unittest.TestCase):
     def testSubtraction(self, s1, s2):
         """ Test subtraction. """
         self.assertEqual(s1 - s2, Size(s1.magnitude - s2.magnitude))
+
+
+class TruedivTestCase(unittest.TestCase):
+    """ Test truediv. """
+
+    def testExceptions(self):
+        """ Test that exceptions are thrown. """
+        # pylint: disable=expression-not-assigned
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            2048 / Size(12, B)
+        with self.assertRaises(SizeNonsensicalBinOpError):
+            Size(12) / "str"
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) / Size(0)
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) / 0
+        with self.assertRaises(SizeNonsensicalBinOpValueError):
+            Size(12) / Decimal('NaN')
+
+    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Size(0)))
+    def testTruedivWithSize(self, s1, s2):
+        """ Test truediv with a size. """
+        self.assertEqual(s1 / s2, s1.magnitude / s2.magnitude)
+
+    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
+    def testTruedivWithNumber(self, s1, s2):
+        """ Test truediv with a number. """
+        self.assertEqual(s1 / s2, Size(s1.magnitude / Fraction(s2)))
+
 
 class UnaryOperatorsTestCase(unittest.TestCase):
     """ Test unary operators. """

@@ -64,6 +64,24 @@ class SizeNonsensicalOpError(SizeUnsupportedOpError):
     """ Error when requesting an operation that doesn't make sense. """
     pass
 
+class SizeNonsensicalBinOpValueError(SizeNonsensicalOpError):
+    """ Error when requesting a binary operation with a nonsense value. """
+
+    _FMT_STR = "nonsensical value for for %s: '%s'"
+
+    def __init__(self, operator, other):
+        """ Initializer.
+
+            :param str operator: the operator
+            :param object other: the other argument
+        """
+        # pylint: disable=super-init-not-called
+        self._operator = operator
+        self._other = other
+
+    def __str__(self):
+        return self._FMT_STR % (self._operator, self._other)
+
 class SizeNonsensicalBinOpError(SizeNonsensicalOpError):
     """ Error when requesting a binary operation that doesn't make sense. """
     _FMT_STR = "nonsensical operand types for %s: 'Size' and '%s'"

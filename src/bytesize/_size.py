@@ -32,6 +32,7 @@ import six
 from ._config import SizeConfig
 
 from ._errors import SizeNonsensicalBinOpError
+from ._errors import SizeNonsensicalBinOpValueError
 from ._errors import SizePowerResultError
 from ._errors import SizeValueError
 
@@ -155,24 +156,33 @@ class Size(object):
         # other * div + rem = self
         # Therefore, T(rem) = T(self) = Size
         #            T(div) = Size, if T(other) is numeric
-        #                   = int, if T(other) is Size
+        #                   = Fraction, if T(other) is Size
         if isinstance(other, Size):
-            (div, rem) = divmod(self._magnitude, other.magnitude)
-            return (div, Size(rem))
+            try:
+                (div, rem) = divmod(self._magnitude, other.magnitude)
+                return (div, Size(rem))
+            except ZeroDivisionError:
+                raise SizeNonsensicalBinOpValueError("divmod", other)
         if isinstance(other, PRECISE_NUMERIC_TYPES):
-            (div, rem) = divmod(self._magnitude, other)
-            return (Size(div), Size(rem))
+            try:
+                (div, rem) = divmod(self._magnitude, Fraction(other))
+                return (Size(div), Size(rem))
+            except (TypeError, ValueError, ZeroDivisionError):
+                raise SizeNonsensicalBinOpValueError("divmod", other)
         raise SizeNonsensicalBinOpError("divmod", other)
 
     def __rdivmod__(self, other):
         # self * div + rem = other
         # Therefore, T(rem) = T(other)
-        #            T(div) = int
+        #            T(div) = Fraction
         # and T(other) is Size
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rdivmod", other)
-        (div, rem) = divmod(other.magnitude, self._magnitude)
-        return (div, Size(rem))
+        try:
+            (div, rem) = divmod(other.magnitude, self._magnitude)
+            return (div, Size(rem))
+        except ZeroDivisionError:
+            raise SizeNonsensicalBinOpValueError("rdivmod", other)
 
     def __eq__(self, other):
         return isinstance(other, Size) and \
@@ -183,9 +193,15 @@ class Size(object):
         # Therefore, T(floor) = Size, if T(other) is numeric
         #                     = int, if T(other) is Size
         if isinstance(other, Size):
-            return self._magnitude.__floordiv__(other.magnitude)
+            try:
+                return self._magnitude.__floordiv__(other.magnitude)
+            except ZeroDivisionError:
+                raise SizeNonsensicalBinOpValueError("floordiv", other)
         if isinstance(other, PRECISE_NUMERIC_TYPES):
-            return Size(self._magnitude.__floordiv__(other))
+            try:
+                return Size(self._magnitude.__floordiv__(Fraction(other)))
+            except (TypeError, ValueError, ZeroDivisionError):
+                raise SizeNonsensicalBinOpValueError("floordiv", other)
         raise SizeNonsensicalBinOpError("floordiv", other)
 
     def __rfloordiv__(self, other):
@@ -193,7 +209,10 @@ class Size(object):
         # Therefore, T(floor) = int and T(other) is Size
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rfloordiv", other)
-        return other.magnitude.__floordiv__(self._magnitude)
+        try:
+            return other.magnitude.__floordiv__(self._magnitude)
+        except ZeroDivisionError:
+            raise SizeNonsensicalBinOpValueError("rfloordiv", other)
 
     def __ge__(self, other):
         if not isinstance(other, Size):
@@ -219,9 +238,15 @@ class Size(object):
         # other * div + mod = self
         # Therefore, T(mod) = Size
         if isinstance(other, Size):
-            return Size(self._magnitude % other.magnitude)
+            try:
+                return Size(self._magnitude % other.magnitude)
+            except ZeroDivisionError:
+                raise SizeNonsensicalBinOpValueError('%', other)
         if isinstance(other, PRECISE_NUMERIC_TYPES):
-            return Size(self._magnitude % other)
+            try:
+                return Size(self._magnitude % Fraction(other))
+            except (TypeError, ValueError, ZeroDivisionError):
+                raise SizeNonsensicalBinOpValueError('%', other)
         raise SizeNonsensicalBinOpError("%", other)
 
     def __rmod__(self, other):
@@ -229,7 +254,10 @@ class Size(object):
         # Therefore, T(mod) = T(other) and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rmod", other)
-        return Size(other.magnitude % self._magnitude)
+        try:
+            return Size(other.magnitude % Fraction(self._magnitude))
+        except (TypeError, ValueError, ZeroDivisionError):
+            raise SizeNonsensicalBinOpValueError("rmod", other)
 
     def __mul__(self, other):
         # self * other = mul
@@ -275,11 +303,16 @@ class Size(object):
     def __truediv__(self, other):
         # other * truediv = self
         # Therefore, T(truediv) = Fraction, if T(other) is Size
-        #
-        # Numeric type other is not allowed, because it results
-        # in a fractional size, in the general case.
         if isinstance(other, Size):
-            return self._magnitude.__truediv__(other.magnitude)
+            try:
+                return self._magnitude.__truediv__(other.magnitude)
+            except ZeroDivisionError:
+                raise SizeNonsensicalBinOpValueError("truediv", other)
+        elif isinstance(other, PRECISE_NUMERIC_TYPES):
+            try:
+                return Size(self._magnitude.__truediv__(Fraction(other)))
+            except (TypeError, ValueError, ZeroDivisionError):
+                raise SizeNonsensicalBinOpValueError("truediv", other)
         raise SizeNonsensicalBinOpError("truediv", other)
 
     __div__ = __truediv__
@@ -289,7 +322,10 @@ class Size(object):
         # Therefore, T(truediv) = Fraction and T(other) = Size.
         if not isinstance(other, Size):
             raise SizeNonsensicalBinOpError("rtruediv", other)
-        return other.magnitude.__truediv__(self._magnitude)
+        try:
+            return other.magnitude.__truediv__(self._magnitude)
+        except ZeroDivisionError:
+            raise SizeNonsensicalBinOpValueError("rtruediv", self)
 
     __rdiv__ = __rtruediv__
 

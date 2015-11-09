@@ -20,6 +20,7 @@
 import unittest
 
 from bytesize._errors import SizeNonsensicalBinOpError
+from bytesize._errors import SizeNonsensicalBinOpValueError
 from bytesize._errors import SizePowerResultError
 from bytesize._errors import SizeValueError
 
@@ -34,6 +35,10 @@ class ErrorTestCase(unittest.TestCase):
     def testSizeNonsensicalBinOpError(self):
         """ Miscellaneous tests for the method. """
         self.assertIsNotNone(str(SizeNonsensicalBinOpError("+", 2)))
+
+    def testSizeNonsensicalBinOpValueError(self):
+        """ Miscellaneous tests for the method. """
+        self.assertIsNotNone(str(SizeNonsensicalBinOpValueError("+", 2)))
 
     def testSizePowerResultError(self):
         """ Miscellaneous tests for the method. """
