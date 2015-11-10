@@ -30,6 +30,7 @@ from bytesize._constants import RoundingMethods
 from bytesize._errors import SizeValueError
 from bytesize._util.misc import convert_magnitude
 from bytesize._util.misc import format_magnitude
+from bytesize._util.misc import get_repeating_fraction
 from bytesize._util.misc import long_decimal_division
 from bytesize._util.misc import round_fraction
 
@@ -188,3 +189,20 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
         self.assertEqual(res[2], [])
         self.assertEqual(res[1], multiplier)
         self.assertEqual(res[0], 1)
+
+
+class GetRepeatingFractionTestCase(unittest.TestCase):
+    """
+    Test get_repeating_fraction.
+    """
+
+    def testExceptions(self):
+        """
+        Test exceptions.
+        """
+        with self.assertRaises(SizeValueError):
+            get_repeating_fraction(1, 0)
+        with self.assertRaises(SizeValueError):
+            get_repeating_fraction(-1, 1)
+        with self.assertRaises(SizeValueError):
+            get_repeating_fraction(3, 2)
