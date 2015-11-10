@@ -103,6 +103,34 @@ def long_decimal_division(divisor, dividend):
 
     return (left, right, num_repeating)
 
+def decimal_magnitude(value):
+    """
+    Get ``value`` as a possibly repeating decimal.
+
+    :param value: the value
+    :type value: any precise numerical quantity
+    :returns: a precise decimal representation of the number
+    :rtype: tuple of int * list of int * int
+
+    The parts represent the non-fractional part, the fractional part
+    including the first repeating part, the length of the repeating part.
+    """
+    value = Fraction(value)
+    (left, right, repeat) = long_decimal_division(
+       value.denominator,
+       value.numerator
+    )
+    non_repeating = "".join(str(x) for x in right[:len(right) - repeat])
+    repeating = "".join(str(x) for x in right[-repeat:]) if repeat else ""
+
+    if non_repeating == "":
+        return "%s" % left
+
+    if repeating == "":
+        return "%s.%s" % (left, non_repeating)
+
+    return "%s.%s(%s)" % (left, non_repeating, repeating)
+
 def convert_magnitude(value, max_places=2, context=DefaultContext):
     """ Convert magnitude to a decimal string.
 

@@ -41,6 +41,7 @@ from ._constants import BinaryUnits
 from ._constants import DecimalUnits
 from ._constants import PRECISE_NUMERIC_TYPES
 
+from ._util.misc import decimal_magnitude
 from ._util.misc import format_magnitude
 from ._util.misc import round_fraction
 
@@ -119,7 +120,7 @@ class Size(object):
         return self.getString(SizeConfig.STR_CONFIG)
 
     def __repr__(self):
-        return "Size('%s')" % self._magnitude
+        return "Size('%s')" % decimal_magnitude(self._magnitude)
 
     def __deepcopy__(self, memo):
         # pylint: disable=unused-argument
