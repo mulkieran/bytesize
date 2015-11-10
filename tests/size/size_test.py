@@ -215,7 +215,10 @@ class ConfigurationTestCase(unittest.TestCase):
         # if max_places is set to None, all digits are displayed
         SizeConfig.set_str_config(StrConfig(max_places=None, strip=True))
         s = Size(0xfffffffffffff)
-        self.assertEqual(str(s), "@3.9999999999999991118215803 PiB")
+        self.assertEqual(
+           str(s),
+           "3.99999999999999911182158029987476766109466552734375 PiB"
+        )
         s = Size(0x10000)
         self.assertEqual(str(s), ("64 KiB"))
         s = Size(0x10001)
@@ -241,13 +244,14 @@ class ConfigurationTestCase(unittest.TestCase):
         # deviation is greater than 1/2 of 1% of 1024
         s = Size(16384 - (eps + 1))
         self.assertEqual(str(s), "@15.99 KiB")
-        # deviation is greater than 1/2 of 1% of 1024
-        s = Size(16384 + (eps + 1))
-        self.assertEqual(str(s), "@16.01 KiB")
 
         # deviation is less than 1/2 of 1% of 1024
         s = Size(16384 + (eps - 1))
         self.assertEqual(str(s), "@16 KiB")
+
+        # deviation is greater than 1/2 of 1% of 1024
+        s = Size(16384 + (eps + 1))
+        self.assertEqual(str(s), "@16.01 KiB")
 
 
 class ComputationTestCase(unittest.TestCase):

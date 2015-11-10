@@ -18,10 +18,6 @@
 
 """ Miscellaneous utilities. """
 
-from decimal import Decimal
-from decimal import DefaultContext
-from decimal import InvalidOperation
-from decimal import localcontext
 from fractions import Fraction
 
 import six
@@ -43,8 +39,26 @@ def get_repeating_fraction(numerator, denominator):
     :returns: a list of decimal digits and a number indicating length of repeat
     :rtype: tuple of (list of int) * int
 
-    Prereq: abs(numerator) < abs(denominator)
+    Prereq: numerator < denominator, denominator > 0, numerator >= 0
     """
+
+    if numerator < 0:
+        raise SizeValueError(numerator, "numerator", "must be at least 0")
+
+    if denominator <= 0:
+        raise SizeValueError(
+           denominator,
+           "denominator",
+           "must be greater than 0"
+        )
+
+    if denominator < numerator:
+        raise SizeValueError(
+           denominator,
+           "denominator",
+           "must be greater than numerator"
+        )
+
     rem = numerator
 
     quotients = []
@@ -66,14 +80,12 @@ def long_decimal_division(divisor, dividend):
         :param dividend: the dividend
         :type dividend: any precise numeric quantity
         :returns: the result of long division
-        :rtype: a tuple of int * list * integer
+        :rtype: a tuple of int * list * list
         :raises :class:`SizeValueError`: on bad input
 
         The result is the number to the left of the decimal
-        point, a list of the digits to the right of the decimal point,
-        and the length of the repeating part. A zero indicates that the
-        decimal is non-repeating, or equivalently, that its one
-        repeating digit is 0.
+        point, a list of the non-repeating digits to the right of the
+        decimal point, and a list of the repeating digits.
     """
     if not isinstance(divisor, PRECISE_NUMERIC_TYPES):
         raise SizeValueError(
@@ -92,16 +104,30 @@ def long_decimal_division(divisor, dividend):
     if divisor == 0:
         raise SizeValueError(divisor, "divisor")
 
+    sign = 1
+
     (dividend, divisor) = (Fraction(dividend), Fraction(divisor))
 
     (left, rem) = divmod(dividend, divisor)
-    fractional_part = rem / divisor
+
+    if left < 0:
+        sign = -1
+        if rem != 0:
+            left = left + 1
+            rem = rem - divisor
+
+    fractional_part = abs(rem / divisor)
     (right, num_repeating) = get_repeating_fraction(
        fractional_part.numerator,
        fractional_part.denominator
     )
 
-    return (left, right, num_repeating)
+    return (
+       sign,
+       abs(left),
+       right[:len(right) - num_repeating],
+       right[-num_repeating:] if num_repeating != 0 else []
+    )
 
 def decimal_magnitude(value):
     """
@@ -116,47 +142,48 @@ def decimal_magnitude(value):
     including the first repeating part, the length of the repeating part.
     """
     value = Fraction(value)
-    (left, right, repeat) = long_decimal_division(
+    (sign, left, non_repeating, repeating) = long_decimal_division(
        value.denominator,
        value.numerator
     )
-    non_repeating = "".join(str(x) for x in right[:len(right) - repeat])
-    repeating = "".join(str(x) for x in right[-repeat:]) if repeat else ""
 
-    if non_repeating == "":
-        return "%s" % left
+    sign_str = "-" if sign == -1 else ""
 
-    if repeating == "":
-        return "%s.%s" % (left, non_repeating)
+    if non_repeating == []:
+        return "%s%s" % (sign_str, left)
 
-    return "%s.%s(%s)" % (left, non_repeating, repeating)
+    non_repeating_str = "".join(str(x) for x in non_repeating)
+    if repeating == []:
+        return "%s%s.%s" % (sign_str, left, non_repeating_str)
 
-def convert_magnitude(value, max_places=2, context=DefaultContext):
+    repeating_str = "".join(str(x) for x in repeating)
+    return "%s%s.%s(%s)" % (sign_str, left, non_repeating_str, repeating_str)
+
+def convert_magnitude(value, places=2):
     """ Convert magnitude to a decimal string.
 
         :param value: any value
         :type value: a numeric value, not a float
-        :param max_places: number of decimal places to use, default is 2
-        :type max_place: an integer type or NoneType
-        :param :class:`decimal.DefaultContext` context: a decimal context
+        :param places: number of decimal places to use, default is 2
+        :type places: an integer type or NoneType
 
         :returns: a string representation of value
         :rtype: str
 
         Since a rational number may be a non-terminating decimal
         quantity, this representation is not guaranteed to be exact, regardless
-        of the value of max_places.
+        of the value of places.
 
         Even in the case of a terminating decimal representation, the
         representation may be inexact if the number of significant digits
         is too large for the precision of the Decimal operations as
         specified by the context.
     """
-    if max_places is not None and \
-       (max_places < 0 or not isinstance(max_places, six.integer_types)):
+    if places is not None and \
+       (places < 0 or not isinstance(places, six.integer_types)):
         raise SizeValueError(
-           max_places,
-           "max_places",
+           places,
+           "places",
            "must be None or a non-negative integer value"
         )
 
@@ -167,23 +194,43 @@ def convert_magnitude(value, max_places=2, context=DefaultContext):
            "must not be a float"
         )
 
-    with localcontext(context) as ctx:
-        if isinstance(value, Fraction):
-            value = Decimal(value.numerator)/Decimal(value.denominator)
+    value = Fraction(value)
+    (sign, left, non_repeating, repeating) = long_decimal_division(
+       value.denominator,
+       value.numerator
+    )
 
-        value = Decimal(value)
+    places = len(non_repeating) + len(repeating) if places is None else places
 
-        if max_places is not None:
-            while True:
-                try:
-                    value = value.quantize(Decimal(10) ** -max_places)
-                    break
-                except InvalidOperation:
-                    ctx.prec += 2
+    right_side = non_repeating[:]
+    if len(repeating) > 0:
+        while len(right_side) <= places:
+            right_side += repeating
 
-        return str(value)
+    if len(right_side) > places:
+        right = right_side[:places]
+        next_digits = right_side[places:]
+        decider = next((d for d in next_digits if d != 5), None)
+        if decider is not None:
+            if decider > 5:
+                right = str(int("".join(str(x) for x in right)) + 1)
+                right = [l for l in right]
+        if len(right) > places:
+            left = left + int(right[0])
+            right = right[1:]
+        elif len(right) < places:
+            right = [0 for _ in range(places - len(right))] + right
+    else:
+        right = right_side[:] + [0 for _ in range(places - len(right_side))]
 
-def format_magnitude(value, max_places=2, strip=False, context=DefaultContext):
+    sign_str = '-' if sign == -1 else ""
+    if len(right) > 0:
+        return "%s%s.%s" % (sign_str, left, "".join(str(x) for x in right))
+    else:
+        return "%s%s" % (sign_str, left)
+
+
+def format_magnitude(value, max_places=2, strip=False):
     """ Format a numeric value.
 
         :param value: any value
@@ -191,12 +238,11 @@ def format_magnitude(value, max_places=2, strip=False, context=DefaultContext):
         :param max_places: number of decimal places to use, default is 2
         :type max_place: an integer type or NoneType
         :param bool strip: True if trailing zeros are to be stripped
-        :param :class:`decimal.DefaultContext` context: a decimal context
 
         :returns: the formatted value
         :rtype: str
     """
-    ret = convert_magnitude(value, max_places, context=context)
+    ret = convert_magnitude(value, max_places)
 
     if '.' in ret and strip:
         ret = ret.rstrip("0").rstrip(".")

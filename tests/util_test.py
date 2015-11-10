@@ -22,7 +22,7 @@ from hypothesis import strategies
 import unittest
 
 from decimal import Decimal
-from decimal import DefaultContext
+
 from fractions import Fraction
 
 from bytesize._constants import RoundingMethods
@@ -45,43 +45,18 @@ class FormatTestCase(unittest.TestCase):
         with self.assertRaises(SizeValueError):
             format_magnitude(0.1)
 
-    _max_exponent = DefaultContext.prec
     @given(
-       strategies.integers(
-           min_value=-(10**_max_exponent - 1),
-           max_value=10**_max_exponent - 1
-       ),
-       strategies.integers(min_value=0),
+       strategies.integers(),
        strategies.integers(min_value=0)
     )
-    def testExactness(self, n, m, e):
-        """ When max_places is not specified, the denominator of
-            the value is a power of 10, and the number of significant digits
-            in the numerator is no more than the default precision of the
-            decimal operations, the string result is exact.
+    def testExactness(self, n, e):
+        """ When max_places is not specified and the denominator of
+            the value is a power of 10 the string result is exact.
         """
-        x = Fraction(n * 10**m, 10**e)
-        if x.denominator == 1:
-            x = int(x)
-        converted = convert_magnitude(
-           x,
-           max_places=None,
-           context=DefaultContext
-        )
+        x = Fraction(n, 10**e)
+        converted = convert_magnitude(x, places=None)
         self.assertEqual(Fraction(converted), x)
 
-    def testInexactness(self):
-        """ If the number of digits in the numerator exceeds the
-            available precision, and the lowest order digit is non-zero,
-            the result is not exact.
-        """
-        x = Fraction(10**DefaultContext.prec + 1)
-        converted = convert_magnitude(
-           x,
-           max_places=None,
-           context=DefaultContext
-        )
-        self.assertNotEqual(Fraction(converted), x)
 
 class RoundingTestCase(unittest.TestCase):
     """ Test rounding of fraction. """
@@ -133,7 +108,7 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x != 0)
+       strategies.integers().filter(lambda x: x > 0)
     )
     def testExact(self, divisor, multiplier):
         """
@@ -141,12 +116,14 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
         """
         dividend = Fraction(divisor) * multiplier
         res = long_decimal_division(divisor, dividend)
-        self.assertEqual(res[2], 0)
-        self.assertEqual(res[1], [])
+        self.assertEqual(res[3], [])
+        self.assertEqual(res[2], [])
+        self.assertEqual(res[1], multiplier)
+        self.assertEqual(res[0], 1)
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x != 0)
+       strategies.integers().filter(lambda x: x > 0)
     )
     def testNonRepeatingDecimal(self, divisor, multiplier):
         """
@@ -154,12 +131,14 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
         """
         dividend = Fraction(divisor) * (multiplier + Fraction(1, 2))
         res = long_decimal_division(divisor, dividend)
-        self.assertEqual(res[2], 0)
-        self.assertEqual(res[1], [5])
+        self.assertEqual(res[3], [])
+        self.assertEqual(res[2], [5])
+        self.assertEqual(res[1], multiplier)
+        self.assertEqual(res[0], 1)
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x != 0)
+       strategies.integers().filter(lambda x: x > 0)
     )
     def testRepeatingDecimal(self, divisor, multiplier):
         """
@@ -167,13 +146,14 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
         """
         dividend = Fraction(divisor) * (multiplier + Fraction(1, 3))
         res = long_decimal_division(divisor, dividend)
-        self.assertEqual(res[2], 1)
-        self.assertEqual(res[1], [3])
-        self.assertEqual(res[0], multiplier)
+        self.assertEqual(res[3], [3])
+        self.assertEqual(res[2], [])
+        self.assertEqual(res[1], multiplier)
+        self.assertEqual(res[0], 1)
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x != 0)
+       strategies.integers().filter(lambda x: x > 0)
     )
     def testComplexRepeatingDecimal(self, divisor, multiplier):
         """
@@ -181,13 +161,14 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
         """
         dividend = Fraction(divisor) * (multiplier + Fraction(1, 6))
         res = long_decimal_division(divisor, dividend)
-        self.assertEqual(res[2], 1)
-        self.assertEqual(res[1], [1, 6])
-        self.assertEqual(res[0], multiplier)
+        self.assertEqual(res[3], [6])
+        self.assertEqual(res[2], [1])
+        self.assertEqual(res[1], multiplier)
+        self.assertEqual(res[0], 1)
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x != 0)
+       strategies.integers().filter(lambda x: x > 0)
     )
     def testMoreComplexRepeatingDecimal(self, divisor, multiplier):
         """
@@ -195,6 +176,7 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
         """
         dividend = Fraction(divisor) * (multiplier + Fraction(1, 7))
         res = long_decimal_division(divisor, dividend)
-        self.assertEqual(res[2], 6)
-        self.assertEqual(res[1], [1, 4, 2, 8, 5, 7])
-        self.assertEqual(res[0], multiplier)
+        self.assertEqual(res[3], [1, 4, 2, 8, 5, 7])
+        self.assertEqual(res[2], [])
+        self.assertEqual(res[1], multiplier)
+        self.assertEqual(res[0], 1)
