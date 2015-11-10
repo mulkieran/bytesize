@@ -27,7 +27,81 @@ from fractions import Fraction
 import six
 
 from .._constants import RoundingMethods
+from .._constants import PRECISE_NUMERIC_TYPES
+
 from .._errors import SizeValueError
+
+
+def get_repeating_fraction(numerator, denominator):
+    """
+    Get the repeating decimal number corresponding to the ratio of
+    ``numerator`` and ``denominator``.
+
+    :param int numerator: the numerator
+    :param int denominator: the denominator
+
+    :returns: a list of decimal digits and a number indicating length of repeat
+    :rtype: tuple of (list of int) * int
+
+    Prereq: abs(numerator) < abs(denominator)
+    """
+    rem = numerator
+
+    quotients = []
+    remainders = []
+    while rem != 0 and rem not in remainders:
+        remainders.append(rem)
+        (quot, rem) = divmod(rem * 10, denominator)
+        quotients.append(quot)
+
+    # if rem is not 0 this is a repeating decimal
+    repeat_len = 0 if rem == 0 else len(remainders) - remainders.index(rem)
+    return (quotients, repeat_len)
+
+def long_decimal_division(divisor, dividend):
+    """ Precise division of two precise quantities.
+
+        :param divisor: the divisor
+        :type divisor: any precise numeric quantity
+        :param dividend: the dividend
+        :type dividend: any precise numeric quantity
+        :returns: the result of long division
+        :rtype: a tuple of int * list * integer
+        :raises :class:`SizeValueError`: on bad input
+
+        The result is the number to the left of the decimal
+        point, a list of the digits to the right of the decimal point,
+        and the length of the repeating part. A zero indicates that the
+        decimal is non-repeating, or equivalently, that its one
+        repeating digit is 0.
+    """
+    if not isinstance(divisor, PRECISE_NUMERIC_TYPES):
+        raise SizeValueError(
+           divisor,
+           "divisor",
+           "divisor must be a precise numeric type"
+       )
+
+    if not isinstance(dividend, PRECISE_NUMERIC_TYPES):
+        raise SizeValueError(
+           dividend,
+           "dividend",
+           "dividend must be a precise numeric type"
+       )
+
+    if divisor == 0:
+        raise SizeValueError(divisor, "divisor")
+
+    (dividend, divisor) = (Fraction(dividend), Fraction(divisor))
+
+    (left, rem) = divmod(dividend, divisor)
+    fractional_part = rem / divisor
+    (right, num_repeating) = get_repeating_fraction(
+       fractional_part.numerator,
+       fractional_part.denominator
+    )
+
+    return (left, right, num_repeating)
 
 def convert_magnitude(value, max_places=2, context=DefaultContext):
     """ Convert magnitude to a decimal string.

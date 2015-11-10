@@ -29,7 +29,10 @@ from bytesize._constants import RoundingMethods
 from bytesize._errors import SizeValueError
 from bytesize._util.misc import convert_magnitude
 from bytesize._util.misc import format_magnitude
+from bytesize._util.misc import long_decimal_division
 from bytesize._util.misc import round_fraction
+
+from .utils import NUMBERS_STRATEGY
 
 
 class FormatTestCase(unittest.TestCase):
@@ -111,3 +114,87 @@ class RoundingTestCase(unittest.TestCase):
             self.assertEqual(r, 1)
         else:
             self.assertEqual(r, 0)
+
+class LongDecimalDivisionTestCase(unittest.TestCase):
+    """
+    Test long decimal division.
+    """
+
+    def testException(self):
+        """
+        Test exceptions.
+        """
+        with self.assertRaises(SizeValueError):
+            long_decimal_division(1.2, 1)
+        with self.assertRaises(SizeValueError):
+            long_decimal_division(1, 1.2)
+        with self.assertRaises(SizeValueError):
+            long_decimal_division(0, 1)
+
+    @given(
+       NUMBERS_STRATEGY.filter(lambda x: x != 0),
+       strategies.integers().filter(lambda x: x != 0)
+    )
+    def testExact(self, divisor, multiplier):
+        """
+        A divisor that divides the dividend has no decimal part.
+        """
+        dividend = Fraction(divisor) * multiplier
+        res = long_decimal_division(divisor, dividend)
+        self.assertEqual(res[2], 0)
+        self.assertEqual(res[1], [])
+
+    @given(
+       NUMBERS_STRATEGY.filter(lambda x: x != 0),
+       strategies.integers().filter(lambda x: x != 0)
+    )
+    def testNonRepeatingDecimal(self, divisor, multiplier):
+        """
+        Should always end in .5.
+        """
+        dividend = Fraction(divisor) * (multiplier + Fraction(1, 2))
+        res = long_decimal_division(divisor, dividend)
+        self.assertEqual(res[2], 0)
+        self.assertEqual(res[1], [5])
+
+    @given(
+       NUMBERS_STRATEGY.filter(lambda x: x != 0),
+       strategies.integers().filter(lambda x: x != 0)
+    )
+    def testRepeatingDecimal(self, divisor, multiplier):
+        """
+        Should always end in .33333.....
+        """
+        dividend = Fraction(divisor) * (multiplier + Fraction(1, 3))
+        res = long_decimal_division(divisor, dividend)
+        self.assertEqual(res[2], 1)
+        self.assertEqual(res[1], [3])
+        self.assertEqual(res[0], multiplier)
+
+    @given(
+       NUMBERS_STRATEGY.filter(lambda x: x != 0),
+       strategies.integers().filter(lambda x: x != 0)
+    )
+    def testComplexRepeatingDecimal(self, divisor, multiplier):
+        """
+        Should always end in .16666.....
+        """
+        dividend = Fraction(divisor) * (multiplier + Fraction(1, 6))
+        res = long_decimal_division(divisor, dividend)
+        self.assertEqual(res[2], 1)
+        self.assertEqual(res[1], [1, 6])
+        self.assertEqual(res[0], multiplier)
+
+    @given(
+       NUMBERS_STRATEGY.filter(lambda x: x != 0),
+       strategies.integers().filter(lambda x: x != 0)
+    )
+    def testMoreComplexRepeatingDecimal(self, divisor, multiplier):
+        """
+        Should always end in .142857142857....
+        """
+        dividend = Fraction(divisor) * (multiplier + Fraction(1, 7))
+        res = long_decimal_division(divisor, dividend)
+        self.assertEqual(res[2], 6)
+        self.assertEqual(res[1], [1, 4, 2, 8, 5, 7])
+        self.assertEqual(res[0], multiplier)

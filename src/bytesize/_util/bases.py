@@ -18,7 +18,6 @@
 
 """ Utilities for base conversions. """
 
-from .._errors import SizeValueError
 
 def to_int(number, base):
     """ Convert number to an int.
@@ -67,43 +66,3 @@ def convert_to(number, from_base, to_base):
     """
     value = to_int(number, from_base)
     return from_int(value, to_base)
-
-def long_decimal_division(divisor, dividend):
-    """ Precise division of two integer quantities.
-
-        :param divisor: the divisor
-        :type divisor: any precise numeric quantity
-        :param dividend: the dividend
-        :type dividend: any precise numeric quantity
-        :returns: the result of long division
-        :rtype: a tuple of int * list * integer
-        :raises :class:`SizeValueError`: on bad input
-
-        The result is the number to the left of the decimal
-        point, a list of the digits to the right of the decimal point,
-        and the length of the repeating part. A zero indicates that the
-        decimal is non-repeating, or equivalently, that its one
-        repeating digit is 0.
-    """
-    if isinstance(divisor, float):
-        raise SizeValueError("divisor must not be a float")
-
-    if isinstance(divisor, float):
-        raise SizeValueError("dividend must not be a float")
-
-    # pylint: disable=unidiomatic-typecheck
-    if type(divisor) != type(dividend):
-        raise SizeValueError("divisor and dividend must have the same type")
-
-    (left, rem) = divmod(dividend, divisor)
-
-    dividends = []
-    right = []
-    while not dividend in dividends:
-        quotient = dividend / rem
-        right.append(quotient)
-        dividend = dividend - quotient * rem
-        dividend = dividend * 10
-
-    start = dividends.index(dividend)
-    return (left, right, len(dividends) - start)
