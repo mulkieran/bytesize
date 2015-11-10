@@ -19,6 +19,7 @@
 """ Test for utility functions. """
 from hypothesis import given
 from hypothesis import strategies
+from hypothesis import Settings
 import unittest
 
 from decimal import Decimal
@@ -47,7 +48,8 @@ class FormatTestCase(unittest.TestCase):
 
     @given(
        strategies.integers(),
-       strategies.integers(min_value=0)
+       strategies.integers(min_value=0),
+       settings=Settings(max_examples=10)
     )
     def testExactness(self, n, e):
         """ When max_places is not specified and the denominator of
@@ -70,7 +72,8 @@ class RoundingTestCase(unittest.TestCase):
             round_fraction(Fraction(16, 32), "a string")
 
     @given(
-       strategies.integers(min_value=1, max_value=9)
+       strategies.integers(min_value=1, max_value=9),
+       settings=Settings(max_examples=20)
     )
     def testRounding(self, i):
         """ Rounding various values according to various methods. """
@@ -108,7 +111,8 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x > 0)
+       strategies.integers().filter(lambda x: x > 0),
+       settings=Settings(max_examples=20)
     )
     def testExact(self, divisor, multiplier):
         """
@@ -123,7 +127,8 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x > 0)
+       strategies.integers().filter(lambda x: x > 0),
+       settings=Settings(max_examples=20)
     )
     def testNonRepeatingDecimal(self, divisor, multiplier):
         """
@@ -138,7 +143,8 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x > 0)
+       strategies.integers().filter(lambda x: x > 0),
+       settings=Settings(max_examples=20)
     )
     def testRepeatingDecimal(self, divisor, multiplier):
         """
@@ -153,7 +159,8 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x > 0)
+       strategies.integers().filter(lambda x: x > 0),
+       settings=Settings(max_examples=20)
     )
     def testComplexRepeatingDecimal(self, divisor, multiplier):
         """
@@ -168,7 +175,8 @@ class LongDecimalDivisionTestCase(unittest.TestCase):
 
     @given(
        NUMBERS_STRATEGY.filter(lambda x: x != 0),
-       strategies.integers().filter(lambda x: x > 0)
+       strategies.integers().filter(lambda x: x > 0),
+       settings=Settings(max_examples=20)
     )
     def testMoreComplexRepeatingDecimal(self, divisor, multiplier):
         """

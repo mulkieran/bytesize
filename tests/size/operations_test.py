@@ -127,7 +127,7 @@ class AdditionTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) + 2
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY)
+    @given(SIZE_STRATEGY, SIZE_STRATEGY, settings=Settings(max_examples=10))
     def testAddition(self, s1, s2):
         """ Test addition. """
         self.assertEqual(s1 + s2, Size(s1.magnitude + s2.magnitude))
@@ -150,13 +150,21 @@ class DivmodTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpValueError):
             divmod(Size(12), Decimal('NaN'))
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Size(0)))
+    @given(
+       SIZE_STRATEGY,
+       SIZE_STRATEGY.filter(lambda x: x != Size(0)),
+       settings=Settings(max_examples=10)
+    )
     def testDivmodWithSize(self, s1, s2):
         """ Test divmod with a size. """
         (div, rem) = divmod(s1.magnitude, s2.magnitude)
         self.assertEqual(divmod(s1, s2), (div, Size(rem)))
 
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
+    @given(
+       SIZE_STRATEGY,
+       NUMBERS_STRATEGY.filter(lambda x: x != 0),
+       settings=Settings(max_examples=10)
+    )
     def testDivmodWithNumber(self, s1, s2):
         """ Test divmod with a number. """
         (div, rem) = divmod(s1.magnitude, Fraction(s2))
@@ -180,12 +188,20 @@ class FloordivTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpValueError):
             Size(12) // Decimal('NaN')
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Size(0)))
+    @given(
+       SIZE_STRATEGY,
+       SIZE_STRATEGY.filter(lambda x: x != Size(0)),
+       settings=Settings(max_examples=10)
+    )
     def testFloordivWithSize(self, s1, s2):
         """ Test floordiv with a size. """
         self.assertEqual(s1 // s2, s1.magnitude // s2.magnitude)
 
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
+    @given(
+       SIZE_STRATEGY,
+       NUMBERS_STRATEGY.filter(lambda x: x != 0),
+       settings=Settings(max_examples=10)
+    )
     def testFloordivWithNumber(self, s1, s2):
         """ Test floordiv with a number. """
         self.assertEqual(s1 // s2, Size(s1.magnitude // Fraction(s2)))
@@ -208,12 +224,20 @@ class ModTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpValueError):
             Size(12) % Decimal('NaN')
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Size(0)))
+    @given(
+       SIZE_STRATEGY,
+       SIZE_STRATEGY.filter(lambda x: x != Size(0)),
+       settings=Settings(max_examples=10)
+    )
     def testModWithSize(self, s1, s2):
         """ Test mod with a size. """
         self.assertEqual(s1 % s2, Size(s1.magnitude % s2.magnitude))
 
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY.filter(lambda x: x != 0))
+    @given(
+       SIZE_STRATEGY,
+       NUMBERS_STRATEGY.filter(lambda x: x != 0),
+       settings=Settings(max_examples=10)
+    )
     def testModWithNumber(self, s1, s2):
         """ Test mod with a number. """
         self.assertEqual(s1 % s2, Size(s1.magnitude % Fraction(s2)))
@@ -232,7 +256,7 @@ class MultiplicationTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) * 'str'
 
-    @given(SIZE_STRATEGY, NUMBERS_STRATEGY)
+    @given(SIZE_STRATEGY, NUMBERS_STRATEGY, settings=Settings(max_examples=10))
     def testMultiplication(self, s, n):
         """ Test multiplication. """
         self.assertEqual(s * n, Size(Fraction(n) * s.magnitude))
@@ -251,7 +275,11 @@ class RdivmodTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(12).__rdivmod__(32)
 
-    @given(SIZE_STRATEGY.filter(lambda x: x != Size(0)), SIZE_STRATEGY)
+    @given(
+       SIZE_STRATEGY.filter(lambda x: x != Size(0)),
+       SIZE_STRATEGY,
+       settings=Settings(max_examples=10)
+    )
     def testRdivmodWithSize(self, s1, s2):
         """ Test divmod with a size. """
         (div, rem) = divmod(s2.magnitude, s1.magnitude)
@@ -271,7 +299,11 @@ class RfloordivTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(12).__rfloordiv__(Decimal('NaN'))
 
-    @given(SIZE_STRATEGY.filter(lambda x: x != Size(0)), SIZE_STRATEGY)
+    @given(
+       SIZE_STRATEGY.filter(lambda x: x != Size(0)),
+       SIZE_STRATEGY,
+       settings=Settings(max_examples=10)
+    )
     def testRfloordivWithSize(self, s1, s2):
         """ Test floordiv with a size. """
         self.assertEqual(s1.__rfloordiv__(s2), s2.magnitude // s1.magnitude)
@@ -292,7 +324,11 @@ class RmodTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(12).__rmod__(Decimal('NaN'))
 
-    @given(SIZE_STRATEGY.filter(lambda x: x != Size(0)), SIZE_STRATEGY)
+    @given(
+       SIZE_STRATEGY.filter(lambda x: x != Size(0)),
+       SIZE_STRATEGY,
+       settings=Settings(max_examples=10)
+    )
     def testRmodWithSize(self, s1, s2):
         """ Test rmod with a size. """
         self.assertEqual(s1.__rmod__(s2), Size(s2.magnitude % s1.magnitude))
@@ -307,7 +343,7 @@ class RsubTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0).__rsub__(2)
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY)
+    @given(SIZE_STRATEGY, SIZE_STRATEGY, settings=Settings(max_examples=10))
     def testRsub(self, s1, s2):
         """ Test __rsub__. """
         self.assertEqual(s1.__rsub__(s2), Size(s2.magnitude - s1.magnitude))
@@ -328,7 +364,11 @@ class RtruedivTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(12).__rtruediv__(Decimal('NaN'))
 
-    @given(SIZE_STRATEGY.filter(lambda x: x != Size(0)), SIZE_STRATEGY)
+    @given(
+       SIZE_STRATEGY.filter(lambda x: x != Size(0)),
+       SIZE_STRATEGY,
+       settings=Settings(max_examples=10)
+    )
     def testTruedivWithSize(self, s1, s2):
         """ Test truediv with a size. """
         self.assertEqual(s1.__rtruediv__(s2), s2.magnitude / s1.magnitude)
@@ -345,7 +385,7 @@ class SubtractionTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) - 2
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY)
+    @given(SIZE_STRATEGY, SIZE_STRATEGY, settings=Settings(max_examples=10))
     def testSubtraction(self, s1, s2):
         """ Test subtraction. """
         self.assertEqual(s1 - s2, Size(s1.magnitude - s2.magnitude))
@@ -368,7 +408,11 @@ class TruedivTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpValueError):
             Size(12) / Decimal('NaN')
 
-    @given(SIZE_STRATEGY, SIZE_STRATEGY.filter(lambda x: x != Size(0)))
+    @given(
+       SIZE_STRATEGY,
+       SIZE_STRATEGY.filter(lambda x: x != Size(0)),
+       settings=Settings(max_examples=10)
+    )
     def testTruedivWithSize(self, s1, s2):
         """ Test truediv with a size. """
         self.assertEqual(s1 / s2, s1.magnitude / s2.magnitude)
