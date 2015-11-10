@@ -34,7 +34,9 @@ from bytesize import StrConfig
 
 from bytesize._config import SizeConfig
 
+from bytesize._errors import SizeFractionalResultError
 from bytesize._errors import SizeValueError
+
 
 class ConstructionTestCase(unittest.TestCase):
     """ Test construction of Size objects. """
@@ -246,3 +248,23 @@ class ConfigurationTestCase(unittest.TestCase):
         # deviation is less than 1/2 of 1% of 1024
         s = Size(16384 + (eps - 1))
         self.assertEqual(str(s), "@16 KiB")
+
+
+class ComputationTestCase(unittest.TestCase):
+    """ Test setting configuration for computation. """
+
+    def setUp(self):
+        """ Get current config. """
+        self.strict = SizeConfig.STRICT
+
+    def tearDown(self):
+        """ Reset configuration to default. """
+        SizeConfig.STRICT = self.strict
+
+    def testFractionalBytes(self):
+        """
+        Test that error is raised on fractional bytes when EXACT is True.
+        """
+        SizeConfig.STRICT = True
+        with self.assertRaises(SizeFractionalResultError):
+            Size(Fraction(1, 2))

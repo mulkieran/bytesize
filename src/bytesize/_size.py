@@ -31,6 +31,7 @@ import six
 
 from ._config import SizeConfig
 
+from ._errors import SizeFractionalResultError
 from ._errors import SizeNonsensicalBinOpError
 from ._errors import SizeNonsensicalBinOpValueError
 from ._errors import SizePowerResultError
@@ -83,6 +84,8 @@ class Size(object):
         else:
             raise SizeValueError(value, "value")
 
+        if SizeConfig.STRICT is True and magnitude.denominator != 1:
+            raise SizeFractionalResultError()
         self._magnitude = magnitude
 
     @property

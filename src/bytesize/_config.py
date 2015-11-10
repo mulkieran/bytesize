@@ -136,6 +136,8 @@ class SizeConfig(object):
     INPUT_CONFIG = InputConfig(B, RoundingMethods.ROUND_DOWN)
     """ Default configuration for interpreting input values. """
 
+    STRICT = False
+
     @classmethod
     def set_str_config(cls, config):
         """ Set the configuration for __str__ method for all Size objects.

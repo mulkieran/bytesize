@@ -111,3 +111,9 @@ class SizePowerResultError(SizeUnrepresentableResultError):
 
     def __str__(self):
         return  "requested operation result requires non-unit power of bytes"
+
+class SizeFractionalResultError(SizeUnrepresentableResultError):
+    """ Error when Size construction is strict. """
+
+    def __str__(self):
+        return "requested operation result has a fractional quantity of bytes"
