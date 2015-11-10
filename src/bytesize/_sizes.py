@@ -28,9 +28,9 @@ def getSizeFromInput(value=0, units=None, config=None):
         :param value: a size value, default is 0
         :type value: Size, or any finite numeric type (possibly as str)
         :param units: the units of the size, default is None
-        :type units: any of the publicly defined units constants
+        :type units: any of the defined units constants or Size or NoneType
         :param config: configures interpretation of inputs
-        :type config: a member of :class:`InputConfig`
+        :type config: a member of :class:`InputConfig` or NoneType
         :returns: a Size object
         :rtype: :class:`Size`
         :raises SizeValueError: on bad parameters
