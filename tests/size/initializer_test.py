@@ -57,8 +57,14 @@ class InitializerTestCase(unittest.TestCase):
              strategies.decimals().filter(lambda x: x.is_finite())
           )
        ),
-       strategies.sampled_from(UNITS())
+       strategies.one_of(
+          strategies.sampled_from(UNITS()),
+          strategies.builds(Size, strategies.fractions())
+       )
     )
     def testInitialization(self, s, u):
         """ Test the initializer. """
-        self.assertEqual(int(Size(s, u)), int(Fraction(s) * int(u)))
+        self.assertEqual(
+           Size(s, u).magnitude,
+           Fraction(s) * (getattr(u, "magnitude", None) or int(u))
+        )

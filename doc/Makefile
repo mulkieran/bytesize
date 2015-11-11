@@ -8,7 +8,7 @@ SPHINXAPIOPTS = --private --separate
 SPHINXAPIDOC  = sphinx-apidoc
 PAPER         =
 BUILDDIR      = _build
-SOURCEDIR     = ../bytesize
+SOURCEDIR     = ../src/bytesize
 TESTDIR       = ../tests
 
 # Internal variables.

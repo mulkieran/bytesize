@@ -19,7 +19,9 @@
 """ Test for error classes. """
 import unittest
 
+from bytesize._errors import SizeFractionalResultError
 from bytesize._errors import SizeNonsensicalBinOpError
+from bytesize._errors import SizeNonsensicalBinOpValueError
 from bytesize._errors import SizePowerResultError
 from bytesize._errors import SizeValueError
 
@@ -31,9 +33,17 @@ class ErrorTestCase(unittest.TestCase):
         self.assertIsNotNone(str(SizeValueError("junk", "junk", "junk")))
         self.assertIsNotNone(str(SizeValueError("junk", "junk")))
 
+    def testSizeFractionalResultError(self):
+        """ Miscellaneous tests for the method. """
+        self.assertIsNotNone(str(SizeFractionalResultError()))
+
     def testSizeNonsensicalBinOpError(self):
         """ Miscellaneous tests for the method. """
         self.assertIsNotNone(str(SizeNonsensicalBinOpError("+", 2)))
+
+    def testSizeNonsensicalBinOpValueError(self):
+        """ Miscellaneous tests for the method. """
+        self.assertIsNotNone(str(SizeNonsensicalBinOpValueError("+", 2)))
 
     def testSizePowerResultError(self):
         """ Miscellaneous tests for the method. """

@@ -18,6 +18,9 @@
 
 """ Configuration of the bytesize package. """
 
+from ._constants import B
+from ._constants import RoundingMethods
+
 class StrConfig(object):
     """ Configuration for __str__ method.
 
@@ -45,6 +48,7 @@ class StrConfig(object):
        "binary_units=%(binary_units)s",
        "max_places=%(max_places)s",
        "min_value=%(strip)s",
+       "show_approx_str=%(show_approx_str)s",
        "strip=%(strip)s"
     ])
 
@@ -53,7 +57,8 @@ class StrConfig(object):
        max_places=2,
        strip=False,
        min_value=1,
-       binary_units=True
+       binary_units=True,
+       show_approx_str=True
     ):
         """ Initializer.
 
@@ -63,17 +68,21 @@ class StrConfig(object):
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int or Decimal
             :param bool binary_units: binary units if True, else SI
+            :param bool show_approx_str: distinguish approximate str values
         """
+        # pylint: disable=too-many-arguments
         self._max_places = max_places
         self._strip = strip
         self._min_value = min_value
         self._binary_units = binary_units
+        self._show_approx_str = show_approx_str
 
     def __str__(self):
         values = {
            'binary_units' : self.binary_units,
            'max_places' : self.max_places,
            'min_value' : self.min_value,
+           'show_approx_str' : self.show_approx_str,
            'strip' : self.strip
         }
         return "StrConfig(%s)" % (self._FMT_STR % values)
@@ -84,10 +93,72 @@ class StrConfig(object):
     min_value = property(lambda s: s._min_value)
     strip = property(lambda s: s._strip)
     binary_units = property(lambda s: s._binary_units)
+    show_approx_str = property(lambda s: s._show_approx_str)
 
-class Defaults(object):
-    """ Configuration defaults. """
+class InputConfig(object):
+    """ Configuration for input of Sizes.
+
+        Specifies rounding unit and method for Sizes constructed from
+        user input.
+    """
     # pylint: disable=too-few-public-methods
 
-    STR_CONFIG = StrConfig(2, False, 1, True)
+    _FMT_STR = ", ".join(["method=%(method)s", "unit=%(unit)s"])
+
+    def __init__(self, unit=B, method=RoundingMethods.ROUND_DOWN):
+        """ Initializer.
+
+            :param unit: unit to round to, default is B
+            :type unit: an instance of :func:`._constants.UNITS`
+            :param method: rounding method, default is ROUND_DOWN
+            :type method: instance of :func:`._constants.ROUNDING_METHODS`
+        """
+        self._unit = unit
+        self._method = method
+
+    def __str__(self):
+        values = {'method' : self.method, 'unit' : self.unit}
+        return "InputConfig(%s)" % (self._FMT_STR % values)
+    __repr__ = __str__
+
+    # pylint: disable=protected-access
+    method = property(lambda s: s._method)
+    unit = property(lambda s: s._unit)
+
+
+class SizeConfig(object):
+    """ Configuration for :class:`Size` class. """
+    # pylint: disable=too-few-public-methods
+
+    STR_CONFIG = StrConfig(2, False, 1, True, True)
     """ Default configuration for string display. """
+
+    INPUT_CONFIG = InputConfig(B, RoundingMethods.ROUND_DOWN)
+    """ Default configuration for interpreting input values. """
+
+    STRICT = False
+
+    @classmethod
+    def set_str_config(cls, config):
+        """ Set the configuration for __str__ method for all Size objects.
+
+            :param :class:`StrConfig` config: a configuration object
+        """
+        cls.STR_CONFIG = StrConfig(
+            binary_units=config.binary_units,
+            max_places=config.max_places,
+            min_value=config.min_value,
+            show_approx_str=config.show_approx_str,
+            strip=config.strip
+        )
+
+    @classmethod
+    def set_input_config(cls, config):
+        """ Set the configuration for input method for all Size objects.
+
+            :param :class:`.InputConfig` config: a configuration object
+        """
+        cls.INPUT_CONFIG = InputConfig(
+            method=config.method,
+            unit=config.unit
+        )
