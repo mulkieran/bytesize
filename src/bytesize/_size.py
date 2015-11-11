@@ -43,7 +43,7 @@ from ._constants import DecimalUnits
 from ._constants import PRECISE_NUMERIC_TYPES
 
 from ._util.misc import decimal_magnitude
-from ._util.misc import format_magnitude
+from ._util.misc import get_string_info
 from ._util.misc import round_fraction
 
 _BYTES_SYMBOL = "B"
@@ -107,17 +107,19 @@ class Size(object):
            min_value=config.min_value,
            binary_units=config.binary_units
         )
-        res = format_magnitude(
+
+        (exact, value) = get_string_info(
            magnitude,
            max_places=config.max_places,
            strip=config.strip
         )
 
-        if Fraction(res) != magnitude and config.show_approx_str:
-            modifier = "@"
-        else:
+        if exact and config.show_approx_str:
             modifier = ""
-        return modifier + res + " " + units.abbr + _BYTES_SYMBOL
+        else:
+            modifier = "@"
+
+        return modifier + value + " " + units.abbr + _BYTES_SYMBOL
 
     def __str__(self):
         return self.getString(SizeConfig.STR_CONFIG)

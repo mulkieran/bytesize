@@ -249,6 +249,22 @@ def format_magnitude(value, max_places=2, strip=False):
 
     return ret
 
+def get_string_info(magnitude, max_places, strip):
+    """
+    Get information about the string that represents this magnitude.
+
+    :param Fraction magnitude: the magnitude
+    :param int max_places: the maximum number of places after the decimal pt
+    :param bool strip: whether to strip trailing zeros
+    :returns: a pair, indicating whether the value is exact and the value
+    :rtypes: tuple of bool * str
+    """
+    res = format_magnitude(magnitude, max_places=max_places, strip=strip)
+    if Fraction(res) == magnitude:
+        return (True, res)
+    else:
+        return (False, res)
+
 def round_fraction(value, rounding):
     """ Round a fraction to an integer according to rounding method.
 
