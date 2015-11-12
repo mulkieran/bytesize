@@ -213,7 +213,7 @@ def convert_magnitude(value, places=2):
         decider = next((d for d in next_digits if d != 5), None)
         if decider is not None:
             if decider > 5:
-                right = str(int("".join(str(x) for x in right)) + 1)
+                right = str(int("".join(str(x) for x in right) or "0") + 1)
                 right = [l for l in right]
         if len(right) > places:
             left = left + int(right[0])
