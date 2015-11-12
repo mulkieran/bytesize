@@ -60,7 +60,8 @@ class SizeTestCase(unittest.TestCase):
           max_places=strategies.integers().filter(lambda x: x >= 0),
           min_value=strategies.fractions(),
           show_approx_str=strategies.booleans(),
-          strip=strategies.booleans()
+          strip=strategies.booleans(),
+          exact_value=strategies.booleans()
        ),
        settings=Settings(max_examples=30)
     )
