@@ -1,4 +1,9 @@
 *.pyc
+*.swp
+*.egg-info
+build
+dist
+.cache
 
 doc/_build
 doc/bytesize
