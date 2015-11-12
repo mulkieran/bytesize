@@ -229,37 +229,16 @@ def convert_magnitude(value, places=2):
     else:
         return "%s%s" % (sign_str, left)
 
-
-def format_magnitude(value, max_places=2, strip=False):
-    """ Format a numeric value.
-
-        :param value: any value
-        :type value: a numeric value, not a float
-        :param max_places: number of decimal places to use, default is 2
-        :type max_place: an integer type or NoneType
-        :param bool strip: True if trailing zeros are to be stripped
-
-        :returns: the formatted value
-        :rtype: str
-    """
-    ret = convert_magnitude(value, max_places)
-
-    if '.' in ret and strip:
-        ret = ret.rstrip("0").rstrip(".")
-
-    return ret
-
-def get_string_info(magnitude, max_places, strip):
+def get_string_info(magnitude, places):
     """
     Get information about the string that represents this magnitude.
 
     :param Fraction magnitude: the magnitude
-    :param int max_places: the maximum number of places after the decimal pt
-    :param bool strip: whether to strip trailing zeros
+    :param int places: the number of places after the decimal pt
     :returns: a pair, indicating whether the value is exact and the value
     :rtypes: tuple of bool * str
     """
-    res = format_magnitude(magnitude, max_places=max_places, strip=strip)
+    res = convert_magnitude(magnitude, places=places)
     if Fraction(res) == magnitude:
         return (True, res)
     else:

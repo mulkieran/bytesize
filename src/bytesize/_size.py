@@ -108,11 +108,10 @@ class Size(object):
            binary_units=config.binary_units
         )
 
-        (exact, value) = get_string_info(
-           magnitude,
-           max_places=config.max_places,
-           strip=config.strip
-        )
+        (exact, value) = get_string_info(magnitude, places=config.max_places)
+
+        if '.' in value and config.strip:
+            value = value.rstrip("0").rstrip(".")
 
         if exact and config.show_approx_str:
             modifier = ""
