@@ -33,10 +33,9 @@ quantities, are disallowed by this requirement.
 This module does not accomodate multi-dimensionality of byte quantities.
 Consequently, multiplying one Size object by another Size object will cause
 an error to be raised, since bytes^2 is not representable by the module.
-For most uses, and for all uses in blivet from which this module originates,
-any operation which would yield a multi-dimensional quantity of bytes is not
-useful. There are no plans to adapt this package so that it can accomodate
-multi-dimensionality of bytes.
+For most uses any operation which would yield a multi-dimensional quantity
+of bytes is not useful. There are no plans to adapt this package so that it
+can accomodate multi-dimensionality of bytes.
 
 Numerous computations with bytes are nonsensical. For example, 2 raised to a
 power which is some number of bytes, is a meaningless computation. All such
