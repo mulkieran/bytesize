@@ -43,7 +43,7 @@ from ._constants import DecimalUnits
 from ._constants import PRECISE_NUMERIC_TYPES
 
 from ._util.misc import decimal_magnitude
-from ._util.misc import format_magnitude
+from ._util.misc import get_string_info
 from ._util.misc import round_fraction
 
 _BYTES_SYMBOL = "B"
@@ -105,19 +105,22 @@ class Size(object):
         """
         (magnitude, units) = self.components(
            min_value=config.min_value,
-           binary_units=config.binary_units
-        )
-        res = format_magnitude(
-           magnitude,
-           max_places=config.max_places,
-           strip=config.strip
+           binary_units=config.binary_units,
+           exact_value=config.exact_value,
+           max_places=config.max_places
         )
 
-        if Fraction(res) != magnitude and config.show_approx_str:
-            modifier = "@"
-        else:
+        (exact, value) = get_string_info(magnitude, places=config.max_places)
+
+        if '.' in value and config.strip:
+            value = value.rstrip("0").rstrip(".")
+
+        if exact and config.show_approx_str:
             modifier = ""
-        return modifier + res + " " + units.abbr + _BYTES_SYMBOL
+        else:
+            modifier = "@"
+
+        return modifier + value + " " + units.abbr + _BYTES_SYMBOL
 
     def __str__(self):
         return self.getString(SizeConfig.STR_CONFIG)
@@ -370,13 +373,20 @@ class Size(object):
         for unit in [B] + units.UNITS():
             yield (self.convertTo(unit), unit)
 
-    def components(self, min_value=1, binary_units=True):
+    def components(
+       self,
+       min_value=1,
+       binary_units=True,
+       exact_value=False,
+       max_places=SizeConfig.STR_CONFIG.max_places
+    ):
         """ Return a representation of this size, decomposed into a
             Fraction value and a unit specifier tuple.
 
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int, long, or Decimal
             :param bool binary_units: binary units if True, else SI
+            :param bool exact_value: use largest bytes that allow exact value
             :returns: a pair of a decimal value and a unit
             :rtype: tuple of Fraction and unit
             :raises SizeValueError: if min_value is not usable
@@ -399,9 +409,17 @@ class Size(object):
         # If the number is so large that no prefix will satisfy this
         # requirement use the largest prefix.
         limit = units.FACTOR * Fraction(min_value)
+        tried = []
         for (value, unit) in self.componentsList(binary_units=binary_units):
+            tried.append((value, unit))
             if abs(value) < limit:
                 break
+
+        if exact_value:
+            for (value, unit) in reversed(tried):
+                (exact, _) = get_string_info(value, max_places)
+                if exact is True:
+                    break
 
         # pylint: disable=undefined-loop-variable
         return (value, unit)

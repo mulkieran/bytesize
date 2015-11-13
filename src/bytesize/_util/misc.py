@@ -213,7 +213,7 @@ def convert_magnitude(value, places=2):
         decider = next((d for d in next_digits if d != 5), None)
         if decider is not None:
             if decider > 5:
-                right = str(int("".join(str(x) for x in right)) + 1)
+                right = str(int("".join(str(x) for x in right) or "0") + 1)
                 right = [l for l in right]
         if len(right) > places:
             left = left + int(right[0])
@@ -229,25 +229,20 @@ def convert_magnitude(value, places=2):
     else:
         return "%s%s" % (sign_str, left)
 
-
-def format_magnitude(value, max_places=2, strip=False):
-    """ Format a numeric value.
-
-        :param value: any value
-        :type value: a numeric value, not a float
-        :param max_places: number of decimal places to use, default is 2
-        :type max_place: an integer type or NoneType
-        :param bool strip: True if trailing zeros are to be stripped
-
-        :returns: the formatted value
-        :rtype: str
+def get_string_info(magnitude, places):
     """
-    ret = convert_magnitude(value, max_places)
+    Get information about the string that represents this magnitude.
 
-    if '.' in ret and strip:
-        ret = ret.rstrip("0").rstrip(".")
-
-    return ret
+    :param Fraction magnitude: the magnitude
+    :param int places: the number of places after the decimal pt
+    :returns: a pair, indicating whether the value is exact and the value
+    :rtypes: tuple of bool * str
+    """
+    res = convert_magnitude(magnitude, places=places)
+    if Fraction(res) == magnitude:
+        return (True, res)
+    else:
+        return (False, res)
 
 def round_fraction(value, rounding):
     """ Round a fraction to an integer according to rounding method.

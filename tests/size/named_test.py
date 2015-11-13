@@ -20,6 +20,7 @@
 
 from hypothesis import given
 from hypothesis import strategies
+from hypothesis import Settings
 import unittest
 
 from fractions import Fraction
@@ -36,6 +37,8 @@ from bytesize._constants import DecimalUnits
 from bytesize._constants import UNITS
 
 from bytesize._errors import SizeValueError
+
+from bytesize._util.misc import get_string_info
 
 from tests.utils import SIZE_STRATEGY
 
@@ -75,11 +78,14 @@ class ComponentsTestCase(unittest.TestCase):
     @given(
        strategies.builds(Size, strategies.integers()),
        strategies.integers(min_value=1),
-       strategies.booleans()
-    )
-    def testResults(self, s, min_value, binary_units):
+       strategies.booleans(),
+       strategies.booleans(),
+       strategies.integers().filter(lambda x: x >= 0 and x < 64),
+       settings=Settings(max_examples=100)
+    ) # pylint: disable=too-many-arguments
+    def testResults(self, s, min_val, binary_units, exact_value, max_places):
         """ Test component results. """
-        (m, u) = s.components(min_value, binary_units)
+        (m, u) = s.components(min_val, binary_units, exact_value, max_places)
         self.assertEqual(m * int(u), int(s))
         if u == B:
             return
@@ -87,7 +93,14 @@ class ComponentsTestCase(unittest.TestCase):
             self.assertIn(u, BinaryUnits.UNITS())
         else:
             self.assertIn(u, DecimalUnits.UNITS())
-        self.assertTrue(abs(m) >= min_value)
+        self.assertTrue(abs(m) >= min_val)
+
+        (exact, value) = get_string_info(m, places=max_places)
+        if exact_value:
+            self.assertTrue(exact)
+            self.assertTrue(Fraction(value) * int(u) == s.magnitude)
+        if not exact:
+            self.assertFalse(Fraction(value) * int(u) == s.magnitude)
 
 class RoundingTestCase(unittest.TestCase):
     """ Test rounding methods. """

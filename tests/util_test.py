@@ -29,8 +29,8 @@ from fractions import Fraction
 from bytesize._constants import RoundingMethods
 from bytesize._errors import SizeValueError
 from bytesize._util.misc import convert_magnitude
-from bytesize._util.misc import format_magnitude
 from bytesize._util.misc import get_repeating_fraction
+from bytesize._util.misc import get_string_info
 from bytesize._util.misc import long_decimal_division
 from bytesize._util.misc import round_fraction
 
@@ -43,9 +43,9 @@ class FormatTestCase(unittest.TestCase):
     def testException(self):
         """ Raises exception on bad input. """
         with self.assertRaises(SizeValueError):
-            format_magnitude(Decimal(200), max_places=-1)
+            get_string_info(Decimal(200), places=-1)
         with self.assertRaises(SizeValueError):
-            format_magnitude(0.1)
+            get_string_info(0.1, places=0)
 
     @given(
        strategies.integers(),

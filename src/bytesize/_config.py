@@ -46,6 +46,7 @@ class StrConfig(object):
 
     _FMT_STR = ", ".join([
        "binary_units=%(binary_units)s",
+       "exact_value=%(exact_value)s",
        "max_places=%(max_places)s",
        "min_value=%(strip)s",
        "show_approx_str=%(show_approx_str)s",
@@ -58,7 +59,8 @@ class StrConfig(object):
        strip=False,
        min_value=1,
        binary_units=True,
-       show_approx_str=True
+       show_approx_str=True,
+       exact_value=False
     ):
         """ Initializer.
 
@@ -69,6 +71,7 @@ class StrConfig(object):
             :type min_value: A precise numeric type: int or Decimal
             :param bool binary_units: binary units if True, else SI
             :param bool show_approx_str: distinguish approximate str values
+            :param bool exact_value: uses largest units that allow exact value
         """
         # pylint: disable=too-many-arguments
         self._max_places = max_places
@@ -76,10 +79,12 @@ class StrConfig(object):
         self._min_value = min_value
         self._binary_units = binary_units
         self._show_approx_str = show_approx_str
+        self._exact_value = exact_value
 
     def __str__(self):
         values = {
            'binary_units' : self.binary_units,
+           'exact_value' : self.exact_value,
            'max_places' : self.max_places,
            'min_value' : self.min_value,
            'show_approx_str' : self.show_approx_str,
@@ -89,6 +94,7 @@ class StrConfig(object):
     __repr__ = __str__
 
     # pylint: disable=protected-access
+    exact_value = property(lambda s: s._exact_value)
     max_places = property(lambda s: s._max_places)
     min_value = property(lambda s: s._min_value)
     strip = property(lambda s: s._strip)
@@ -130,7 +136,7 @@ class SizeConfig(object):
     """ Configuration for :class:`Size` class. """
     # pylint: disable=too-few-public-methods
 
-    STR_CONFIG = StrConfig(2, False, 1, True, True)
+    STR_CONFIG = StrConfig(2, False, 1, True, True, False)
     """ Default configuration for string display. """
 
     INPUT_CONFIG = InputConfig(B, RoundingMethods.ROUND_DOWN)
@@ -149,7 +155,8 @@ class SizeConfig(object):
             max_places=config.max_places,
             min_value=config.min_value,
             show_approx_str=config.show_approx_str,
-            strip=config.strip
+            strip=config.strip,
+            exact_value=config.exact_value
         )
 
     @classmethod
