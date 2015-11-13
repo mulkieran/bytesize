@@ -18,6 +18,7 @@
 
 """ Tests for named methods of Size objects. """
 
+from hypothesis import example
 from hypothesis import given
 from hypothesis import strategies
 from hypothesis import Settings
@@ -76,7 +77,7 @@ class ComponentsTestCase(unittest.TestCase):
             Size(0).components(min_value=3.2)
 
     @given(
-       strategies.builds(Size, strategies.integers()),
+       SIZE_STRATEGY,
        strategies.integers(min_value=1),
        strategies.booleans(),
        strategies.booleans(),
@@ -86,7 +87,7 @@ class ComponentsTestCase(unittest.TestCase):
     def testResults(self, s, min_val, binary_units, exact_value, max_places):
         """ Test component results. """
         (m, u) = s.components(min_val, binary_units, exact_value, max_places)
-        self.assertEqual(m * int(u), int(s))
+        self.assertEqual(m * int(u), s.magnitude)
         if u == B:
             return
         if binary_units:
@@ -113,6 +114,7 @@ class RoundingTestCase(unittest.TestCase):
        ),
        strategies.sampled_from(ROUNDING_METHODS())
     )
+    @example(Size(32), Size(0), ROUND_DOWN)
     def testResults(self, s, unit, rounding):
         """ Test roundTo results. """
         rounded = s.roundTo(unit, rounding)

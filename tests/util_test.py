@@ -28,11 +28,11 @@ from fractions import Fraction
 
 from bytesize._constants import RoundingMethods
 from bytesize._errors import SizeValueError
+from bytesize._util.math_util import get_repeating_fraction
+from bytesize._util.math_util import round_fraction
 from bytesize._util.misc import convert_magnitude
-from bytesize._util.misc import get_repeating_fraction
 from bytesize._util.misc import get_string_info
 from bytesize._util.misc import long_decimal_division
-from bytesize._util.misc import round_fraction
 
 from .utils import NUMBERS_STRATEGY
 
