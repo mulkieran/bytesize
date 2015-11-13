@@ -76,7 +76,7 @@ class ComponentsTestCase(unittest.TestCase):
             Size(0).components(min_value=3.2)
 
     @given(
-       strategies.builds(Size, strategies.integers()),
+       SIZE_STRATEGY,
        strategies.integers(min_value=1),
        strategies.booleans(),
        strategies.booleans(),
@@ -86,7 +86,7 @@ class ComponentsTestCase(unittest.TestCase):
     def testResults(self, s, min_val, binary_units, exact_value, max_places):
         """ Test component results. """
         (m, u) = s.components(min_val, binary_units, exact_value, max_places)
-        self.assertEqual(m * int(u), int(s))
+        self.assertEqual(m * int(u), s.magnitude)
         if u == B:
             return
         if binary_units:
