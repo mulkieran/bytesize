@@ -18,6 +18,7 @@
 
 """ Tests for named methods of Size objects. """
 
+from hypothesis import example
 from hypothesis import given
 from hypothesis import strategies
 from hypothesis import Settings
@@ -113,6 +114,7 @@ class RoundingTestCase(unittest.TestCase):
        ),
        strategies.sampled_from(ROUNDING_METHODS())
     )
+    @example(Size(32), Size(0), ROUND_DOWN)
     def testResults(self, s, unit, rounding):
         """ Test roundTo results. """
         rounded = s.roundTo(unit, rounding)
