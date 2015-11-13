@@ -42,9 +42,10 @@ from ._constants import BinaryUnits
 from ._constants import DecimalUnits
 from ._constants import PRECISE_NUMERIC_TYPES
 
+from ._util.math_util import round_fraction
+
 from ._util.misc import decimal_magnitude
 from ._util.misc import get_string_info
-from ._util.misc import round_fraction
 
 _BYTES_SYMBOL = "B"
 
