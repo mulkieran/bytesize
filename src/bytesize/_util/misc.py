@@ -47,7 +47,7 @@ def decimal_magnitude(value):
 
     sign_str = "-" if sign == -1 else ""
 
-    if non_repeating == []:
+    if non_repeating == [] and repeating == []:
         return "%s%s" % (sign_str, left)
 
     non_repeating_str = "".join(str(x) for x in non_repeating)
