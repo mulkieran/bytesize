@@ -52,6 +52,18 @@ _BYTES_SYMBOL = "B"
 class Size(object):
     """ Class for instantiating Size objects. """
 
+    _FMT_STR = "".join([
+       "%(approx)s",
+       "%(sign)s",
+       "%(left)s",
+       "%(radix)s",
+       "%(right)s",
+       " ",
+       "%(units)s",
+       "%(bytes)s"
+    ])
+
+
     def __init__(self, value=0, units=None):
         """ Initialize a new Size object.
 
@@ -97,6 +109,34 @@ class Size(object):
         """
         return self._magnitude
 
+    def getStringInfo(self, config=SizeConfig.STR_CONFIG):
+        """
+        Return a representation of the size.
+
+        :param :class:`StrConfig` config: representation configuration
+        :returns: a tuple representing the string to display
+        :rtype: tuple of bool * int * str * str * unit
+
+        Components are:
+        1. If true, show approximation symbol.
+        2. -1 for a negative number, 1 for a positive
+        3. a string with the decimal digits to the left of the decimal point
+        4. a string with the decimal digits to the right of the decimal point
+        5. a unit specifier
+
+        """
+        (magnitude, units) = self.components(config)
+
+        (exact, sign, left, right) = get_string_info(
+           magnitude,
+           places=config.max_places
+        )
+
+        if config.strip:
+            right = right.rstrip('0')
+
+        return (not exact and config.show_approx_str, sign, left, right, units)
+
     def getString(self, config=SizeConfig.STR_CONFIG):
         """ Return a string representation of the size.
 
@@ -104,19 +144,19 @@ class Size(object):
             :returns: a string representation
             :rtype: str
         """
-        (magnitude, units) = self.components(config)
+        (approx, sign, left, right, units) = self.getStringInfo(config)
 
-        (exact, value) = get_string_info(magnitude, places=config.max_places)
+        result = {
+           'approx' : "@" if approx else "",
+           'sign': "-" if sign == -1 else "",
+           'left': left,
+           'radix': '.' if right else "",
+           'right' : right,
+           'units' : units.abbr,
+           'bytes' : _BYTES_SYMBOL
+        }
 
-        if '.' in value and config.strip:
-            value = value.rstrip("0").rstrip(".")
-
-        if exact or not config.show_approx_str:
-            modifier = ""
-        else:
-            modifier = "@"
-
-        return modifier + value + " " + units.abbr + _BYTES_SYMBOL
+        return self._FMT_STR % result
 
     def __str__(self):
         return self.getString(SizeConfig.STR_CONFIG)
@@ -402,7 +442,7 @@ class Size(object):
 
         if config.exact_value:
             for (value, unit) in reversed(tried):
-                (exact, _) = get_string_info(value, config.max_places)
+                (exact, _, _, _) = get_string_info(value, config.max_places)
                 if exact is True:
                     break
 

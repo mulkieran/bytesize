@@ -65,8 +65,13 @@ def convert_magnitude(value, places=2):
         :param places: number of decimal places to use, default is 2
         :type places: an integer type or NoneType
 
-        :returns: a string representation of value
-        :rtype: str
+        :returns: a representation of the value
+        :rtype: tuple of int * str * str
+
+        Components of the result are:
+        1. -1 or 1, representing the sign
+        2. a string representing the value to the left of the decimal
+        3. a string representing the value to the right of the decimal
 
         Since a rational number may be a non-terminating decimal
         quantity, this representation is not guaranteed to be exact, regardless
@@ -121,11 +126,7 @@ def convert_magnitude(value, places=2):
     else:
         right = right_side[:] + [0 for _ in range(places - len(right_side))]
 
-    sign_str = '-' if sign == -1 else ""
-    if len(right) > 0:
-        return "%s%s.%s" % (sign_str, left, "".join(str(x) for x in right))
-    else:
-        return "%s%s" % (sign_str, left)
+    return (sign, left, "".join(str(x) for x in right))
 
 def get_string_info(magnitude, places):
     """
@@ -133,11 +134,15 @@ def get_string_info(magnitude, places):
 
     :param Fraction magnitude: the magnitude
     :param int places: the number of places after the decimal pt
-    :returns: a pair, indicating whether the value is exact and the value
-    :rtypes: tuple of bool * str
+    :returns: a tuple with string information
+    :rtypes: tuple of bool * int * str * str
+
+    Components of result are:
+    1. True if the value is exact, otherwise False
+    2. -1 if the value is negative, otherwise 1
+    3. the string representing the numbers to the left of the radix
+    4. the string representing the numbers to the right of the radix
     """
-    res = convert_magnitude(magnitude, places=places)
-    if Fraction(res) == magnitude:
-        return (True, res)
-    else:
-        return (False, res)
+    (sign, left, right) = convert_magnitude(magnitude, places=places)
+    exact = Fraction(sign * Fraction("%s.%s" % (left, right))) == magnitude
+    return (exact, sign, left, right)
