@@ -100,32 +100,38 @@ class DisplayTestCase(unittest.TestCase):
         """ Test behavior on min_value parameter. """
         s = Size(9, MiB)
         self.assertEqual(s.components(), (Fraction(9, 1), MiB))
-        self.assertEqual(s.components(min_value=10), (Fraction(9216, 1), KiB))
+        self.assertEqual(
+           s.components(StrConfig(min_value=10)),
+           (Fraction(9216, 1), KiB)
+        )
 
         s = Size("0.5", GiB)
-        self.assertEqual(s.components(min_value=1), (Fraction(512, 1), MiB))
         self.assertEqual(
-           s.components(min_value=Decimal("0.1")),
+           s.components(StrConfig(min_value=1)),
+           (Fraction(512, 1), MiB)
+        )
+        self.assertEqual(
+           s.components(StrConfig(min_value=Decimal("0.1"))),
            (Fraction(1, 2), GiB)
         )
         self.assertEqual(
-           s.components(min_value=Decimal(1)),
+           s.components(StrConfig(min_value=Decimal(1))),
            (Fraction(512, 1), MiB)
         )
 
         # when min_value is 10 and single digit on left of decimal, display
         # with smaller unit.
         s = Size('7.18', KiB)
-        self.assertEqual(s.components(min_value=10)[1], B)
+        self.assertEqual(s.components(StrConfig(min_value=10))[1], B)
         s = Size('9.68', TiB)
-        self.assertEqual(s.components(min_value=10)[1], GiB)
+        self.assertEqual(s.components(StrConfig(min_value=10))[1], GiB)
         s = Size('4.29', MiB)
-        self.assertEqual(s.components(min_value=10)[1], KiB)
+        self.assertEqual(s.components(StrConfig(min_value=10))[1], KiB)
 
         # when min value is 100 and two digits on left of decimal
         s = Size('14', MiB)
         self.assertEqual(
-           s.components(min_value=100),
+           s.components(StrConfig(min_value=100)),
            (Fraction(14 * 1024, 1), KiB)
         )
 
@@ -133,7 +139,7 @@ class DisplayTestCase(unittest.TestCase):
         """ Test that exceptions are properly raised on bad params. """
         s = Size(500)
         with self.assertRaises(SizeValueError):
-            s.components(min_value=-1)
+            s.components(StrConfig(min_value=-1))
 
     def testRoundingToBytes(self):
         """ Test that second part is B when rounding to bytes. """
@@ -143,7 +149,7 @@ class DisplayTestCase(unittest.TestCase):
     def testSIUnits(self):
         """ Test binary_units param. """
         s = Size(1000)
-        self.assertEqual(s.components(binary_units=False), (1, KB))
+        self.assertEqual(s.components(StrConfig(binary_units=False)), (1, KB))
 
 class ConfigurationTestCase(unittest.TestCase):
     """ Test setting configuration for display. """

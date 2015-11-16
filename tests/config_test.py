@@ -30,6 +30,8 @@ from bytesize._config import StrConfig
 from bytesize._constants import RoundingMethods
 from bytesize._constants import UNITS
 
+from bytesize._errors import SizeValueError
+
 class ConfigTestCase(unittest.TestCase):
     """ Exercise methods of output configuration classes. """
     # pylint: disable=too-few-public-methods
@@ -37,6 +39,15 @@ class ConfigTestCase(unittest.TestCase):
     def testStrConfigObject(self):
         """ Miscellaneous tests for string configuration. """
         self.assertIsNotNone(str(SizeConfig.STR_CONFIG))
+
+    def testException(self):
+        """ Test exceptions. """
+        with self.assertRaises(SizeValueError):
+            StrConfig(min_value=-1)
+        with self.assertRaises(SizeValueError):
+            StrConfig(min_value=3.2)
+        with self.assertRaises(SizeValueError):
+            StrConfig(unit=2)
 
 class InputTestCase(unittest.TestCase):
     """ Exercise methods of input configuration classes. """
@@ -58,10 +69,11 @@ class SizeTestCase(unittest.TestCase):
           StrConfig,
           binary_units=strategies.booleans(),
           max_places=strategies.integers().filter(lambda x: x >= 0),
-          min_value=strategies.fractions(),
+          min_value=strategies.fractions().filter(lambda x: x >= 0),
           show_approx_str=strategies.booleans(),
           strip=strategies.booleans(),
-          exact_value=strategies.booleans()
+          exact_value=strategies.booleans(),
+          unit=strategies.sampled_from(UNITS())
        ),
        settings=Settings(max_examples=30)
     )

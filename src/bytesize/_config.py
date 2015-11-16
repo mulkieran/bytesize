@@ -19,7 +19,11 @@
 """ Configuration of the bytesize package. """
 
 from ._constants import B
+from ._constants import PRECISE_NUMERIC_TYPES
 from ._constants import RoundingMethods
+from ._constants import UNITS
+
+from ._errors import SizeValueError
 
 class StrConfig(object):
     """ Configuration for __str__ method.
@@ -50,7 +54,8 @@ class StrConfig(object):
        "max_places=%(max_places)s",
        "min_value=%(strip)s",
        "show_approx_str=%(show_approx_str)s",
-       "strip=%(strip)s"
+       "strip=%(strip)s",
+       "unit=%(unit)s"
     ])
 
     def __init__(
@@ -60,7 +65,8 @@ class StrConfig(object):
        min_value=1,
        binary_units=True,
        show_approx_str=True,
-       exact_value=False
+       exact_value=False,
+       unit=None
     ):
         """ Initializer.
 
@@ -72,14 +78,31 @@ class StrConfig(object):
             :param bool binary_units: binary units if True, else SI
             :param bool show_approx_str: distinguish approximate str values
             :param bool exact_value: uses largest units that allow exact value
+            :param unit: use the specified unit, overrides other options
         """
         # pylint: disable=too-many-arguments
+        if min_value < 0 or \
+           not isinstance(min_value, PRECISE_NUMERIC_TYPES):
+            raise SizeValueError(
+               min_value,
+               "min_value",
+               "must be a precise positive numeric value."
+            )
+
+        if unit is not None and not unit in UNITS():
+            raise SizeValueError(
+               unit,
+               "unit",
+               "must be one of %s" % ", ".join(str(x) for x in UNITS())
+            )
+
         self._max_places = max_places
         self._strip = strip
         self._min_value = min_value
         self._binary_units = binary_units
         self._show_approx_str = show_approx_str
         self._exact_value = exact_value
+        self._unit = unit
 
     def __str__(self):
         values = {
@@ -88,7 +111,8 @@ class StrConfig(object):
            'max_places' : self.max_places,
            'min_value' : self.min_value,
            'show_approx_str' : self.show_approx_str,
-           'strip' : self.strip
+           'strip' : self.strip,
+           'unit' : self.unit
         }
         return "StrConfig(%s)" % (self._FMT_STR % values)
     __repr__ = __str__
@@ -100,6 +124,7 @@ class StrConfig(object):
     strip = property(lambda s: s._strip)
     binary_units = property(lambda s: s._binary_units)
     show_approx_str = property(lambda s: s._show_approx_str)
+    unit = property(lambda s: s._unit)
 
 class InputConfig(object):
     """ Configuration for input of Sizes.
@@ -136,7 +161,7 @@ class SizeConfig(object):
     """ Configuration for :class:`Size` class. """
     # pylint: disable=too-few-public-methods
 
-    STR_CONFIG = StrConfig(2, False, 1, True, True, False)
+    STR_CONFIG = StrConfig(2, False, 1, True, True, False, None)
     """ Default configuration for string display. """
 
     INPUT_CONFIG = InputConfig(B, RoundingMethods.ROUND_DOWN)
@@ -156,7 +181,8 @@ class SizeConfig(object):
             min_value=config.min_value,
             show_approx_str=config.show_approx_str,
             strip=config.strip,
-            exact_value=config.exact_value
+            exact_value=config.exact_value,
+            unit=config.unit
         )
 
     @classmethod
