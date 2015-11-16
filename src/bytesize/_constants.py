@@ -136,7 +136,7 @@ class BinaryUnits(object):
 
 def UNITS():
     """ All unit constants. """
-    return ([B] + BinaryUnits.UNITS() + DecimalUnits.UNITS())[:]
+    return [B] + BinaryUnits.UNITS() + DecimalUnits.UNITS()
 
 ROUNDING_METHODS = RoundingMethods.METHODS
 
