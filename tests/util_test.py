@@ -59,8 +59,8 @@ class FormatTestCase(unittest.TestCase):
             the value is 2^n * 5^m the result is exact.
         """
         x = Fraction(p * q, p * (2**n * 5**m))
-        converted = convert_magnitude(x, places=None)
-        self.assertEqual(Fraction(converted), x)
+        (sign, left, right) = convert_magnitude(x, places=None)
+        self.assertEqual(sign * Fraction("%s.%s" % (left, right)), x)
 
 
 class RoundingTestCase(unittest.TestCase):

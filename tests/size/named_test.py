@@ -99,7 +99,11 @@ class ComponentsTestCase(unittest.TestCase):
             self.assertEqual(u, config.unit)
 
 
-        (exact, value) = get_string_info(m, places=config.max_places)
+        (exact, sign, left, right) = get_string_info(
+           m,
+           places=config.max_places
+        )
+        value = sign * Fraction("%s.%s" % (left, right))
         if config.exact_value and config.unit is None:
             self.assertTrue(exact)
             self.assertTrue(Fraction(value) * int(u) == s.magnitude)
