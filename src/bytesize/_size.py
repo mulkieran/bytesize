@@ -111,7 +111,7 @@ class Size(object):
         if '.' in value and config.strip:
             value = value.rstrip("0").rstrip(".")
 
-        if exact and config.show_approx_str:
+        if exact or not config.show_approx_str:
             modifier = ""
         else:
             modifier = "@"
