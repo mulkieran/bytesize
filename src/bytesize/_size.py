@@ -97,19 +97,14 @@ class Size(object):
         """
         return self._magnitude
 
-    def getString(self, config):
+    def getString(self, config=SizeConfig.STR_CONFIG):
         """ Return a string representation of the size.
 
-            :param :class:`SizeConfig` config: representation configuration
+            :param :class:`StrConfig` config: representation configuration
             :returns: a string representation
             :rtype: str
         """
-        (magnitude, units) = self.components(
-           min_value=config.min_value,
-           binary_units=config.binary_units,
-           exact_value=config.exact_value,
-           max_places=config.max_places
-        )
+        (magnitude, units) = self.components(config)
 
         (exact, value) = get_string_info(magnitude, places=config.max_places)
 
@@ -374,20 +369,12 @@ class Size(object):
         for unit in [B] + units.UNITS():
             yield (self.convertTo(unit), unit)
 
-    def components(
-       self,
-       min_value=1,
-       binary_units=True,
-       exact_value=False,
-       max_places=SizeConfig.STR_CONFIG.max_places
-    ):
+    def components(self, config=SizeConfig.STR_CONFIG):
         """ Return a representation of this size, decomposed into a
             Fraction value and a unit specifier tuple.
 
-            :param min_value: Lower bound for value, default is 1.
-            :type min_value: A precise numeric type: int, long, or Decimal
-            :param bool binary_units: binary units if True, else SI
-            :param bool exact_value: use largest bytes that allow exact value
+            :param StrConfig config: configuration
+
             :returns: a pair of a decimal value and a unit
             :rtype: tuple of Fraction and unit
             :raises SizeValueError: if min_value is not usable
@@ -395,30 +382,27 @@ class Size(object):
             The meaning of the parameters is the same as for
             :class:`._config.StrConfig`.
         """
-        if min_value < 0 or \
-           not isinstance(min_value, PRECISE_NUMERIC_TYPES):
-            raise SizeValueError(
-               min_value,
-               "min_value",
-               "must be a precise positive numeric value."
-            )
+        units = BinaryUnits if config.binary_units else DecimalUnits
 
-        units = BinaryUnits if binary_units else DecimalUnits
+        if config.unit is not None:
+            return (self.convertTo(config.unit), config.unit)
 
         # Find the smallest prefix which will allow a number less than
         # FACTOR * min_value to the left of the decimal point.
         # If the number is so large that no prefix will satisfy this
         # requirement use the largest prefix.
-        limit = units.FACTOR * Fraction(min_value)
+        limit = units.FACTOR * Fraction(config.min_value)
         tried = []
-        for (value, unit) in self.componentsList(binary_units=binary_units):
+        for (value, unit) in self.componentsList(
+           binary_units=config.binary_units
+        ):
             tried.append((value, unit))
             if abs(value) < limit:
                 break
 
-        if exact_value:
+        if config.exact_value:
             for (value, unit) in reversed(tried):
-                (exact, _) = get_string_info(value, max_places)
+                (exact, _) = get_string_info(value, config.max_places)
                 if exact is True:
                     break
 

@@ -32,6 +32,7 @@ from bytesize import ROUND_DOWN
 from bytesize import ROUND_HALF_UP
 from bytesize import ROUND_UP
 from bytesize import ROUNDING_METHODS
+from bytesize import StrConfig
 
 from bytesize._constants import BinaryUnits
 from bytesize._constants import DecimalUnits
@@ -69,35 +70,37 @@ class ConversionTestCase(unittest.TestCase):
 class ComponentsTestCase(unittest.TestCase):
     """ Test components method. """
 
-    def testException(self):
-        """ Test exceptions. """
-        with self.assertRaises(SizeValueError):
-            Size(0).components(min_value=-1)
-        with self.assertRaises(SizeValueError):
-            Size(0).components(min_value=3.2)
-
     @given(
        SIZE_STRATEGY,
-       strategies.integers(min_value=1),
-       strategies.booleans(),
-       strategies.booleans(),
-       strategies.integers().filter(lambda x: x >= 0 and x < 64),
+       strategies.builds(
+          StrConfig,
+          min_value=strategies.fractions().filter(lambda x: x >= 0),
+          binary_units=strategies.booleans(),
+          exact_value=strategies.booleans(),
+          max_places=strategies.integers().filter(lambda x: x >= 0 and x < 64),
+          unit=strategies.sampled_from(UNITS() + [None])
+       ),
        settings=Settings(max_examples=100)
-    ) # pylint: disable=too-many-arguments
-    def testResults(self, s, min_val, binary_units, exact_value, max_places):
+    )
+    def testResults(self, s, config):
         """ Test component results. """
-        (m, u) = s.components(min_val, binary_units, exact_value, max_places)
+        (m, u) = s.components(config)
         self.assertEqual(m * int(u), s.magnitude)
         if u == B:
             return
-        if binary_units:
-            self.assertIn(u, BinaryUnits.UNITS())
-        else:
-            self.assertIn(u, DecimalUnits.UNITS())
-        self.assertTrue(abs(m) >= min_val)
 
-        (exact, value) = get_string_info(m, places=max_places)
-        if exact_value:
+        if config.unit is None:
+            if config.binary_units:
+                self.assertIn(u, BinaryUnits.UNITS())
+            else:
+                self.assertIn(u, DecimalUnits.UNITS())
+            self.assertTrue(abs(m) >= config.min_value)
+        else:
+            self.assertEqual(u, config.unit)
+
+
+        (exact, value) = get_string_info(m, places=config.max_places)
+        if config.exact_value and config.unit is None:
             self.assertTrue(exact)
             self.assertTrue(Fraction(value) * int(u) == s.magnitude)
         if not exact:
