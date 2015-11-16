@@ -48,15 +48,17 @@ class FormatTestCase(unittest.TestCase):
             get_string_info(0.1, places=0)
 
     @given(
+       strategies.integers(min_value=1),
        strategies.integers(),
-       strategies.integers(min_value=0),
+       strategies.integers(min_value=0, max_value=5),
+       strategies.integers(min_value=0, max_value=5),
        settings=Settings(max_examples=10)
     )
-    def testExactness(self, n, e):
+    def testExactness(self, p, q, n, m):
         """ When max_places is not specified and the denominator of
-            the value is a power of 10 the string result is exact.
+            the value is 2^n * 5^m the result is exact.
         """
-        x = Fraction(n, 10**e)
+        x = Fraction(p * q, p * (2**n * 5**m))
         converted = convert_magnitude(x, places=None)
         self.assertEqual(Fraction(converted), x)
 
