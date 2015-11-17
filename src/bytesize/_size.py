@@ -109,7 +109,7 @@ class Size(object):
         """
         return self._magnitude
 
-    def getDecimalInfo(self, config=SizeConfig.STR_CONFIG):
+    def getDecimalInfo(self, config):
         """
         Get information for the decimal representation of ``self``.
 
@@ -128,7 +128,7 @@ class Size(object):
         (sign, left, non_repeating, repeating) = get_decimal_info(magnitude)
         return (sign, left, non_repeating, repeating, units)
 
-    def getStringInfo(self, config=SizeConfig.STR_CONFIG):
+    def getStringInfo(self, config):
         """
         Return a representation of the size.
 
@@ -150,21 +150,22 @@ class Size(object):
            places=config.max_places
         )
 
-        if config.strip:
-            right = right.rstrip('0')
-
         return (not exact, sign, left, right, units)
 
-    def getString(self, config=SizeConfig.STR_CONFIG):
+    def getString(self, config, display):
         """ Return a string representation of the size.
 
             :param :class:`StrConfig` config: representation configuration
+            :param DisplayConfig display: configuration for display
             :returns: a string representation
             :rtype: str
         """
         (approx, sign, left, right, units) = self.getStringInfo(config)
-        approx_str = config.approx_symbol \
-           if approx and config.show_approx_str else ""
+        approx_str = display.approx_symbol \
+           if approx and display.show_approx_str else ""
+
+        if display.strip:
+            right = right.rstrip('0')
 
         result = {
            'approx' : approx_str,
@@ -179,7 +180,7 @@ class Size(object):
         return self._FMT_STR % result
 
     def __str__(self):
-        return self.getString(SizeConfig.STR_CONFIG)
+        return self.getString(SizeConfig.STR_CONFIG, SizeConfig.DISPLAY_CONFIG)
 
     def __repr__(self):
         (sign, left, non_repeating, repeating) = get_decimal_info(

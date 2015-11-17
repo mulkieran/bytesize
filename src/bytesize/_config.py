@@ -25,15 +25,61 @@ from ._constants import UNITS
 
 from ._errors import SizeValueError
 
+class DisplayConfig(object):
+    """
+    Superficial aspects of display.
+    """
+    # pylint: disable=too-few-public-methods
+
+    _FMT_STR = ", ".join([
+       "approx_symbol=%(approx_symbol)s",
+       "show_approx_str=%(show_approx_str)s",
+       "strip=%(strip)s",
+    ])
+
+    def __init__(
+       self,
+       strip=False,
+       show_approx_str=True,
+       approx_symbol='@'
+    ):
+        """
+        Initializer.
+
+        :param bool strip: True if trailing zeros are to be stripped.
+        :param bool show_approx_str: distinguish approximate str values
+        :param str approx_symbol: symbol to indicate approximation
+
+        If strip is True and there is a fractional quantity, trailing
+        zeros are removed up to (and including) the decimal point.
+
+        The default for strip is False, so that precision is always shown
+        to max_places.
+        """
+        self._strip = strip
+        self._show_approx_str = show_approx_str
+        self._approx_symbol = approx_symbol
+
+    def __str__(self):
+        values = {
+           'approx_symbol': self.approx_symbol,
+           'show_approx_str' : self.show_approx_str,
+           'strip' : self.strip,
+        }
+        return "StrConfig(%s)" % (self._FMT_STR % values)
+    __repr__ = __str__
+
+    # pylint: disable=protected-access
+    approx_symbol = property(lambda s: s._approx_symbol)
+    strip = property(lambda s: s._strip)
+    show_approx_str = property(lambda s: s._show_approx_str)
+
 class StrConfig(object):
     """ Configuration for __str__ method.
 
         If max_places is set to None, all non-zero digits after the
         decimal point will be shown.  Otherwise, max_places digits will
         be shown.
-
-        If strip is True and there is a fractional quantity, trailing
-        zeros are removed up to (and including) the decimal point.
 
         min_value sets the smallest value allowed.
         If min_value is 10, then single digits on the lhs of
@@ -42,47 +88,34 @@ class StrConfig(object):
         If min_value is 1, however, 9 MiB is preferred.
         If min_value is 0.1, then 0.75 GiB is preferred to 768 MiB,
         but 0.05 GiB is still displayed as 51.2 MiB.
-
-        The default for strip is False, so that precision is always shown
-        to max_places.
     """
     # pylint: disable=too-few-public-methods
-    # pylint: disable=too-many-instance-attributes
 
     _FMT_STR = ", ".join([
        "binary_units=%(binary_units)s",
-       "approx_symbol=%(approx_symbol)s",
        "exact_value=%(exact_value)s",
        "max_places=%(max_places)s",
        "min_value=%(min_value)s",
-       "show_approx_str=%(show_approx_str)s",
-       "strip=%(strip)s",
        "unit=%(unit)s"
     ])
 
     def __init__(
        self,
        max_places=2,
-       strip=False,
        min_value=1,
        binary_units=True,
-       show_approx_str=True,
        exact_value=False,
-       unit=None,
-       approx_symbol='@'
+       unit=None
     ):
         """ Initializer.
 
             :param max_places: number of decimal places to use, default is 2
             :type max_places: an integer type or NoneType
-            :param bool strip: True if trailing zeros are to be stripped.
             :param min_value: Lower bound for value, default is 1.
             :type min_value: A precise numeric type: int or Decimal
             :param bool binary_units: binary units if True, else SI
-            :param bool show_approx_str: distinguish approximate str values
             :param bool exact_value: uses largest units that allow exact value
             :param unit: use the specified unit, overrides other options
-            :param str approx_symbol: symbol to indicate approximation
         """
         # pylint: disable=too-many-arguments
         if min_value < 0 or \
@@ -101,36 +134,27 @@ class StrConfig(object):
             )
 
         self._max_places = max_places
-        self._strip = strip
         self._min_value = min_value
         self._binary_units = binary_units
-        self._show_approx_str = show_approx_str
         self._exact_value = exact_value
         self._unit = unit
-        self._approx_symbol = approx_symbol
 
     def __str__(self):
         values = {
            'binary_units' : self.binary_units,
-           'approx_symbol': self.approx_symbol,
            'exact_value' : self.exact_value,
            'max_places' : self.max_places,
            'min_value' : self.min_value,
-           'show_approx_str' : self.show_approx_str,
-           'strip' : self.strip,
            'unit' : self.unit
         }
         return "StrConfig(%s)" % (self._FMT_STR % values)
     __repr__ = __str__
 
     # pylint: disable=protected-access
-    approx_symbol = property(lambda s: s._approx_symbol)
     exact_value = property(lambda s: s._exact_value)
     max_places = property(lambda s: s._max_places)
     min_value = property(lambda s: s._min_value)
-    strip = property(lambda s: s._strip)
     binary_units = property(lambda s: s._binary_units)
-    show_approx_str = property(lambda s: s._show_approx_str)
     unit = property(lambda s: s._unit)
 
 class InputConfig(object):
@@ -166,9 +190,10 @@ class InputConfig(object):
 
 class SizeConfig(object):
     """ Configuration for :class:`Size` class. """
-    # pylint: disable=too-few-public-methods
 
-    STR_CONFIG = StrConfig(2, False, 1, True, True, False, None)
+    DISPLAY_CONFIG = DisplayConfig(False, True, '@')
+
+    STR_CONFIG = StrConfig(2, 1, True, False, None)
     """ Default configuration for string display. """
 
     INPUT_CONFIG = InputConfig(B, RoundingMethods.ROUND_DOWN)
@@ -177,18 +202,28 @@ class SizeConfig(object):
     STRICT = False
 
     @classmethod
+    def set_display_config(cls, config):
+        """
+        Set configuration for superficial aspects of display.
+
+        :param DisplayConfig config: a configuration object
+        """
+        cls.DISPLAY_CONFIG = DisplayConfig(
+            approx_symbol=config.approx_symbol,
+            show_approx_str=config.show_approx_str,
+            strip=config.strip
+        )
+
+    @classmethod
     def set_str_config(cls, config):
         """ Set the configuration for __str__ method for all Size objects.
 
             :param :class:`StrConfig` config: a configuration object
         """
         cls.STR_CONFIG = StrConfig(
-            approx_symbol=config.approx_symbol,
             binary_units=config.binary_units,
             max_places=config.max_places,
             min_value=config.min_value,
-            show_approx_str=config.show_approx_str,
-            strip=config.strip,
             exact_value=config.exact_value,
             unit=config.unit
         )
