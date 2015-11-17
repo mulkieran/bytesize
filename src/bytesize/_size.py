@@ -118,7 +118,7 @@ class Size(object):
         :rtype: tuple of bool * int * str * str * unit
 
         Components are:
-        1. If true, show approximation symbol.
+        1. If true, the value is approximate
         2. -1 for a negative number, 1 for a positive
         3. a string with the decimal digits to the left of the decimal point
         4. a string with the decimal digits to the right of the decimal point
@@ -135,7 +135,7 @@ class Size(object):
         if config.strip:
             right = right.rstrip('0')
 
-        return (not exact and config.show_approx_str, sign, left, right, units)
+        return (not exact, sign, left, right, units)
 
     def getString(self, config=SizeConfig.STR_CONFIG):
         """ Return a string representation of the size.
@@ -147,7 +147,7 @@ class Size(object):
         (approx, sign, left, right, units) = self.getStringInfo(config)
 
         result = {
-           'approx' : "@" if approx else "",
+           'approx' : "@" if approx and config.show_approx_str else "",
            'sign': "-" if sign == -1 else "",
            'left': left,
            'radix': '.' if right else "",
