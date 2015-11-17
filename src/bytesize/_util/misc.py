@@ -126,7 +126,7 @@ def convert_magnitude(value, places=2):
     else:
         right = right_side[:] + [0 for _ in range(places - len(right_side))]
 
-    return (sign, left, "".join(str(x) for x in right))
+    return (sign, str(left), "".join(str(x) for x in right))
 
 def get_string_info(magnitude, places):
     """
