@@ -163,9 +163,11 @@ class Size(object):
             :rtype: str
         """
         (approx, sign, left, right, units) = self.getStringInfo(config)
+        approx_str = config.approx_symbol \
+           if approx and config.show_approx_str else ""
 
         result = {
-           'approx' : "@" if approx and config.show_approx_str else "",
+           'approx' : approx_str,
            'sign': "-" if sign == -1 else "",
            'left': left,
            'radix': '.' if right else "",

@@ -47,9 +47,11 @@ class StrConfig(object):
         to max_places.
     """
     # pylint: disable=too-few-public-methods
+    # pylint: disable=too-many-instance-attributes
 
     _FMT_STR = ", ".join([
        "binary_units=%(binary_units)s",
+       "approx_symbol=%(approx_symbol)s",
        "exact_value=%(exact_value)s",
        "max_places=%(max_places)s",
        "min_value=%(strip)s",
@@ -66,7 +68,8 @@ class StrConfig(object):
        binary_units=True,
        show_approx_str=True,
        exact_value=False,
-       unit=None
+       unit=None,
+       approx_symbol='@'
     ):
         """ Initializer.
 
@@ -79,6 +82,7 @@ class StrConfig(object):
             :param bool show_approx_str: distinguish approximate str values
             :param bool exact_value: uses largest units that allow exact value
             :param unit: use the specified unit, overrides other options
+            :param str approx_symbol: symbol to indicate approximation
         """
         # pylint: disable=too-many-arguments
         if min_value < 0 or \
@@ -103,10 +107,12 @@ class StrConfig(object):
         self._show_approx_str = show_approx_str
         self._exact_value = exact_value
         self._unit = unit
+        self._approx_symbol = approx_symbol
 
     def __str__(self):
         values = {
            'binary_units' : self.binary_units,
+           'approx_symbol': self.approx_symbol,
            'exact_value' : self.exact_value,
            'max_places' : self.max_places,
            'min_value' : self.min_value,
@@ -118,6 +124,7 @@ class StrConfig(object):
     __repr__ = __str__
 
     # pylint: disable=protected-access
+    approx_symbol = property(lambda s: s._approx_symbol)
     exact_value = property(lambda s: s._exact_value)
     max_places = property(lambda s: s._max_places)
     min_value = property(lambda s: s._min_value)
@@ -176,6 +183,7 @@ class SizeConfig(object):
             :param :class:`StrConfig` config: a configuration object
         """
         cls.STR_CONFIG = StrConfig(
+            approx_symbol=config.approx_symbol,
             binary_units=config.binary_units,
             max_places=config.max_places,
             min_value=config.min_value,
