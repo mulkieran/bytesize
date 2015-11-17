@@ -82,7 +82,7 @@ class ConversionTestCase(unittest.TestCase):
     )
     def testRepr(self, s):
         """ Test that repr looks right. """
-        regex = re.compile(r"Size\(\'(?P<val>-?[0-9]+)\'\)")
+        regex = re.compile(r"Size\((?P<val>-?[0-9]+)\)")
         match = re.match(regex, "%r" % s)
         self.assertIsNotNone(match)
         self.assertEqual(int(match.group('val')), int(s))

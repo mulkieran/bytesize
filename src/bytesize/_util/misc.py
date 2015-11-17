@@ -27,51 +27,52 @@ from .._errors import SizeValueError
 from .math_util import long_decimal_division
 
 
-def decimal_magnitude(value):
+def get_decimal_info(value):
     """
-    Get ``value`` as a possibly repeating decimal.
+    Get the full representation of the decimal value.
 
-    :param value: the value
-    :type value: any precise numerical quantity
-    :returns: a precise decimal representation of the number
-    :rtype: str
+    :param value: the value, a precise numeric quantity
+    :returns: a tuple representing the decimal representation
+    :rtype: tuple of int * int * list of int * list of int
 
-    The parts represent the non-fractional part, the fractional part
-    including the first repeating part, the length of the repeating part.
+    Components:
+    1. sign, -1 if negative, 1 if positive
+    2. the value on the left side of the decimal point
+    3. the non-repeating portion on the right side of the decimal point
+    4. the repeating portion on the right side of the decimal point
     """
+    if isinstance(value, float):
+        raise SizeValueError(
+           value,
+           "value",
+           "must not be a float"
+        )
+
     value = Fraction(value)
     (sign, left, non_repeating, repeating) = long_decimal_division(
        value.denominator,
        value.numerator
     )
 
-    sign_str = "-" if sign == -1 else ""
+    return (sign, left, non_repeating, repeating)
 
-    if non_repeating == [] and repeating == []:
-        return "%s%s" % (sign_str, left)
-
-    non_repeating_str = "".join(str(x) for x in non_repeating)
-    if repeating == []:
-        return "%s%s.%s" % (sign_str, left, non_repeating_str)
-
-    repeating_str = "".join(str(x) for x in repeating)
-    return "%s%s.%s(%s)" % (sign_str, left, non_repeating_str, repeating_str)
-
-def convert_magnitude(value, places=2):
+def convert_magnitude(left, non_repeating, repeating, places=2):
     """ Convert magnitude to a decimal string.
 
-        :param value: any value
-        :type value: a numeric value, not a float
+        :param int left: the left side
+        :param non_repeating: the non repeating part after the radix
+        :type non_repeating: list of int
+        :param repeating: the repeating part
+        :type repeating: list of int
         :param places: number of decimal places to use, default is 2
         :type places: an integer type or NoneType
 
         :returns: a representation of the value
-        :rtype: tuple of int * str * str
+        :rtype: tuple of str * str
 
         Components of the result are:
-        1. -1 or 1, representing the sign
-        2. a string representing the value to the left of the decimal
-        3. a string representing the value to the right of the decimal
+        1. a string representing the value to the left of the decimal
+        2. a string representing the value to the right of the decimal
 
         Since a rational number may be a non-terminating decimal
         quantity, this representation is not guaranteed to be exact, regardless
@@ -89,19 +90,6 @@ def convert_magnitude(value, places=2):
            "places",
            "must be None or a non-negative integer value"
         )
-
-    if isinstance(value, float):
-        raise SizeValueError(
-           value,
-           "value",
-           "must not be a float"
-        )
-
-    value = Fraction(value)
-    (sign, left, non_repeating, repeating) = long_decimal_division(
-       value.denominator,
-       value.numerator
-    )
 
     places = len(non_repeating) + len(repeating) if places is None else places
 
@@ -126,7 +114,7 @@ def convert_magnitude(value, places=2):
     else:
         right = right_side[:] + [0 for _ in range(places - len(right_side))]
 
-    return (sign, str(left), "".join(str(x) for x in right))
+    return (str(left), "".join(str(x) for x in right))
 
 def get_string_info(magnitude, places):
     """
@@ -143,6 +131,13 @@ def get_string_info(magnitude, places):
     3. the string representing the numbers to the left of the radix
     4. the string representing the numbers to the right of the radix
     """
-    (sign, left, right) = convert_magnitude(magnitude, places=places)
+
+    (sign, left, non_repeating, repeating) = get_decimal_info(magnitude)
+    (left, right) = convert_magnitude(
+       left,
+       non_repeating,
+       repeating,
+       places=places
+    )
     exact = Fraction(sign * Fraction("%s.%s" % (left, right))) == magnitude
     return (exact, sign, left, right)

@@ -30,7 +30,6 @@ from bytesize._constants import RoundingMethods
 from bytesize._errors import SizeValueError
 from bytesize._util.math_util import get_repeating_fraction
 from bytesize._util.math_util import round_fraction
-from bytesize._util.misc import convert_magnitude
 from bytesize._util.misc import get_string_info
 from bytesize._util.misc import long_decimal_division
 
@@ -59,8 +58,9 @@ class FormatTestCase(unittest.TestCase):
             the value is 2^n * 5^m the result is exact.
         """
         x = Fraction(p * q, p * (2**n * 5**m))
-        (sign, left, right) = convert_magnitude(x, places=None)
+        (exact, sign, left, right) = get_string_info(x, places=None)
         self.assertEqual(sign * Fraction("%s.%s" % (left, right)), x)
+        self.assertTrue(exact)
 
 
 class RoundingTestCase(unittest.TestCase):
