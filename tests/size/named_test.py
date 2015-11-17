@@ -164,3 +164,36 @@ class RoundingTestCase(unittest.TestCase):
         """ Test raising exceptions when rounding. """
         with self.assertRaises(SizeValueError):
             Size(0).roundTo(Size(-1, B), rounding=ROUND_HALF_UP)
+
+
+class DecimalInfoTestCase(unittest.TestCase):
+    """
+    Test calculation of decimal info.
+    """
+
+    @given(
+       SIZE_STRATEGY,
+       settings=Settings(max_examples=30)
+    )
+    def testEquivalence(self, s):
+        """
+        Verify that decimal info and corresponding string are same.
+        """
+        config = StrConfig(max_places=None)
+        (sign, left, non_repeating, repeating, units) = s.getDecimalInfo(config)
+        (approx, new_sign, new_left, right, new_units) = s.getStringInfo(config)
+
+        self.assertEqual(sign, new_sign)
+        self.assertEqual(str(left), new_left)
+        self.assertEqual(units, new_units)
+        if not approx:
+            self.assertEqual(repeating, [])
+            self.assertEqual(
+               s,
+               Size(new_sign * Fraction("%s.%s" % (new_left, right)), units)
+            )
+            non_repeating = "".join(str(x) for x in non_repeating)
+            self.assertEqual(
+               s,
+               Size(sign * Fraction("%s.%s" % (left, non_repeating)), units)
+            )

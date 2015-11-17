@@ -111,9 +111,9 @@ class UtilityMethodsTestCase(unittest.TestCase):
         """ Test miscellaneous non-operator methods. """
 
 
-        self.assertEqual(repr(Size(0)), "Size('0')")
-        self.assertEqual(repr(Size(1024)), "Size('1024')")
-        self.assertEqual(repr(Size("1024.1")), "Size('1024.1')")
+        self.assertEqual(repr(Size(0)), "Size(0)")
+        self.assertEqual(repr(Size(1024)), "Size(1024)")
+        self.assertEqual(repr(Size("1024.1")), "Size(1024.1)")
 
 
 class AdditionTestCase(unittest.TestCase):

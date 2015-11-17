@@ -44,7 +44,7 @@ from ._constants import PRECISE_NUMERIC_TYPES
 
 from ._util.math_util import round_fraction
 
-from ._util.misc import decimal_magnitude
+from ._util.misc import get_decimal_info
 from ._util.misc import get_string_info
 
 _BYTES_SYMBOL = "B"
@@ -109,6 +109,25 @@ class Size(object):
         """
         return self._magnitude
 
+    def getDecimalInfo(self, config=SizeConfig.STR_CONFIG):
+        """
+        Get information for the decimal representation of ``self``.
+
+        :param StrConfig config: the display configuration
+        :returns: a tuple representing the value
+        :rtype: tuple of int * int * list of int * list of int
+
+        Components:
+        1. sign, -1 if negative else 1
+        2. portion on the left of the decimal point
+        3. non-repeating portion to the right of the decimal point
+        4. repeating portion to the right of the decimal point
+        5. units specifier
+        """
+        (magnitude, units) = self.components(config)
+        (sign, left, non_repeating, repeating) = get_decimal_info(magnitude)
+        return (sign, left, non_repeating, repeating, units)
+
     def getStringInfo(self, config=SizeConfig.STR_CONFIG):
         """
         Return a representation of the size.
@@ -126,7 +145,6 @@ class Size(object):
 
         """
         (magnitude, units) = self.components(config)
-
         (exact, sign, left, right) = get_string_info(
            magnitude,
            places=config.max_places
@@ -162,7 +180,22 @@ class Size(object):
         return self.getString(SizeConfig.STR_CONFIG)
 
     def __repr__(self):
-        return "Size('%s')" % decimal_magnitude(self._magnitude)
+        (sign, left, non_repeating, repeating) = get_decimal_info(
+           self._magnitude
+        )
+
+        sign_str = "-" if sign == -1 else ""
+
+        if non_repeating == [] and repeating == []:
+            return "Size(%s%s)" % (sign_str, left)
+
+        non_repeating_str = "".join(str(x) for x in non_repeating)
+        if repeating == []:
+            return "Size(%s%s.%s)" % (sign_str, left, non_repeating_str)
+
+        repeating_str = "".join(str(x) for x in repeating)
+        return "Size(%s%s.%s(%s))" % \
+           (sign_str, left, non_repeating_str, repeating_str)
 
     def __deepcopy__(self, memo):
         # pylint: disable=unused-argument
