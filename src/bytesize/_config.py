@@ -54,7 +54,7 @@ class StrConfig(object):
        "approx_symbol=%(approx_symbol)s",
        "exact_value=%(exact_value)s",
        "max_places=%(max_places)s",
-       "min_value=%(strip)s",
+       "min_value=%(min_value)s",
        "show_approx_str=%(show_approx_str)s",
        "strip=%(strip)s",
        "unit=%(unit)s"
