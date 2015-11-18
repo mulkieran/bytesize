@@ -24,6 +24,8 @@ import six
 
 from .._errors import SizeValueError
 
+from .._types import RadixNumber
+
 from .math_util import long_decimal_division
 
 
@@ -32,14 +34,8 @@ def get_decimal_info(value):
     Get the full representation of the decimal value.
 
     :param value: the value, a precise numeric quantity
-    :returns: a tuple representing the decimal representation
-    :rtype: tuple of int * int * list of int * list of int
-
-    Components:
-    1. sign, -1 if negative, 1 if positive
-    2. the value on the left side of the decimal point
-    3. the non-repeating portion on the right side of the decimal point
-    4. the repeating portion on the right side of the decimal point
+    :returns: a decimal representation of the value
+    :rtype: RadixNumber
     """
     if isinstance(value, float):
         raise SizeValueError(
@@ -54,7 +50,7 @@ def get_decimal_info(value):
        value.numerator
     )
 
-    return (sign, left, non_repeating, repeating)
+    return RadixNumber(sign, left, non_repeating, repeating)
 
 def convert_magnitude(left, non_repeating, repeating, places=2):
     """ Convert magnitude to a decimal string.
@@ -132,12 +128,13 @@ def get_string_info(magnitude, places):
     4. the string representing the numbers to the right of the radix
     """
 
-    (sign, left, non_repeating, repeating) = get_decimal_info(magnitude)
+    radix_num = get_decimal_info(magnitude)
     (left, right) = convert_magnitude(
-       left,
-       non_repeating,
-       repeating,
+       radix_num.left,
+       radix_num.non_repeating,
+       radix_num.repeating,
        places=places
     )
-    exact = Fraction(sign * Fraction("%s.%s" % (left, right))) == magnitude
-    return (exact, sign, left, right)
+    exact = \
+       Fraction(radix_num.sign * Fraction("%s.%s" % (left, right))) == magnitude
+    return (exact, radix_num.sign, left, right)

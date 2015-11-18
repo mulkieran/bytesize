@@ -125,8 +125,14 @@ class Size(object):
         5. units specifier
         """
         (magnitude, units) = self.components(config)
-        (sign, left, non_repeating, repeating) = get_decimal_info(magnitude)
-        return (sign, left, non_repeating, repeating, units)
+        radix_num = get_decimal_info(magnitude)
+        return (
+           radix_num.sign,
+           radix_num.left,
+           radix_num.non_repeating,
+           radix_num.repeating,
+           units
+        )
 
     def getStringInfo(self, config):
         """
@@ -183,22 +189,20 @@ class Size(object):
         return self.getString(SizeConfig.STR_CONFIG, SizeConfig.DISPLAY_CONFIG)
 
     def __repr__(self):
-        (sign, left, non_repeating, repeating) = get_decimal_info(
-           self._magnitude
-        )
+        radix_num = get_decimal_info(self._magnitude)
 
-        sign_str = "-" if sign == -1 else ""
+        sign = "-" if radix_num.sign == -1 else ""
 
-        if non_repeating == [] and repeating == []:
-            return "Size(%s%s)" % (sign_str, left)
+        if radix_num.non_repeating == [] and radix_num.repeating == []:
+            return "Size(%s%s)" % (sign, radix_num.left)
 
-        non_repeating_str = "".join(str(x) for x in non_repeating)
-        if repeating == []:
-            return "Size(%s%s.%s)" % (sign_str, left, non_repeating_str)
+        non_repeating = "".join(str(x) for x in radix_num.non_repeating)
+        if radix_num.repeating == []:
+            return "Size(%s%s.%s)" % (sign, radix_num.left, non_repeating)
 
-        repeating_str = "".join(str(x) for x in repeating)
+        repeating = "".join(str(x) for x in radix_num.repeating)
         return "Size(%s%s.%s(%s))" % \
-           (sign_str, left, non_repeating_str, repeating_str)
+           (sign, radix_num.left, non_repeating, repeating)
 
     def __deepcopy__(self, memo):
         # pylint: disable=unused-argument
