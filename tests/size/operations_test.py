@@ -447,3 +447,45 @@ class UnaryOperatorsTestCase(unittest.TestCase):
     def testPos(self, s):
         """ Test positive. """
         self.assertEqual(+s, s)
+
+
+class ArithmeticPropertiesTestCase(unittest.TestCase):
+    """
+    Verify that distributive property holds.
+    """
+
+    @given(
+       SIZE_STRATEGY,
+       NUMBERS_STRATEGY.filter(lambda n: not isinstance(n, Decimal)),
+       NUMBERS_STRATEGY.filter(lambda n: not isinstance(n, Decimal)),
+       settings=Settings(max_examples=10)
+    )
+    def testDistributivity1(self, s, n, m):
+        """
+        Assert distributivity across numbers.
+        """
+        self.assertEqual((n + m) * s, n * s + m * s)
+
+    @given(
+       SIZE_STRATEGY,
+       SIZE_STRATEGY,
+       NUMBERS_STRATEGY,
+       settings=Settings(max_examples=10)
+    )
+    def testDistributivity2(self, p, q, n):
+        """
+        Assert distributivity across sizes.
+        """
+        self.assertEqual((p + q) * n, p * n + q * n)
+
+    @given(
+       SIZE_STRATEGY,
+       SIZE_STRATEGY,
+       SIZE_STRATEGY,
+       settings=Settings(max_examples=10)
+    )
+    def testAssociativity(self, p, q, r):
+        """
+        Assert associativity across sizes.
+        """
+        self.assertEqual((p + q) + r, p + (r + q))
