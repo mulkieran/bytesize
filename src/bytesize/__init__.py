@@ -62,6 +62,7 @@
 
     * Size classes:
        - Size: :class:`._size.Size`
+       - AI: :class:`._sizes.AI`
 
     All parts of the public interface of bytesize must be imported directly
     from the top-level bytesize module, as::
@@ -124,3 +125,4 @@ from ._errors import SizeError
 # SIZE
 from ._size import Size
 from ._sizes import getSizeFromInput
+from ._sizes import AI

@@ -88,3 +88,39 @@ Display in selected units::
 
     >>> size.getString(StrConfig(unit=YiB), SizeConfig.DISPLAY_CONFIG)
     '@0.00 YiB'
+
+
+Using the Additive Identity
+---------------------------
+
+Sum a list of Size objects using the sum method and the additive identity::
+
+    >>> sum([], AI)
+    Size(0)
+
+If the additive identity is not specified, there are two possiblities, both
+bad:
+
+1. A SizeError exception may be raised::
+
+    >>> l = [Size(32)]
+    >>> sum(l)
+    Traceback (most recent call last):
+    ...
+
+This is due to the fact that addition must be type-correct. Only a Size can be
+added to another Size, but the implementation of sum() adds the number 0 to
+the elements in the list, resulting in an exception.
+
+2. If the list argument is empty, the result will have the wrong type, int::
+
+   >>> res = sum(l[1:])
+   >>> res
+   0
+   >>> type(res)
+   <type 'int'>
+
+Of course, the additive identity is just Size(0)::
+
+    >>> AI
+    Size(0)
