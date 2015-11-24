@@ -38,3 +38,5 @@ def getSizeFromInput(value=0, units=None, config=None):
     config = config or SizeConfig.INPUT_CONFIG
 
     return Size(value, units).roundTo(config.unit, config.method)
+
+AI = Size(0) # pragma: no cover
