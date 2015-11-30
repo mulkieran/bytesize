@@ -126,7 +126,7 @@ class StrConfig(object):
                "must be a precise positive numeric value."
             )
 
-        if unit is not None and not unit in UNITS():
+        if unit is not None and unit not in UNITS():
             raise SizeValueError(
                unit,
                "unit",

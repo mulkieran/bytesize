@@ -360,6 +360,7 @@ class Size(object):
     __rmul__ = __mul__
 
     def __pow__(self, other):
+        # pylint: disable=no-self-use
         # Cannot represent multiples of Sizes.
         if not isinstance(other, PRECISE_NUMERIC_TYPES):
             raise SizeNonsensicalBinOpError("**", other)
