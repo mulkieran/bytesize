@@ -18,13 +18,14 @@
 
 """ Tests for named methods of Size objects. """
 
+from fractions import Fraction
+
+import unittest
+
 from hypothesis import example
 from hypothesis import given
 from hypothesis import strategies
 from hypothesis import Settings
-import unittest
-
-from fractions import Fraction
 
 from bytesize import Size
 from bytesize import B

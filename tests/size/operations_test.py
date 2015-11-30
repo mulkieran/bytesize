@@ -18,13 +18,14 @@
 
 """ Tests for operations on Size objects. """
 
-from hypothesis import given
-from hypothesis import Settings
-import unittest
-
 import copy
 from decimal import Decimal
 from fractions import Fraction
+
+import unittest
+
+from hypothesis import given
+from hypothesis import Settings
 
 from bytesize import Size
 from bytesize import B
