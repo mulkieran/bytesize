@@ -78,6 +78,7 @@
             raise e
 """
 # pylint: disable=invalid-name
+# pylint: disable=wrong-import-position
 
 # UNIT CONSTANTS
 from ._constants import B
