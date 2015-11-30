@@ -63,6 +63,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) < 1 # pylint: disable=expression-not-assigned
         with self.assertRaises(SizeNonsensicalBinOpError):
+            # pylint: disable=misplaced-comparison-constant
             1 < Size(32, TiB) # pylint: disable=expression-not-assigned
 
         # <=
@@ -70,6 +71,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) <= 1 # pylint: disable=expression-not-assigned
         with self.assertRaises(SizeNonsensicalBinOpError):
+            # pylint: disable=misplaced-comparison-constant
             1 <= Size(32, TiB) # pylint: disable=expression-not-assigned
 
         # >
@@ -77,6 +79,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(32) > 1 # pylint: disable=expression-not-assigned
         with self.assertRaises(SizeNonsensicalBinOpError):
+            # pylint: disable=misplaced-comparison-constant
             1 > Size(0, TiB) # pylint: disable=expression-not-assigned
 
         # >=
@@ -84,6 +87,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(32) >= 1 # pylint: disable=expression-not-assigned
         with self.assertRaises(SizeNonsensicalBinOpError):
+            # pylint: disable=misplaced-comparison-constant
             1 >= Size(0, TiB) # pylint: disable=expression-not-assigned
 
         # !=
