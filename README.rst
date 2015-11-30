@@ -30,6 +30,8 @@ representation of the number of bytes. Floating point numbers, which are
 frequently the preferred type for the representation of physical
 quantities, are disallowed by this requirement.
 
+Operations
+----------
 This module does not accomodate multi-dimensionality of byte quantities.
 Consequently, multiplying one Size object by another Size object will cause
 an error to be raised, since bytes^2 is not representable by the module.
@@ -40,6 +42,9 @@ can accomodate multi-dimensionality of bytes.
 Numerous computations with bytes are nonsensical. For example, 2 raised to a
 power which is some number of bytes, is a meaningless computation. All such
 operations cause an error to be raised.
+
+The result type of operations is a Size, where appropriate, or a subtype of
+Rational, where a numeric value is appropriate.
 
 Floating Point Numbers
 ----------------------

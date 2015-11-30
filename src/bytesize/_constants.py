@@ -24,7 +24,7 @@
 """
 
 from decimal import Decimal
-from fractions import Fraction
+from numbers import Rational
 
 import six
 
@@ -140,4 +140,4 @@ def UNITS():
 
 ROUNDING_METHODS = RoundingMethods.METHODS
 
-PRECISE_NUMERIC_TYPES = (six.integer_types, Decimal, Fraction)
+PRECISE_NUMERIC_TYPES = (six.integer_types, Decimal, Rational)
