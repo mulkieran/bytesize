@@ -18,13 +18,14 @@
 
 """ Tests for operations on Size objects. """
 
+import copy
+import re
+
+import unittest
+
 from hypothesis import given
 from hypothesis import strategies
 from hypothesis import Settings
-import unittest
-
-import copy
-import re
 
 from bytesize import Size
 from bytesize import UNITS

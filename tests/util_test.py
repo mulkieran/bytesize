@@ -17,14 +17,14 @@
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
 """ Test for utility functions. """
+from decimal import Decimal
+from fractions import Fraction
+
+import unittest
+
 from hypothesis import given
 from hypothesis import strategies
 from hypothesis import Settings
-import unittest
-
-from decimal import Decimal
-
-from fractions import Fraction
 
 from bytesize._constants import RoundingMethods
 from bytesize._errors import SizeValueError
