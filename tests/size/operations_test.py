@@ -18,13 +18,14 @@
 
 """ Tests for operations on Size objects. """
 
-from hypothesis import given
-from hypothesis import Settings
-import unittest
-
 import copy
 from decimal import Decimal
 from fractions import Fraction
+
+import unittest
+
+from hypothesis import given
+from hypothesis import Settings
 
 from bytesize import Size
 from bytesize import B
@@ -62,6 +63,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) < 1 # pylint: disable=expression-not-assigned
         with self.assertRaises(SizeNonsensicalBinOpError):
+            # pylint: disable=misplaced-comparison-constant
             1 < Size(32, TiB) # pylint: disable=expression-not-assigned
 
         # <=
@@ -69,6 +71,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(0) <= 1 # pylint: disable=expression-not-assigned
         with self.assertRaises(SizeNonsensicalBinOpError):
+            # pylint: disable=misplaced-comparison-constant
             1 <= Size(32, TiB) # pylint: disable=expression-not-assigned
 
         # >
@@ -76,6 +79,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(32) > 1 # pylint: disable=expression-not-assigned
         with self.assertRaises(SizeNonsensicalBinOpError):
+            # pylint: disable=misplaced-comparison-constant
             1 > Size(0, TiB) # pylint: disable=expression-not-assigned
 
         # >=
@@ -83,6 +87,7 @@ class UtilityMethodsTestCase(unittest.TestCase):
         with self.assertRaises(SizeNonsensicalBinOpError):
             Size(32) >= 1 # pylint: disable=expression-not-assigned
         with self.assertRaises(SizeNonsensicalBinOpError):
+            # pylint: disable=misplaced-comparison-constant
             1 >= Size(0, TiB) # pylint: disable=expression-not-assigned
 
         # !=
@@ -111,9 +116,9 @@ class UtilityMethodsTestCase(unittest.TestCase):
         """ Test miscellaneous non-operator methods. """
 
 
-        self.assertEqual(repr(Size(0)), "Size('0')")
-        self.assertEqual(repr(Size(1024)), "Size('1024')")
-        self.assertEqual(repr(Size("1024.1")), "Size('1024.1')")
+        self.assertEqual(repr(Size(0)), "Size(0)")
+        self.assertEqual(repr(Size(1024)), "Size(1024)")
+        self.assertEqual(repr(Size("1024.1")), "Size(1024.1)")
 
 
 class AdditionTestCase(unittest.TestCase):
@@ -447,3 +452,45 @@ class UnaryOperatorsTestCase(unittest.TestCase):
     def testPos(self, s):
         """ Test positive. """
         self.assertEqual(+s, s)
+
+
+class ArithmeticPropertiesTestCase(unittest.TestCase):
+    """
+    Verify that distributive property holds.
+    """
+
+    @given(
+       SIZE_STRATEGY,
+       NUMBERS_STRATEGY.filter(lambda n: not isinstance(n, Decimal)),
+       NUMBERS_STRATEGY.filter(lambda n: not isinstance(n, Decimal)),
+       settings=Settings(max_examples=10)
+    )
+    def testDistributivity1(self, s, n, m):
+        """
+        Assert distributivity across numbers.
+        """
+        self.assertEqual((n + m) * s, n * s + m * s)
+
+    @given(
+       SIZE_STRATEGY,
+       SIZE_STRATEGY,
+       NUMBERS_STRATEGY,
+       settings=Settings(max_examples=10)
+    )
+    def testDistributivity2(self, p, q, n):
+        """
+        Assert distributivity across sizes.
+        """
+        self.assertEqual((p + q) * n, p * n + q * n)
+
+    @given(
+       SIZE_STRATEGY,
+       SIZE_STRATEGY,
+       SIZE_STRATEGY,
+       settings=Settings(max_examples=10)
+    )
+    def testAssociativity(self, p, q, r):
+        """
+        Assert associativity across sizes.
+        """
+        self.assertEqual((p + q) + r, p + (r + q))

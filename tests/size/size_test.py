@@ -30,6 +30,7 @@ from bytesize import MiB
 from bytesize import GiB
 from bytesize import TiB
 from bytesize import KB
+from bytesize import DisplayConfig
 from bytesize import StrConfig
 
 from bytesize._config import SizeConfig
@@ -100,32 +101,38 @@ class DisplayTestCase(unittest.TestCase):
         """ Test behavior on min_value parameter. """
         s = Size(9, MiB)
         self.assertEqual(s.components(), (Fraction(9, 1), MiB))
-        self.assertEqual(s.components(min_value=10), (Fraction(9216, 1), KiB))
+        self.assertEqual(
+           s.components(StrConfig(min_value=10)),
+           (Fraction(9216, 1), KiB)
+        )
 
         s = Size("0.5", GiB)
-        self.assertEqual(s.components(min_value=1), (Fraction(512, 1), MiB))
         self.assertEqual(
-           s.components(min_value=Decimal("0.1")),
+           s.components(StrConfig(min_value=1)),
+           (Fraction(512, 1), MiB)
+        )
+        self.assertEqual(
+           s.components(StrConfig(min_value=Decimal("0.1"))),
            (Fraction(1, 2), GiB)
         )
         self.assertEqual(
-           s.components(min_value=Decimal(1)),
+           s.components(StrConfig(min_value=Decimal(1))),
            (Fraction(512, 1), MiB)
         )
 
         # when min_value is 10 and single digit on left of decimal, display
         # with smaller unit.
         s = Size('7.18', KiB)
-        self.assertEqual(s.components(min_value=10)[1], B)
+        self.assertEqual(s.components(StrConfig(min_value=10))[1], B)
         s = Size('9.68', TiB)
-        self.assertEqual(s.components(min_value=10)[1], GiB)
+        self.assertEqual(s.components(StrConfig(min_value=10))[1], GiB)
         s = Size('4.29', MiB)
-        self.assertEqual(s.components(min_value=10)[1], KiB)
+        self.assertEqual(s.components(StrConfig(min_value=10))[1], KiB)
 
         # when min value is 100 and two digits on left of decimal
         s = Size('14', MiB)
         self.assertEqual(
-           s.components(min_value=100),
+           s.components(StrConfig(min_value=100)),
            (Fraction(14 * 1024, 1), KiB)
         )
 
@@ -133,7 +140,7 @@ class DisplayTestCase(unittest.TestCase):
         """ Test that exceptions are properly raised on bad params. """
         s = Size(500)
         with self.assertRaises(SizeValueError):
-            s.components(min_value=-1)
+            s.components(StrConfig(min_value=-1))
 
     def testRoundingToBytes(self):
         """ Test that second part is B when rounding to bytes. """
@@ -143,7 +150,7 @@ class DisplayTestCase(unittest.TestCase):
     def testSIUnits(self):
         """ Test binary_units param. """
         s = Size(1000)
-        self.assertEqual(s.components(binary_units=False), (1, KB))
+        self.assertEqual(s.components(StrConfig(binary_units=False)), (1, KB))
 
 class ConfigurationTestCase(unittest.TestCase):
     """ Test setting configuration for display. """
@@ -151,23 +158,25 @@ class ConfigurationTestCase(unittest.TestCase):
     def setUp(self):
         """ Get current config. """
         self.str_config = SizeConfig.STR_CONFIG
+        self.display_config = SizeConfig.DISPLAY_CONFIG
 
     def tearDown(self):
         """ Reset configuration to default. """
         SizeConfig.set_str_config(self.str_config)
+        SizeConfig.set_display_config(self.display_config)
 
     def testSettingConfiguration(self):
         """ Test that setting configuration to different values has effect. """
         s = Size(64, GiB)
-        SizeConfig.set_str_config(StrConfig(strip=False))
+        SizeConfig.set_display_config(DisplayConfig(strip=False))
         prev = str(s)
-        SizeConfig.set_str_config(StrConfig(strip=True))
+        SizeConfig.set_display_config(DisplayConfig(strip=True))
         subs = str(s)
         self.assertTrue(subs != prev)
 
     def testStrConfigs(self):
         """ Test str with various configuration options. """
-        SizeConfig.set_str_config(StrConfig(strip=True))
+        SizeConfig.set_display_config(DisplayConfig(strip=True))
 
         # exactly 4 Pi
         s = Size(0x10000000000000)
@@ -204,16 +213,19 @@ class ConfigurationTestCase(unittest.TestCase):
         # so the trailing 0s are stripped.
         self.assertEqual(str(s), "@64 KiB")
 
-        SizeConfig.set_str_config(StrConfig(max_places=3, strip=True))
+        SizeConfig.set_str_config(StrConfig(max_places=3))
+        SizeConfig.set_display_config(DisplayConfig(strip=True))
         s = Size('23.7874', TiB)
         self.assertEqual(str(s), "@23.787 TiB")
 
-        SizeConfig.set_str_config(StrConfig(min_value=10, strip=True))
+        SizeConfig.set_str_config(StrConfig(min_value=10))
+        SizeConfig.set_display_config(DisplayConfig(strip=True))
         s = Size(8193)
         self.assertEqual(str(s), ("8193 B"))
 
         # if max_places is set to None, all digits are displayed
-        SizeConfig.set_str_config(StrConfig(max_places=None, strip=True))
+        SizeConfig.set_str_config(StrConfig(max_places=None))
+        SizeConfig.set_display_config(DisplayConfig(strip=True))
         s = Size(0xfffffffffffff)
         self.assertEqual(
            str(s),
@@ -224,7 +236,8 @@ class ConfigurationTestCase(unittest.TestCase):
         s = Size(0x10001)
         self.assertEqual(str(s), "64.0009765625 KiB")
 
-        SizeConfig.set_str_config(StrConfig(strip=False))
+        SizeConfig.set_str_config(StrConfig(max_places=2))
+        SizeConfig.set_display_config(DisplayConfig(strip=False))
         s = Size(1024**9 + 1)
         self.assertEqual(str(s), "@1024.00 YiB")
 
@@ -233,7 +246,7 @@ class ConfigurationTestCase(unittest.TestCase):
 
     def testStrWithSmallDeviations(self):
         """ Behavior when deviation from whole value is small. """
-        SizeConfig.set_str_config(StrConfig(strip=True))
+        SizeConfig.set_display_config(DisplayConfig(strip=True))
 
         eps = Decimal(1024)/100/2 # 1/2 of 1% of 1024
 

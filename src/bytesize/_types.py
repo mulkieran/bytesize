@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2015  Red Hat, Inc.
 #
 # This copyrighted material is made available to anyone wishing to use,
@@ -17,14 +16,22 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
-"""
-    bytesize.version
-    ================
+""" Tiny classes used by some methods to pack up their results. """
 
-    Version information.
+class RadixNumber(object):
+    """ Represents a class with a radix and possibly repeating digits. """
+    # pylint: disable=too-few-public-methods
 
-    .. moduleauthor::  mulhern  <amulhern@redhat.com>
-"""
+    def __init__(self, sign, left, non_repeating, repeating):
+        """
+        Initializer.
 
-__version__ = '0.04'
-__version_info__ = tuple(int(x) for x in __version__.split('.'))
+        :param int sign: -1 for negative, 1 for positive
+        :param int left: the number to the left of the point
+        :param non_repeating: non-repeating numbers to the right of the point
+        :param repeating: repeating numbers to the right of the point
+        """
+        self.sign = sign
+        self.left = left
+        self.non_repeating = non_repeating
+        self.repeating = repeating
