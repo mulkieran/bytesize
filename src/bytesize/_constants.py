@@ -24,7 +24,7 @@
 """
 
 from decimal import Decimal
-from fractions import Fraction
+from numbers import Rational
 
 import six
 
@@ -136,8 +136,8 @@ class BinaryUnits(object):
 
 def UNITS():
     """ All unit constants. """
-    return ([B] + BinaryUnits.UNITS() + DecimalUnits.UNITS())[:]
+    return [B] + BinaryUnits.UNITS() + DecimalUnits.UNITS()
 
 ROUNDING_METHODS = RoundingMethods.METHODS
 
-PRECISE_NUMERIC_TYPES = (six.integer_types, Decimal, Fraction)
+PRECISE_NUMERIC_TYPES = (six.integer_types, Decimal, Rational)

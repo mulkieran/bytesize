@@ -16,27 +16,22 @@
 #
 # Red Hat Author(s): Anne Mulhern <amulhern@redhat.com>
 
-""" Class for methods that do not properly belong in the Size class. """
+""" Tiny classes used by some methods to pack up their results. """
 
-from ._config import SizeConfig
+class RadixNumber(object):
+    """ Represents a class with a radix and possibly repeating digits. """
+    # pylint: disable=too-few-public-methods
 
-from ._size import Size
+    def __init__(self, sign, left, non_repeating, repeating):
+        """
+        Initializer.
 
-def getSizeFromInput(value=0, units=None, config=None):
-    """ Get a Size object from an input value and units.
-
-        :param value: a size value, default is 0
-        :type value: Size, or any finite numeric type (possibly as str)
-        :param units: the units of the size, default is None
-        :type units: any of the defined units constants or Size or NoneType
-        :param config: configures interpretation of inputs
-        :type config: a member of :class:`InputConfig` or NoneType
-        :returns: a Size object
-        :rtype: :class:`Size`
-        :raises SizeValueError: on bad parameters
-    """
-    config = config or SizeConfig.INPUT_CONFIG
-
-    return Size(value, units).roundTo(config.unit, config.method)
-
-AI = Size(0) # pragma: no cover
+        :param int sign: -1 for negative, 1 for positive
+        :param int left: the number to the left of the point
+        :param non_repeating: non-repeating numbers to the right of the point
+        :param repeating: repeating numbers to the right of the point
+        """
+        self.sign = sign
+        self.left = left
+        self.non_repeating = non_repeating
+        self.repeating = repeating

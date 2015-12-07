@@ -18,13 +18,14 @@
 
 """ Tests for operations on Size objects. """
 
+import copy
+import re
+
+import unittest
+
 from hypothesis import given
 from hypothesis import strategies
 from hypothesis import Settings
-import unittest
-
-import copy
-import re
 
 from bytesize import Size
 from bytesize import UNITS
@@ -82,7 +83,7 @@ class ConversionTestCase(unittest.TestCase):
     )
     def testRepr(self, s):
         """ Test that repr looks right. """
-        regex = re.compile(r"Size\(\'(?P<val>-?[0-9]+)\'\)")
+        regex = re.compile(r"Size\((?P<val>-?[0-9]+)\)")
         match = re.match(regex, "%r" % s)
         self.assertIsNotNone(match)
         self.assertEqual(int(match.group('val')), int(s))

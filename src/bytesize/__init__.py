@@ -62,6 +62,7 @@
 
     * Size classes:
        - Size: :class:`._size.Size`
+       - AI: :class:`._sizes.AI`
 
     All parts of the public interface of bytesize must be imported directly
     from the top-level bytesize module, as::
@@ -77,6 +78,7 @@
             raise e
 """
 # pylint: disable=invalid-name
+# pylint: disable=wrong-import-position
 
 # UNIT CONSTANTS
 from ._constants import B
@@ -113,6 +115,7 @@ ROUND_UP = _RoundingMethods.ROUND_UP
 from ._constants import ROUNDING_METHODS
 
 # CONFIGURATION
+from ._config import DisplayConfig
 from ._config import InputConfig
 from ._config import SizeConfig
 from ._config import StrConfig
@@ -123,3 +126,4 @@ from ._errors import SizeError
 # SIZE
 from ._size import Size
 from ._sizes import getSizeFromInput
+from ._sizes import AI

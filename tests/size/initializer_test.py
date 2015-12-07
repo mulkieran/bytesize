@@ -18,18 +18,20 @@
 
 """ Tests for Size initialization. """
 
-from hypothesis import given
-from hypothesis import strategies
-import unittest
-
 from decimal import Decimal
 from fractions import Fraction
+
+import unittest
+
+from hypothesis import given
+from hypothesis import strategies
 
 from bytesize import B
 from bytesize import Size
 from bytesize import UNITS
 
 from bytesize._errors import SizeValueError
+
 
 class InitializerTestCase(unittest.TestCase):
     """ Test conversions. """

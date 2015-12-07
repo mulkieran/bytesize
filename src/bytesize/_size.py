@@ -44,13 +44,25 @@ from ._constants import PRECISE_NUMERIC_TYPES
 
 from ._util.math_util import round_fraction
 
-from ._util.misc import decimal_magnitude
+from ._util.misc import get_decimal_info
 from ._util.misc import get_string_info
 
 _BYTES_SYMBOL = "B"
 
 class Size(object):
     """ Class for instantiating Size objects. """
+
+    _FMT_STR = "".join([
+       "%(approx)s",
+       "%(sign)s",
+       "%(left)s",
+       "%(radix)s",
+       "%(right)s",
+       " ",
+       "%(units)s",
+       "%(bytes)s"
+    ])
+
 
     def __init__(self, value=0, units=None):
         """ Initialize a new Size object.
@@ -97,37 +109,100 @@ class Size(object):
         """
         return self._magnitude
 
-    def getString(self, config):
+    def getDecimalInfo(self, config):
+        """
+        Get information for the decimal representation of ``self``.
+
+        :param StrConfig config: the display configuration
+        :returns: a tuple representing the value
+        :rtype: tuple of int * int * list of int * list of int
+
+        Components:
+        1. sign, -1 if negative else 1
+        2. portion on the left of the decimal point
+        3. non-repeating portion to the right of the decimal point
+        4. repeating portion to the right of the decimal point
+        5. units specifier
+        """
+        (magnitude, units) = self.components(config)
+        radix_num = get_decimal_info(magnitude)
+        return (
+           radix_num.sign,
+           radix_num.left,
+           radix_num.non_repeating,
+           radix_num.repeating,
+           units
+        )
+
+    def getStringInfo(self, config):
+        """
+        Return a representation of the size.
+
+        :param :class:`StrConfig` config: representation configuration
+        :returns: a tuple representing the string to display
+        :rtype: tuple of bool * int * str * str * unit
+
+        Components are:
+        1. If true, the value is approximate
+        2. -1 for a negative number, 1 for a positive
+        3. a string with the decimal digits to the left of the decimal point
+        4. a string with the decimal digits to the right of the decimal point
+        5. a unit specifier
+
+        """
+        (magnitude, units) = self.components(config)
+        (exact, sign, left, right) = get_string_info(
+           magnitude,
+           places=config.max_places
+        )
+
+        return (not exact, sign, left, right, units)
+
+    def getString(self, config, display):
         """ Return a string representation of the size.
 
-            :param :class:`SizeConfig` config: representation configuration
+            :param :class:`StrConfig` config: representation configuration
+            :param DisplayConfig display: configuration for display
             :returns: a string representation
             :rtype: str
         """
-        (magnitude, units) = self.components(
-           min_value=config.min_value,
-           binary_units=config.binary_units,
-           exact_value=config.exact_value,
-           max_places=config.max_places
-        )
+        (approx, sign, left, right, units) = self.getStringInfo(config)
+        approx_str = display.approx_symbol \
+           if approx and display.show_approx_str else ""
 
-        (exact, value) = get_string_info(magnitude, places=config.max_places)
+        if display.strip:
+            right = right.rstrip('0')
 
-        if '.' in value and config.strip:
-            value = value.rstrip("0").rstrip(".")
+        result = {
+           'approx' : approx_str,
+           'sign': "-" if sign == -1 else "",
+           'left': left,
+           'radix': '.' if right else "",
+           'right' : right,
+           'units' : units.abbr,
+           'bytes' : _BYTES_SYMBOL
+        }
 
-        if exact and config.show_approx_str:
-            modifier = ""
-        else:
-            modifier = "@"
-
-        return modifier + value + " " + units.abbr + _BYTES_SYMBOL
+        return self._FMT_STR % result
 
     def __str__(self):
-        return self.getString(SizeConfig.STR_CONFIG)
+        return self.getString(SizeConfig.STR_CONFIG, SizeConfig.DISPLAY_CONFIG)
 
     def __repr__(self):
-        return "Size('%s')" % decimal_magnitude(self._magnitude)
+        radix_num = get_decimal_info(self._magnitude)
+
+        sign = "-" if radix_num.sign == -1 else ""
+
+        if radix_num.non_repeating == [] and radix_num.repeating == []:
+            return "Size(%s%s)" % (sign, radix_num.left)
+
+        non_repeating = "".join(str(x) for x in radix_num.non_repeating)
+        if radix_num.repeating == []:
+            return "Size(%s%s.%s)" % (sign, radix_num.left, non_repeating)
+
+        repeating = "".join(str(x) for x in radix_num.repeating)
+        return "Size(%s%s.%s(%s))" % \
+           (sign, radix_num.left, non_repeating, repeating)
 
     def __deepcopy__(self, memo):
         # pylint: disable=unused-argument
@@ -285,6 +360,7 @@ class Size(object):
     __rmul__ = __mul__
 
     def __pow__(self, other):
+        # pylint: disable=no-self-use
         # Cannot represent multiples of Sizes.
         if not isinstance(other, PRECISE_NUMERIC_TYPES):
             raise SizeNonsensicalBinOpError("**", other)
@@ -374,20 +450,12 @@ class Size(object):
         for unit in [B] + units.UNITS():
             yield (self.convertTo(unit), unit)
 
-    def components(
-       self,
-       min_value=1,
-       binary_units=True,
-       exact_value=False,
-       max_places=SizeConfig.STR_CONFIG.max_places
-    ):
+    def components(self, config=SizeConfig.STR_CONFIG):
         """ Return a representation of this size, decomposed into a
             Fraction value and a unit specifier tuple.
 
-            :param min_value: Lower bound for value, default is 1.
-            :type min_value: A precise numeric type: int, long, or Decimal
-            :param bool binary_units: binary units if True, else SI
-            :param bool exact_value: use largest bytes that allow exact value
+            :param StrConfig config: configuration
+
             :returns: a pair of a decimal value and a unit
             :rtype: tuple of Fraction and unit
             :raises SizeValueError: if min_value is not usable
@@ -395,30 +463,27 @@ class Size(object):
             The meaning of the parameters is the same as for
             :class:`._config.StrConfig`.
         """
-        if min_value < 0 or \
-           not isinstance(min_value, PRECISE_NUMERIC_TYPES):
-            raise SizeValueError(
-               min_value,
-               "min_value",
-               "must be a precise positive numeric value."
-            )
+        units = BinaryUnits if config.binary_units else DecimalUnits
 
-        units = BinaryUnits if binary_units else DecimalUnits
+        if config.unit is not None:
+            return (self.convertTo(config.unit), config.unit)
 
         # Find the smallest prefix which will allow a number less than
         # FACTOR * min_value to the left of the decimal point.
         # If the number is so large that no prefix will satisfy this
         # requirement use the largest prefix.
-        limit = units.FACTOR * Fraction(min_value)
+        limit = units.FACTOR * Fraction(config.min_value)
         tried = []
-        for (value, unit) in self.componentsList(binary_units=binary_units):
+        for (value, unit) in self.componentsList(
+           binary_units=config.binary_units
+        ):
             tried.append((value, unit))
             if abs(value) < limit:
                 break
 
-        if exact_value:
+        if config.exact_value:
             for (value, unit) in reversed(tried):
-                (exact, _) = get_string_info(value, max_places)
+                (exact, _, _, _) = get_string_info(value, config.max_places)
                 if exact is True:
                     break
 

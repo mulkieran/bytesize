@@ -23,12 +23,15 @@ from hypothesis import given
 from hypothesis import strategies
 from hypothesis import Settings
 
+from bytesize._config import DisplayConfig
 from bytesize._config import InputConfig
 from bytesize._config import SizeConfig
 from bytesize._config import StrConfig
 
 from bytesize._constants import RoundingMethods
 from bytesize._constants import UNITS
+
+from bytesize._errors import SizeValueError
 
 class ConfigTestCase(unittest.TestCase):
     """ Exercise methods of output configuration classes. """
@@ -37,6 +40,15 @@ class ConfigTestCase(unittest.TestCase):
     def testStrConfigObject(self):
         """ Miscellaneous tests for string configuration. """
         self.assertIsNotNone(str(SizeConfig.STR_CONFIG))
+
+    def testException(self):
+        """ Test exceptions. """
+        with self.assertRaises(SizeValueError):
+            StrConfig(min_value=-1)
+        with self.assertRaises(SizeValueError):
+            StrConfig(min_value=3.2)
+        with self.assertRaises(SizeValueError):
+            StrConfig(unit=2)
 
 class InputTestCase(unittest.TestCase):
     """ Exercise methods of input configuration classes. """
@@ -51,17 +63,37 @@ class SizeTestCase(unittest.TestCase):
     # pylint: disable=too-few-public-methods
 
     def setUp(self):
+        self.display_config = SizeConfig.DISPLAY_CONFIG
+        self.input_config = SizeConfig.INPUT_CONFIG
         self.str_config = SizeConfig.STR_CONFIG
+
+    def tearDown(self):
+        SizeConfig.DISPLAY_CONFIG = self.display_config
+        SizeConfig.INPUT_CONFIG = self.input_config
+        SizeConfig.STR_CONFIG = self.str_config
+
+    @given(
+       strategies.builds(
+          DisplayConfig,
+          approx_symbol=strategies.just('=~='),
+          show_approx_str=strategies.booleans(),
+          strip=strategies.booleans()
+       ),
+       settings=Settings(max_examples=30)
+    )
+    def testSettingDisplayConfig(self, config):
+        """ Test that new str config is the correct one. """
+        SizeConfig.set_display_config(config)
+        self.assertEqual(str(config), str(SizeConfig.DISPLAY_CONFIG))
 
     @given(
        strategies.builds(
           StrConfig,
           binary_units=strategies.booleans(),
           max_places=strategies.integers().filter(lambda x: x >= 0),
-          min_value=strategies.fractions(),
-          show_approx_str=strategies.booleans(),
-          strip=strategies.booleans(),
-          exact_value=strategies.booleans()
+          min_value=strategies.fractions().filter(lambda x: x >= 0),
+          exact_value=strategies.booleans(),
+          unit=strategies.sampled_from(UNITS())
        ),
        settings=Settings(max_examples=30)
     )
@@ -82,6 +114,3 @@ class SizeTestCase(unittest.TestCase):
         """ That that new input config is the correct one. """
         SizeConfig.set_input_config(config)
         self.assertEqual(str(config), str(SizeConfig.INPUT_CONFIG))
-
-    def tearDown(self):
-        SizeConfig.STR_CONFIG = self.str_config
